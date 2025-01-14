@@ -1,5 +1,16 @@
 {
   "dependencies": {
-    "git": "^0.1.5"
+    "@react-navigation/bottom-tabs": "^7.2.0",
+    "@react-navigation/native": "^7.0.14",
+    "expo": "^52.0.25",
+    "git": "^0.1.5",
+    "react-native-animatable": "^1.4.0",
+    "react-native-paper": "^5.13.1",
+    "react-native-reanimated": "~3.16.1"
+  },
+  "devDependencies": {
+    "@types/react": "~18.3.12",
+    "@types/react-native": "^0.72.8",
+    "typescript": "^5.3.3"
   }
 }
