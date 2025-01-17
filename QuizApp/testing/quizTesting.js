@@ -1,20 +1,17 @@
-import React, { Component } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-class Quiz extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      currentQuestion: 0,
-      score: 0,
-      showScore: false,
-      selectedAnswer: null,
-      answerLocked: false,
-    };
-  }
+const Quiz = ({ onRestart }) => {
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [score, setScore] = useState(0);
+  const [showScore, setShowScore] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [answerLocked, setAnswerLocked] = useState(false);
 
-  quizData = [
+  const { width, height } = Dimensions.get('window');
+
+  const quizData = [
     {
       question: 'This is just a test question',
       options: ['option 1', 'option 2', 'option 3', 'option 4'],
@@ -27,49 +24,63 @@ class Quiz extends Component {
     },
   ];
 
-  handleAnswer = (selectedAnswer) => {
-    const correctAnswer = this.quizData[this.state.currentQuestion]?.answer;
-    this.setState({ selectedAnswer });
+  const handleAnswer = (selectedAnswer) => {
+    const correctAnswer = quizData[currentQuestion]?.answer;
+    setSelectedAnswer(selectedAnswer);
     if (correctAnswer === selectedAnswer) {
-      this.setState((prevState) => ({
-        score: prevState.score + 1,
-      }));
+      setScore((prevScore) => prevScore + 1);
     }
-    this.setState({ answerLocked: true });
+    setAnswerLocked(true);
   };
 
-  handleRestart = () => {
-    this.setState({
-      currentQuestion: 0,
-      score: 0,
-      showScore: false,
-      answerLocked: false,
-      selectedAnswer: null,
-    });
-    if (this.props.onRestart) {
-      this.props.onRestart();
-    }
+  const handleRestart = () => {
+    setCurrentQuestion(0);
+    setScore(0);
+    setShowScore(false);
+    setAnswerLocked(false);
+    setSelectedAnswer(null);
+    onRestart && onRestart();
   };
 
-  movNextQuestion = () => {
-    const nextQuestion = this.state.currentQuestion + 1;
-    if (nextQuestion < this.quizData.length) {
-      this.setState({
-        currentQuestion: nextQuestion,
-        selectedAnswer: null,
-        answerLocked: false,
-      });
+  const movNextQuestion = () => {
+    const nextQuestion = currentQuestion + 1;
+    if (nextQuestion < quizData.length) {
+      setCurrentQuestion(nextQuestion);
+      setSelectedAnswer(null);
+      setAnswerLocked(false);
     } else {
-      this.setState({ showScore: true });
+      setShowScore(true);
     }
   };
 
-  calculateFontSize = (text) => {
+  const ProgressBar = ({ currentQuestion, totalQuestions, showScore }) => {
+    const progress = showScore ? 100 : (currentQuestion / totalQuestions) * 100;
+    const numOfDashes = 15;
+    const dashes = Array.from({ length: numOfDashes }, (_, i) => {
+      const opacity = i / numOfDashes <= progress / 100 ? 1 : 0.3;
+      return <View key={i} style={[styles.dash, { left: `${(i / numOfDashes) * 100}%`, opacity }]} />;
+    });
+
+    return (
+      <View style={styles.progressBarContainer}>
+        <View style={styles.progressBar}>
+          {dashes}
+          <Icon
+            name="plane"
+            size={30}
+            style={[styles.planeIcon, { left: `${progress}%` }]}
+          />
+        </View>
+      </View>
+    );
+  };
+
+  const calculateFontSize = (text) => {
     const maxLength = 40;
     return text.length > maxLength ? 24 : 48;
   };
 
-  getOptionStyle = (option, selectedAnswer, correctAnswer) => {
+  const getOptionStyle = (option, selectedAnswer, correctAnswer) => {
     if (selectedAnswer === option) {
       return option === correctAnswer
         ? styles.correctOption
@@ -81,91 +92,59 @@ class Quiz extends Component {
     return styles.optionButton;
   };
 
-  renderAnswerIcon = (option, selectedAnswer, correctAnswer) => {
+  const renderAnswerIcon = (option, selectedAnswer, correctAnswer) => {
     if (selectedAnswer === option) {
       return option === correctAnswer ? (
-        <Icon name="check-circle" size={30} color="#90EE90" style={styles.icon} />
+        <Icon name="check-circle" size={30} color="#90EE90" style={[styles.icon, { right: 30 }]} />
       ) : (
-        <Icon name="times-circle" size={30} color="#FF6F6F" style={styles.icon} />
+        <Icon name="times-circle" size={30} color="#FF6F6F" style={[styles.icon,{ right: 30 }]} />
       );
     }
     return null;
   };
 
-  render() {
-    const { currentQuestion, score, showScore, selectedAnswer } = this.state;
-    const correctAnswer = this.quizData[currentQuestion]?.answer;
-
-    return (
-      <View style={styles.container}>
-        <ProgressBar
-          currentQuestion={currentQuestion}
-          totalQuestions={this.quizData.length}
-          showScore={showScore}
-        />
-        {showScore ? (
-          <View style={styles.questionContainer}>
-            <Text style={styles.optionsStyle}>Your Score: {score}</Text>
-            <TouchableOpacity style={styles.resetButton} onPress={this.handleRestart}>
-              <Text style={styles.resetButtonText}>Home</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <Text
-            style={[styles.questionText, { fontSize: this.calculateFontSize(this.quizData[currentQuestion]?.question) }]}
-          >
-            {this.quizData[currentQuestion]?.question}
-          </Text>
-        )}
-
-        {!showScore && (
-          <View style={styles.optionsContainer}>
-            {this.quizData[currentQuestion]?.options.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => this.handleAnswer(item)}
-                style={this.getOptionStyle(item, selectedAnswer, correctAnswer)}
-                disabled={this.state.answerLocked}
-              >
-                <View style={styles.optionContent}>
-                  <Text style={[styles.optionsBox, selectedAnswer === item && { marginRight: 35 }]}>
-                    {item}
-                  </Text>
-                  {this.renderAnswerIcon(item, selectedAnswer, correctAnswer)}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
-        {!showScore && (
-          <TouchableOpacity style={styles.nextButton} onPress={this.movNextQuestion}>
-            <Text style={styles.nextButtonText}>Next</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    );
-  }
-}
-
-const ProgressBar = ({ currentQuestion, totalQuestions, showScore }) => {
-  const progress = showScore ? 100 : (currentQuestion / totalQuestions) * 100;
-  const numOfDashes = 15;
-  const dashes = Array.from({ length: numOfDashes }, (_, i) => {
-    const opacity = i / numOfDashes <= progress / 100 ? 1 : 0.3;
-    return <View key={i} style={[styles.dash, { left: `${(i / numOfDashes) * 100}%`, opacity }]} />;
-  });
-
   return (
-    <View style={styles.progressBarContainer}>
-      <View style={styles.progressBar}>
-        {dashes}
-          <Icon
-            name="plane"
-            size={30}
-            style={[styles.planeIcon, { left: `${progress}%` }]}
-          />
-      </View>
+    <View style={styles.container}>
+      <ProgressBar currentQuestion={currentQuestion} totalQuestions={quizData.length} showScore={showScore} />
+
+      {showScore ? (
+        <View style={styles.questionContainer}>
+          <Text style={styles.optionsStyle}>Your Score: {score}</Text>
+          <TouchableOpacity style={styles.resetButton} onPress={handleRestart}>
+            <Text style={styles.resetButtonText}>Home</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <Text style={[styles.questionText, { fontSize: calculateFontSize(quizData[currentQuestion]?.question) }]}>
+          {quizData[currentQuestion]?.question}
+        </Text>
+      )}
+
+      {!showScore && (
+        <View style={styles.optionsContainer}>
+          {quizData[currentQuestion]?.options.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => handleAnswer(item)}
+              style={getOptionStyle(item, selectedAnswer, quizData[currentQuestion]?.answer)}
+              disabled={answerLocked}
+            >
+              <View style={styles.optionContent}>
+                <Text style={[styles.optionsBox, selectedAnswer === item && { marginRight: 35 }]}>
+                  {item}
+                </Text>
+                {renderAnswerIcon(item, selectedAnswer, quizData[currentQuestion]?.answer)}
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {!showScore && (
+        <TouchableOpacity style={styles.nextButton} onPress={movNextQuestion}>
+          <Text style={styles.nextButtonText}>Next</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -271,8 +250,6 @@ const styles = StyleSheet.create({
     width: '90%',
     height: 30,
     backgroundColor: '#071f35',
-    borderColor: 'white',
-    borderWidth:'1',
     borderRadius: 10,
     overflow: 'hidden',
   },
@@ -294,7 +271,7 @@ const styles = StyleSheet.create({
   },
   planeIcon: {
     position: 'absolute',
-    color:"#FFD700",
+    color: "#FFD700",
     top: 0,
   },
 });

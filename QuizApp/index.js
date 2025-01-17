@@ -1,10 +1,8 @@
 import { registerRootComponent } from 'expo';
 
-//import App from './App';
-import App from './testing/quizTesting';
-//import App from './testing/profileTesting';
+//import App from './App'; //This is to run the whole app
+import App from './testing/quizTesting'; //This is to run the quiz portion
+//import App from './testing/profileTesting'; //This is to run the profile portion
+//import App from './testing/appTesting'; //This is to run the quiz home page
 
-// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
-// It also ensures that whether you load the app in Expo Go or in a native build,
-// the environment is set up appropriately
 registerRootComponent(App);
