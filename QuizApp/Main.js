@@ -6,12 +6,13 @@ import Colors from './constants/Colors';
 import ColorScreen from './screens/ColorScreen';
 import * as Animatable from 'react-native-animatable';
 import Quiz from './tabs/Quiz';   // Import the function from quiz.js
+import BoardingPass from './tabs/Profile'; // Import Profile (or BoardingPass)
 
 const TabArr = [
   { route: 'Home', label: 'Home', type: Icons.Ionicons, activeIcon: 'grid', inActiveIcon: 'grid-outline', component: ColorScreen },
   { route: 'LeaderBoard', label: 'LeaderBoard', type: Icons.MaterialIcons, activeIcon: 'leaderboard', inActiveIcon: 'leaderboard', component: ColorScreen },
   { route: 'Shop', label: 'Shop', type: Icons.AntDesign, activeIcon: 'isv', inActiveIcon: 'isv', component: ColorScreen },
-  { route: 'Account', label: 'Account', type: Icons.FontAwesome, activeIcon: 'user-circle', inActiveIcon: 'user-circle-o', component: ColorScreen },
+  { route: 'Account', label: 'Account', type: Icons.FontAwesome, activeIcon: 'user-circle', inActiveIcon: 'user-circle-o', component: BoardingPass }, // Profile tab now linked to BoardingPass
 ];
 
 const Tab = createBottomTabNavigator();
