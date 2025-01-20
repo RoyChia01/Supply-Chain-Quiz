@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Dimensions, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import StartQuiz from './allQuizTesting';  // Adjust paths as needed
 
-const Quiz = ({ onRestart }) => {
+const Quiz = ({ navigation  }) => {
   // State hooks for tracking current question, score, and other quiz states
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -57,7 +58,7 @@ const Quiz = ({ onRestart }) => {
     setShowScore(false);
     setAnswerLocked(false);
     setSelectedAnswer(null);
-    onRestart?.();
+    navigation.navigate('StartQuiz');  // This line ensures navigation back
   };
 
   // Function to move to the next question or show score

@@ -46,27 +46,32 @@ const StartQuiz = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#24496b',
+    backgroundColor: '#2F4F6D', // Deep blue to reflect Air Force theme
     alignItems: 'center',
+    paddingTop: 40,
   },
   imageContainer: {
-    width: '30%',
+    width: '40%',
     height: 200,
+    marginTop:50,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20, // Add some space above the image
-    marginBottom: 20,
+    marginBottom: 30,
   },
   image: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
+    resizeMode: 'contain',
+    borderRadius: 10,
+    borderWidth: 5,
+    borderColor: '#FFD700', // Gold border to match Air Force color
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 20,
+    color: '#FFD700', // Gold color for emphasis
+    marginBottom: 40,
+    fontFamily: 'Arial', // Military-style font
   },
   contentContainer: {
     alignItems: 'center',
@@ -78,27 +83,32 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   windowButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    width: 120,
-    height: 160,
-    borderRadius: 50,
+    backgroundColor: '#3A5F77', // Navy blue background
+    width: 140,
+    height: 180,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 10,
+    margin: 15,
     borderWidth: 2,
-    borderColor: 'white',
+    borderColor: '#FFD700', // Gold border to give it a strong, military theme
+    shadowColor: '#000', // Adding shadow for depth
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
   windowNumber: {
-    fontSize: 30,
+    fontSize: 36,
     fontWeight: 'bold',
-    color: 'white',
+    color: '#FFD700', // Gold color
   },
   windowText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     color: 'white',
     textAlign: 'center',
     marginTop: 10,
+    fontFamily: 'Arial',
   },
 });
 
