@@ -1,35 +1,16 @@
-import React, { useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';  // Import NavigationContainer
-import BottomTabNavigator from './Main';  // Ensure Main is the correct path
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';  // Import the Navigation container
+import AnimTab1 from './Main';  // Import the AnimTab1 component
+import { StatusBar } from 'react-native';  // To set up status bar styling
 
-const App = () => {
-  const [showQuiz, setShowQuiz] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
-
-  const startQuiz = () => {
-    setShowQuiz(true);  // Set quiz to be visible
-  };
-
-  const showHomeScreen = () => {
-    setShowQuiz(false);  // Hide quiz and show home screen again
-    setShowProfile(false);
-  };
-
-  const startProfile = () => {
-    setShowProfile(true);  // Set quiz to be visible
-  };
-
+export default function App() {
   return (
     <NavigationContainer>
-      <BottomTabNavigator
-        showQuiz={showQuiz}
-        startQuiz={startQuiz}
-        showProfile={showProfile}
-        startProfile={startProfile}
-        showHomeScreen={showHomeScreen}
-      />
+      {/* Set the status bar appearance */}
+      <StatusBar barStyle="dark-content" />
+      
+      {/* Use the AnimTab1 as the main navigator for the app */}
+      <AnimTab1 />
     </NavigationContainer>
   );
-};
-
-export default App;
+}
