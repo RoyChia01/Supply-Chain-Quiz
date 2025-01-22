@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Dimensions, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
+import { fetchQuizQuestions } from './apiHandler';  // Import the function
 
 const QuizQuestions = ({ navigation, route }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -9,8 +10,26 @@ const QuizQuestions = ({ navigation, route }) => {
   const [showScore, setShowScore] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [answerLocked, setAnswerLocked] = useState(false);
+  const [questions, setQuestions] = useState([]);  // State for quiz questions
+  const [loading, setLoading] = useState(true);  // Loading state
 
   const { topicId } = route.params;
+
+  // Fetch quiz questions from the API when the component is mounted
+  useEffect(() => {
+    const loadQuestions = async () => {
+      try {
+        const fetchedQuestions = await fetchQuizQuestions(topicId);
+        setQuestions(fetchedQuestions);
+      } catch (error) {
+        console.error("Error loading quiz questions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadQuestions();
+  }, [topicId]);
 
   // Hide bottom navigation bar when screen is focused
   useFocusEffect(
@@ -22,26 +41,6 @@ const QuizQuestions = ({ navigation, route }) => {
       };
     }, [navigation])
   );
-
-  const quizData = [
-    {
-      topicId: 1,
-      questions: [
-        { question: 'What is the capital of France?', options: ['Berlin', 'Madrid', 'Paris', 'Lisbon'], answer: 'Paris' },
-        { question: 'Who developed the theory of relativity?', options: ['Isaac Newton', 'Albert Einstein', 'Galileo Galilei', 'Nikola Tesla'], answer: 'Albert Einstein' },
-      ],
-    },
-    {
-      topicId: 2,
-      questions: [
-        { question: 'What is the chemical symbol for water?', options: ['H2O', 'O2', 'CO2', 'HO2'], answer: 'H2O' },
-        { question: 'What planet is known as the Red Planet?', options: ['Mars', 'Earth', 'Venus', 'Jupiter'], answer: 'Mars' },
-      ],
-    },
-  ];
-
-  const filteredQuiz = quizData.find((topic) => topic.topicId === topicId);
-  const questions = filteredQuiz ? filteredQuiz.questions : [];
 
   const getRank = (score) =>
     score === questions.length
@@ -83,6 +82,10 @@ const QuizQuestions = ({ navigation, route }) => {
       return () => clearTimeout(timeout);
     }
   }, [answerLocked, currentQuestion]);
+
+  if (loading) {
+    return <Text style={styles.loadingText}>Loading...</Text>;
+  }
 
   return (
     <View style={styles.container}>
@@ -159,10 +162,7 @@ const ProgressBar = ({ currentQuestion, totalQuestions }) => {
     return (
       <View
         key={i}
-        style={[
-          styles.dash,
-          { left: `${(i / numOfDashes) * 100}%`, opacity },
-        ]}
+        style={[styles.dash, { left: `${(i / numOfDashes) * 100}%`, opacity }]}
       />
     );
   });
@@ -257,8 +257,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   progressBar: { position: 'relative', width: '100%', height: '100%', flexDirection: 'row', alignItems: 'center' },
-  dash: { position: 'absolute', top: '50%', width: 10, height: 6, backgroundColor: 'white', borderRadius: 2,transform: [{ translateY: -2}, { translateX: 7 }] },
+  dash: { position: 'absolute', top: '50%', width: 10, height: 6, backgroundColor: 'white', borderRadius: 2, transform: [{ translateY: -2 }, { translateX: 7 }] },
   planeIcon: { position: 'absolute', color: '#FFD700', top: 0 },
+  loadingText: { color: 'white', fontSize: 20, fontWeight: 'bold' },
 });
 
 export default QuizQuestions;

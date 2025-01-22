@@ -1,0 +1,64 @@
+{
+    "quizData": [
+    {
+      "topicId": 1,
+      "topic": "Live-Fire Safety",
+      "question": "What is the first action to take in case of a live-fire accident?",
+      "options": [
+        "Secure your weapon",
+        "Check for casualties and call for help",
+        "Continue firing",
+        "Ignore the incident"
+      ],
+      "answer": "Check for casualties and call for help"
+    },
+    {
+      "topicId": 2,
+      "topic": "Weapon Malfunction",
+      "question": "How should you handle a misfire during a live-fire exercise?",
+      "options": [
+        "Immediately inspect the barrel",
+        "Keep the weapon pointed downrange and wait before clearing",
+        "Look inside the barrel to check",
+        "Ignore it and keep firing"
+      ],
+      "answer": "Keep the weapon pointed downrange and wait before clearing"
+    },
+    {
+      "topicId": 3,
+      "topic": "Heat Exhaustion",
+      "question": "What is the correct response if you see someone collapse due to heat exhaustion?",
+      "options": [
+        "Pour cold water on them immediately",
+        "Move them to shade, provide water, and call for medical help",
+        "Ignore and continue the activity",
+        "Force them to continue training"
+      ],
+      "answer": "Move them to shade, provide water, and call for medical help"
+    },
+    {
+      "topicId": 4,
+      "topic": "Explosives Safety",
+      "question": "What safety gear is essential when handling explosives?",
+      "options": [
+        "Ear protection and gloves",
+        "Helmet and body armor",
+        "All of the above",
+        "No safety gear needed"
+      ],
+      "answer": "All of the above"
+    },
+    {
+      "topicId": 5,
+      "topic": "Night Patrol Tactics",
+      "question": "During a night patrol, how should you use a flashlight to maintain stealth?",
+      "options": [
+        "Shine it directly ahead at full brightness",
+        "Use a red filter and keep it low",
+        "Flash it frequently to scare enemies",
+        "Never use it under any circumstances"
+      ],
+      "answer": "Use a red filter and keep it low"
+    }
+  ]
+}
