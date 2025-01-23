@@ -1,23 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 
 // Local image import
 const placeholderImage = require('../images/soldier.png'); // Adjust the path as needed
 
-// Default topics array (if undefined, it will fallback to this)
-const topics = [
-  { id: 1, name: 'General Knowledge' },
-  { id: 2, name: 'Science' },
-  { id: 3, name: 'Safety' },
-  { id: 4, name: 'Aircraft' },
-];
-
 const QuizTopics = () => {
+  
   const navigation = useNavigation(); // Access navigation with useNavigation hook
+  const [topics, setTopics] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Ensure topics is always an array (fallback to empty array if undefined)
-  const safeTopics = Array.isArray(topics) ? topics : [];
+    useEffect(() => {
+      const fetchTopics = async () => {
+        try {
+          const response = await fetch("http://192.168.50.161:5500/QuizApp/testing/data.json");
+          const data = await response.json();
+          setTopics(data);
+          console.log(data);
+        } catch (error) {
+          console.error("Error fetching topics:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchTopics();
+    }, []);
 
   return (
     <View style={styles.container}>
@@ -34,14 +43,14 @@ const QuizTopics = () => {
       {/* ScrollView for selecting topics */}
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <View style={styles.windowRow}>
-          {safeTopics.map((topic) => (
+          {topics.map((topic) => (
             <TouchableOpacity
-              key={topic.id}
+              key={topic.documentId}
               style={styles.windowButton}
-              onPress={() => navigation.navigate('QuizQuestions', { topicId: topic.id })} // Use navigation from hook
+              onPress={() => navigation.navigate('QuizQuestions', { documentId : documentId})} // Use navigation from hook
             >
-              <Text style={styles.windowNumber}>{topic.id}</Text>
-              <Text style={styles.windowText}>{topic.name}</Text>
+              <Text style={styles.windowNumber}>{topic.topicId}</Text>
+              <Text style={styles.windowText}>{topic.topic}</Text>
             </TouchableOpacity>
           ))}
         </View>
