@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import apiHandler from './apiHandler'; // Import useNavigation
 
 // Local image import
 const placeholderImage = require('../images/soldier.png'); // Adjust the path as needed
@@ -8,25 +9,7 @@ const placeholderImage = require('../images/soldier.png'); // Adjust the path as
 const QuizTopics = () => {
   
   const navigation = useNavigation(); // Access navigation with useNavigation hook
-  const [topics, setTopics] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-      const fetchTopics = async () => {
-        try {
-          const response = await fetch("http://192.168.50.161:5500/QuizApp/testing/data.json");
-          const data = await response.json();
-          setTopics(data);
-          console.log(data);
-        } catch (error) {
-          console.error("Error fetching topics:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-  
-      fetchTopics();
-    }, []);
+  const { topics, loading } = apiHandler("http://192.168.50.161:5500/QuizApp/testing/data.json");
 
   return (
     <View style={styles.container}>
