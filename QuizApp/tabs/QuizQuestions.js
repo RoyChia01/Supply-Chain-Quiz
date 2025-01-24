@@ -1,8 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Dimensions, Image } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
 import { fetchQuestions } from './apiHandler'; // Import useNavigation
+
+// Custom Hook for fetching quiz questions
+const useQuizQuestions = (documentId) => {
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const loadQuestions = async () => {
+      setLoading(true);
+      try {
+        const response = await fetchQuestions(documentId);
+        setQuestions(response.questions);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadQuestions();
+  }, [documentId]);
+
+  return { questions, loading, error };
+};
 
 const QuizQuestions = ({ navigation, route }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -11,47 +36,28 @@ const QuizQuestions = ({ navigation, route }) => {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [answerLocked, setAnswerLocked] = useState(false);
   const { documentId } = route.params;
-  const [questions, setQuestions] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Fetching quiz questions when the component mounts or documentId changes
-  useEffect(() => {
-    const loadQuestions = async () => {
-      setLoading(true);  // Set loading to true before fetching data
-      try {
-        const response = await fetchQuestions(documentId);
-        setQuestions(response.questions); // Set questions when data is fetched
-      } catch (error) {
-        console.error("Error fetching questions:", error);
-      } finally {
-        setLoading(false);  // Set loading to false after data is fetched
-      }
-    };
-
-    loadQuestions();
-  }, [documentId]); // Re-fetch when documentId changes
+  const { questions, loading, error } = useQuizQuestions(documentId);
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
-
       return () => {
         navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex' } });
       };
     }, [navigation])
   );
 
-  const getRank = (score) =>
-    score === questions.length
-      ? 'Elite Pilot'
-      : score >= questions.length - 2
-      ? 'Veteran Pilot'
-      : score >= questions.length - 4
-      ? 'Cadet'
-      : 'Recruit';
+  const getRank = (score) => {
+    if (score === questions.length) return 'Elite Pilot';
+    if (score >= questions.length - 2) return 'Veteran Pilot';
+    if (score >= questions.length - 4) return 'Cadet';
+    return 'Recruit';
+  };
 
   const handleAnswer = (answer) => {
-    if (answer === questions[currentQuestion]?.answer) setScore((prev) => prev + 1);
+    if (answer === questions[currentQuestion]?.answer) {
+      setScore((prev) => prev + 1);
+    }
     setSelectedAnswer(answer);
     setAnswerLocked(true);
   };
@@ -82,110 +88,116 @@ const QuizQuestions = ({ navigation, route }) => {
     }
   }, [answerLocked, currentQuestion]);
 
-  // Only show loading if data hasn't been fetched
-  if (loading) {
-    return <Text style={styles.loadingText}>Loading...</Text>;
-  }
+  if (loading) return <Text style={styles.loadingText}>Loading...</Text>;
+  if (error) return <Text style={styles.loadingText}>Error: {error.message}</Text>;
 
   return (
     <View style={styles.container}>
       {!showScore && <ProgressBar currentQuestion={currentQuestion} totalQuestions={questions.length} />}
 
       {showScore ? (
-        <View style={styles.scoreContainer}>
-          <Text style={styles.rankText}>Rank: {getRank(score)}</Text>
-          <Image source={require('../images/soldier.png')} style={styles.avatar} />
-          <Text style={styles.scoreText}>
-            Score: {score} / {questions.length}
-          </Text>
-          <TouchableOpacity style={styles.resetButton} onPress={handleRestart}>
-            <Text style={styles.resetButtonText}>Home</Text>
-          </TouchableOpacity>
-        </View>
+        <Score score={score} totalQuestions={questions.length} getRank={getRank} onRestart={handleRestart} />
       ) : (
-        <>
-          {/* Check if there is a valid question for currentQuestion index */}
-          <Text style={[styles.questionText, { fontSize: 40 }]}>
-            {questions[currentQuestion]?.question || 'Loading question...'}
-          </Text>
-
-          {/* Check if optionList exists and is an array */}
-          <View style={styles.optionsContainer}>
-            {questions[currentQuestion]?.optionList?.length ? (
-              questions[currentQuestion]?.optionList.map((option, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => handleAnswer(option)}
-                  style={[
-                    styles.optionButton,
-                    selectedAnswer === option
-                      ? option === questions[currentQuestion]?.answer
-                        ? styles.correctOption
-                        : styles.incorrectOption
-                      : null,
-                  ]}
-                  disabled={answerLocked}
-                >
-                  <Text
-                    style={[styles.optionsBox, selectedAnswer === option && { marginRight: 35 }]}
-                  >
-                    {option}
-                  </Text>
-                  {selectedAnswer === option && (
-                    <Icon
-                      name={
-                        option === questions[currentQuestion]?.answer
-                          ? 'check-circle'
-                          : 'times-circle'
-                      }
-                      size={30}
-                      color={
-                        option === questions[currentQuestion]?.answer
-                          ? '#90EE90'
-                          : '#FF6F6F'
-                      }
-                      style={styles.icon}
-                    />
-                  )}
-                </TouchableOpacity>
-              ))
-            ) : (
-              <Text style={styles.loadingText}>No options available</Text>
-            )}
-          </View>
-        </>
+        <QuestionCard
+          question={questions[currentQuestion]}
+          selectedAnswer={selectedAnswer}
+          answerLocked={answerLocked}
+          onAnswer={handleAnswer}
+        />
       )}
     </View>
   );
 };
 
-// ProgressBar component to show progress of quiz
 const ProgressBar = ({ currentQuestion, totalQuestions }) => {
   const progress = (currentQuestion / totalQuestions) * 100;
   const numOfDashes = 15;
   const dashes = Array.from({ length: numOfDashes }, (_, i) => {
     const opacity = i / numOfDashes <= progress / 100 ? 1 : 0.3;
-    return (
-      <View
-        key={i}
-        style={[styles.dash, { left: `${(i / numOfDashes) * 100}%`, opacity }]}
-      />
-    );
+    return <View key={i} style={[styles.dash, { left: `${(i / numOfDashes) * 100}%`, opacity }]} />;
   });
 
   return (
     <View style={styles.progressBarContainer}>
       <View style={styles.progressBar}>
         {dashes}
-        <Icon
-          name="plane"
-          size={60}
-          style={[styles.planeIcon, { left: `${progress}%` }]}
-        />
+        <Icon name="plane" size={60} style={[styles.planeIcon, { left: `${progress}%` }]} />
       </View>
     </View>
   );
 };
+
+const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer }) => {
+  if (!question) return <Text style={styles.loadingText}>Loading question...</Text>;
+
+  return (
+    <>
+      <Text style={[styles.questionText, { fontSize: 40 }]}>{question?.question || 'Loading question...'}</Text>
+
+      <View style={styles.optionsContainer}>
+        {question.optionList?.length ? (
+          question.optionList.map((option, index) => (
+            <OptionButton
+              key={index}
+              option={option}
+              selectedAnswer={selectedAnswer}
+              isCorrect={option === question.answer}
+              onAnswer={onAnswer}
+              answerLocked={answerLocked}
+            />
+          ))
+        ) : (
+          <Text style={styles.loadingText}>No options available</Text>
+        )}
+      </View>
+    </>
+  );
+};
+
+const OptionButton = ({ option, selectedAnswer, isCorrect, onAnswer, answerLocked }) => {
+  return (
+    <TouchableOpacity
+      onPress={() => onAnswer(option)}
+      style={[
+        styles.optionButton,
+        selectedAnswer === option
+          ? isCorrect
+            ? styles.correctOption
+            : styles.incorrectOption
+          : null,
+      ]}
+      disabled={answerLocked}
+    >
+      <Text
+        style={[
+          styles.optionsBox,
+          selectedAnswer === option && { marginRight: 35 },
+          selectedAnswer === option && { fontSize: 14 }, // Reduce font size when selected
+        ]}
+      >
+        {option}
+      </Text>
+      {selectedAnswer === option && (
+        <Icon
+          name={isCorrect ? 'check-circle' : 'times-circle'}
+          size={30}
+          color={isCorrect ? '#90EE90' : '#FF6F6F'}
+          style={[styles.icon, { right: 10, bottom: 10 }]} // Positioning the icon bottom-right
+        />
+      )}
+    </TouchableOpacity>
+  );
+};
+const Score = ({ score, totalQuestions, getRank, onRestart }) => (
+  <View style={styles.scoreContainer}>
+    <Text style={styles.rankText}>Rank: {getRank(score)}</Text>
+    <Image source={require('../images/soldier.png')} style={styles.avatar} />
+    <Text style={styles.scoreText}>Score: {score} / {totalQuestions}</Text>
+    <TouchableOpacity style={styles.resetButton} onPress={onRestart}>
+      <Text style={styles.resetButtonText}>Home</Text>
+    </TouchableOpacity>
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -202,15 +214,24 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontFamily: 'Roboto',
+    marginBottom: 20, // Added margin to space out from options
+  },
+  optionsContainer: {
+    marginVertical: 20,
+    width: '100%',
+    alignItems: 'center', // Ensures options are centered
   },
   optionButton: {
     backgroundColor: '#5b7c99',
     borderRadius: 20,
-    padding: 5,
+    padding: 10,
     marginVertical: 10,
     width: '100%',
+    maxWidth: 300, // Ensures buttons don't stretch too wide
+    alignItems: 'center',
+    position: 'relative', // Ensures that the icon is positioned relative to this container
   },
-  optionsContainer: { marginVertical: '5%', width: '90%' },
+  
   optionsBox: {
     color: 'white',
     padding: 5,
@@ -218,7 +239,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 18,
     borderRadius: 20,
-    width: '90%',
+    width: '100%',
   },
   correctOption: {
     borderWidth: 3,
@@ -234,6 +255,16 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 5,
   },
+  icon: {
+    position: 'absolute', // Positioning absolutely within the optionButton
+    bottom: 10,           // Position at the bottom
+    right: 10,            // Position at the right
+  },
+  loadingText: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
   resetButton: {
     backgroundColor: '#e0a100',
     padding: 15,
@@ -242,7 +273,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: '5%',
   },
-  resetButtonText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
+  resetButtonText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
   scoreContainer: {
     backgroundColor: '#3a506b',
     padding: 40,
@@ -250,22 +285,55 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '90%',
   },
-  rankText: { color: '#FFD700', fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
-  avatar: { width: 120, height: 120, borderRadius: 60, backgroundColor: '#ccc', marginBottom: 20 },
-  scoreText: { fontSize: 28, color: 'white', fontWeight: 'bold', marginBottom: 20 },
+  rankText: {
+    color: '#FFD700',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#ccc',
+    marginBottom: 20,
+  },
+  scoreText: {
+    fontSize: 28,
+    color: 'white',
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
   progressBarContainer: {
     position: 'absolute',
-    top: 110,
+    top: 50,
     width: '90%',
     height: 60,
     backgroundColor: '#071f35',
     borderRadius: 10,
     overflow: 'hidden',
   },
-  progressBar: { position: 'relative', width: '100%', height: '100%', flexDirection: 'row', alignItems: 'center' },
-  dash: { position: 'absolute', top: '50%', width: 10, height: 6, backgroundColor: 'white', borderRadius: 2, transform: [{ translateY: -2 }, { translateX: 7 }] },
-  planeIcon: { position: 'absolute', color: '#FFD700', top: 0 },
-  loadingText: { color: 'white', fontSize: 20, fontWeight: 'bold' },
+  progressBar: {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dash: {
+    position: 'absolute',
+    top: '50%',
+    width: 10,
+    height: 6,
+    backgroundColor: 'white',
+    borderRadius: 2,
+    transform: [{ translateY: -2 }, { translateX: 7 }],
+  },
+  planeIcon: {
+    position: 'absolute',
+    color: '#FFD700',
+    top: 0,
+  },
 });
 
 export default QuizQuestions;

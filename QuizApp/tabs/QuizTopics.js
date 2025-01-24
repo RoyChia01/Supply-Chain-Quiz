@@ -1,55 +1,89 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation
-import { fetchTopics} from './apiHandler'; // Import useNavigation
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { fetchTopics } from './apiHandler';
+import PropTypes from 'prop-types'; // For prop type checking
 
 // Local image import
-const placeholderImage = require('../images/soldier.png'); // Adjust the path as needed
+const placeholderImage = require('../images/soldier.png');
+
+// Functional Component for each Topic Button
+const TopicButton = ({ topic, onPress }) => (
+  <TouchableOpacity
+    style={styles.windowButton}
+    onPress={onPress}
+  >
+    <Text style={styles.windowNumber}>{topic.topicId}</Text>
+    <Text style={styles.windowText}>{topic.topic}</Text>
+  </TouchableOpacity>
+);
+
+TopicButton.propTypes = {
+  topic: PropTypes.shape({
+    topicId: PropTypes.string.isRequired,
+    topic: PropTypes.string.isRequired,
+    documentId: PropTypes.string.isRequired,
+  }).isRequired,
+  onPress: PropTypes.func.isRequired,
+};
 
 const QuizTopics = () => {
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation(); // Access navigation with useNavigation hook
+  const [error, setError] = useState(null);
+  const navigation = useNavigation();
 
-  useEffect(() => {
-    const loadTopics = async () => {
-      setLoading(true);
+  const loadTopics = useCallback(async () => {
+    setLoading(true);
+    try {
       const { topics } = await fetchTopics();
       setTopics(topics);
+    } catch (err) {
+      setError('Failed to load topics. Please try again later.');
+    } finally {
       setLoading(false);
-    };
-
-    loadTopics();
+    }
   }, []);
 
+  useEffect(() => {
+    loadTopics();
+  }, [loadTopics]);
+
   if (loading) {
-    return <Text>Loading...</Text>;
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#FFD700" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
   }
 
   return (
     <View style={styles.container}>
-      {/* Image placeholder at the top (fixed) */}
       <View style={styles.imageContainer}>
         <Image
-          source={placeholderImage} // Using local image
+          source={placeholderImage}
           style={styles.image}
         />
       </View>
 
       <Text style={styles.title}>Select a Topic</Text>
 
-      {/* ScrollView for selecting topics */}
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <View style={styles.windowRow}>
           {topics.map((topic) => (
-            <TouchableOpacity
-              key={topic.documentId}
-              style={styles.windowButton}
-              onPress={() => navigation.navigate('QuizQuestions', { documentId: topic.documentId })}// Use navigation from hook
-            >
-              <Text style={styles.windowNumber}>{topic.topicId}</Text>
-              <Text style={styles.windowText}>{topic.topic}</Text>
-            </TouchableOpacity>
+            <TopicButton
+            key={topic.documentId}
+            topic={{ ...topic, topicId: String(topic.topicId) }} // Ensure topicId is a string
+            onPress={() => navigation.navigate('QuizQuestions', { documentId: topic.documentId })}
+          />
           ))}
         </View>
       </ScrollView>
@@ -84,11 +118,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFD700', // Gold color for emphasis
     marginBottom: 40,
-    fontFamily: 'Arial', // Military-style font
+    fontFamily: 'Arial',
   },
   contentContainer: {
     alignItems: 'center',
-    paddingBottom: 20, // Space for scrolling
+    paddingBottom: 20,
   },
   windowRow: {
     flexDirection: 'row',
@@ -105,7 +139,7 @@ const styles = StyleSheet.create({
     margin: 15,
     borderWidth: 2,
     borderColor: '#FFD700', // Gold border to give it a strong, military theme
-    shadowColor: '#000', // Adding shadow for depth
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
@@ -113,7 +147,7 @@ const styles = StyleSheet.create({
   windowNumber: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#FFD700', // Gold color
+    color: '#FFD700',
   },
   windowText: {
     fontSize: 18,
@@ -122,6 +156,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
     fontFamily: 'Arial',
+  },
+  errorText: {
+    fontSize: 18,
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 
