@@ -1,27 +1,28 @@
 import { useEffect, useState } from 'react';
 
-const fetchTopics = (url) => {
-  const [topics, setTopics] = useState([]);
-  const [loading, setLoading] = useState(true);
+const BASE_URL = 'http://10.132.0.47:8080/quiz/topic'
 
-  useEffect(() => {
-    const getTopics = async () => {
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-        setTopics(data);
-        console.log("Fetched Topics:", data);
-      } catch (error) {
-        console.error("Error fetching topics:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getTopics();
-  }, [url]);
-
-  return { topics, loading };
+export const fetchTopics = async () => {
+  try {
+    const response = await fetch(BASE_URL);
+    const data = await response.json();
+    console.log("Fetched Topics:", data);
+    return { topics: data, loading: false };
+  } catch (error) {
+    console.error("Error fetching topics:", error);
+    return { topics: [], loading: false };
+  }
 };
 
-export default fetchTopics;
+export const fetchQuestions = async (topicUID) => {
+  try {
+    const response = await fetch(`${BASE_URL}/${topicUID}/qna`);
+    const data = await response.json();
+    //console.log("Fetched Questions:", data);
+    return { questions: data, loading: false };
+  } catch (error) {
+    console.error("Error fetching Questions:", error);
+    return { questions: [], loading: false };
+  }
+};
+

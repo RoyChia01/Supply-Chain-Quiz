@@ -1,15 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
-import apiHandler from './apiHandler'; // Import useNavigation
+import { fetchTopics} from './apiHandler'; // Import useNavigation
 
 // Local image import
 const placeholderImage = require('../images/soldier.png'); // Adjust the path as needed
 
 const QuizTopics = () => {
-  
+  const [topics, setTopics] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation(); // Access navigation with useNavigation hook
-  const { topics, loading } = apiHandler("http://192.168.50.161:5500/QuizApp/testing/data.json");
+
+  useEffect(() => {
+    const loadTopics = async () => {
+      setLoading(true);
+      const { topics } = await fetchTopics();
+      setTopics(topics);
+      setLoading(false);
+    };
+
+    loadTopics();
+  }, []);
+
+  if (loading) {
+    return <Text>Loading...</Text>;
+  }
 
   return (
     <View style={styles.container}>
@@ -30,7 +45,7 @@ const QuizTopics = () => {
             <TouchableOpacity
               key={topic.documentId}
               style={styles.windowButton}
-              onPress={() => navigation.navigate('QuizQuestions', { documentId : documentId})} // Use navigation from hook
+              onPress={() => navigation.navigate('QuizQuestions', { documentId: topic.documentId })}// Use navigation from hook
             >
               <Text style={styles.windowNumber}>{topic.topicId}</Text>
               <Text style={styles.windowText}>{topic.topic}</Text>

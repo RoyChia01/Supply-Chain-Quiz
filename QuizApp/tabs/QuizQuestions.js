@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Dimensions, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
-import { fetchQuizQuestions } from './apiHandler';  // Import the function
+import { fetchQuestions } from './apiHandler'; // Import useNavigation
 
 const QuizQuestions = ({ navigation, route }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -10,28 +10,27 @@ const QuizQuestions = ({ navigation, route }) => {
   const [showScore, setShowScore] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [answerLocked, setAnswerLocked] = useState(false);
-  const [questions, setQuestions] = useState([]);  // State for quiz questions
-  const [loading, setLoading] = useState(true);  // Loading state
+  const { documentId } = route.params;
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const { topicId } = route.params;
-
-  // Fetch quiz questions from the API when the component is mounted
+  // Fetching quiz questions when the component mounts or documentId changes
   useEffect(() => {
     const loadQuestions = async () => {
+      setLoading(true);  // Set loading to true before fetching data
       try {
-        const fetchedQuestions = await fetchQuizQuestions(topicId);
-        setQuestions(fetchedQuestions);
+        const response = await fetchQuestions(documentId);
+        setQuestions(response.questions); // Set questions when data is fetched
       } catch (error) {
-        console.error("Error loading quiz questions:", error);
+        console.error("Error fetching questions:", error);
       } finally {
-        setLoading(false);
+        setLoading(false);  // Set loading to false after data is fetched
       }
     };
 
     loadQuestions();
-  }, [topicId]);
+  }, [documentId]); // Re-fetch when documentId changes
 
-  // Hide bottom navigation bar when screen is focused
   useFocusEffect(
     React.useCallback(() => {
       navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
@@ -83,6 +82,7 @@ const QuizQuestions = ({ navigation, route }) => {
     }
   }, [answerLocked, currentQuestion]);
 
+  // Only show loading if data hasn't been fetched
   if (loading) {
     return <Text style={styles.loadingText}>Loading...</Text>;
   }
@@ -104,48 +104,54 @@ const QuizQuestions = ({ navigation, route }) => {
         </View>
       ) : (
         <>
-          <Text style={[styles.questionText, { fontSize: 40 }]}>{questions[currentQuestion]?.question}</Text>
+          {/* Check if there is a valid question for currentQuestion index */}
+          <Text style={[styles.questionText, { fontSize: 40 }]}>
+            {questions[currentQuestion]?.question || 'Loading question...'}
+          </Text>
+
+          {/* Check if optionList exists and is an array */}
           <View style={styles.optionsContainer}>
-            {questions[currentQuestion]?.options.map((option, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => handleAnswer(option)}
-                style={[
-                  styles.optionButton,
-                  selectedAnswer === option
-                    ? option === questions[currentQuestion]?.answer
-                      ? styles.correctOption
-                      : styles.incorrectOption
-                    : null,
-                ]}
-                disabled={answerLocked}
-              >
-                <Text
+            {questions[currentQuestion]?.optionList?.length ? (
+              questions[currentQuestion]?.optionList.map((option, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => handleAnswer(option)}
                   style={[
-                    styles.optionsBox,
-                    selectedAnswer === option && { marginRight: 35 },
+                    styles.optionButton,
+                    selectedAnswer === option
+                      ? option === questions[currentQuestion]?.answer
+                        ? styles.correctOption
+                        : styles.incorrectOption
+                      : null,
                   ]}
+                  disabled={answerLocked}
                 >
-                  {option}
-                </Text>
-                {selectedAnswer === option && (
-                  <Icon
-                    name={
-                      option === questions[currentQuestion]?.answer
-                        ? 'check-circle'
-                        : 'times-circle'
-                    }
-                    size={30}
-                    color={
-                      option === questions[currentQuestion]?.answer
-                        ? '#90EE90'
-                        : '#FF6F6F'
-                    }
-                    style={styles.icon}
-                  />
-                )}
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={[styles.optionsBox, selectedAnswer === option && { marginRight: 35 }]}
+                  >
+                    {option}
+                  </Text>
+                  {selectedAnswer === option && (
+                    <Icon
+                      name={
+                        option === questions[currentQuestion]?.answer
+                          ? 'check-circle'
+                          : 'times-circle'
+                      }
+                      size={30}
+                      color={
+                        option === questions[currentQuestion]?.answer
+                          ? '#90EE90'
+                          : '#FF6F6F'
+                      }
+                      style={styles.icon}
+                    />
+                  )}
+                </TouchableOpacity>
+              ))
+            ) : (
+              <Text style={styles.loadingText}>No options available</Text>
+            )}
           </View>
         </>
       )}
