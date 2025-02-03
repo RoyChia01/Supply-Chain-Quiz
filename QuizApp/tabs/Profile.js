@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
+import { getUserInfo } from './apiHandler';
+
+// Function to get the current date in the format you need (e.g., "16 Jan 2025")
+const getCurrentDate = () => {
+  const today = new Date();
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return today.toLocaleDateString('en-GB', options); // Format the date as "16 Jan 2025"
+};
+
 
 const BoardingPass = () => {
   const [passengerName, setPassengerName] = useState('');
@@ -9,36 +18,30 @@ const BoardingPass = () => {
   const [rowData, setRowData] = useState([]);
   const [topRowData, setTopRowData] = useState([]);
   const [imageUrl, setImageUrl] = useState('');
+  username = 'John Doe'; // Replace with the actual username
 
-  // Simulate fetching data
   useEffect(() => {
-    setTimeout(() => {
-      const mockData = {
-        passengerName: 'John Doe',
-        email: 'john.doe@example.com',
-        password: '********',
-        pointsBalance: 1250,
-        rowData: [
-          { boldText: 'TP1', topicNameText: 'Safety' },
-          { boldText: 'TP2', topicNameText: 'Aircraft' },
-        ],
-        topRowData: [
-          { title: 'School', subText: 'Supply Chain' },
-          { title: 'Captain', subText: '' },
-          { title: '', subText: '16 Jan 2025' },
-        ],
-        imageUrl: require('../images/soldier.png'),  // Local image file path
-      };
+    const fetchData = async () => {
+      try {
+        const userInfo = await getUserInfo(username);
+        setPassengerName(userInfo.passengerName);
+        setEmail(userInfo.email);
+        setPassword(userInfo.password);
+        setPointsBalance(userInfo.pointsBalance);
+        setRowData(userInfo.userTopics);
+        setTopRowData([
+          { title: 'School', subText: userInfo.school },
+          { title: userInfo.Rank, subText: '' },
+          { title: '', subText: getCurrentDate() },
+        ]);
+        setImageUrl({ uri: userInfo.avatarBLOB }); // Assuming avatarBLOB is a base64 image
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    };
 
-      setPassengerName(mockData.passengerName);
-      setEmail(mockData.email);
-      setPassword(mockData.password);
-      setPointsBalance(mockData.pointsBalance);
-      setRowData(mockData.rowData);
-      setTopRowData(mockData.topRowData);
-      setImageUrl(mockData.imageUrl);
-    }, 1000);
-  }, []);
+    fetchData();
+  }, [username]);
 
   return (
     <View style={styles.container}>
@@ -81,8 +84,8 @@ const BoardingPass = () => {
               <View style={styles.dataSection}>
                 {rowData.slice(0, 1).map((data, index) => (
                   <View key={index}>
-                    <Text style={styles.boldText}>{data.boldText}</Text>
-                    <Text style={styles.topicNameText}>{data.topicNameText}</Text>
+                    <Text style={styles.boldText}>{data.currentTopicNum}</Text>
+                    <Text style={styles.topicNameText}>{data.currentTopicName}</Text>
                   </View>
                 ))}
               </View>
@@ -96,8 +99,8 @@ const BoardingPass = () => {
               <View style={styles.dataSection}>
                 {rowData.slice(1, 2).map((data, index) => (
                   <View key={index}>
-                    <Text style={styles.boldText}>{data.boldText}</Text>
-                    <Text style={styles.topicNameText}>{data.topicNameText}</Text>
+                    <Text style={styles.boldText}>{data.LastTopicNum}</Text>
+                    <Text style={styles.topicNameText}>{data.LastTopicName}</Text>
                   </View>
                 ))}
               </View>
