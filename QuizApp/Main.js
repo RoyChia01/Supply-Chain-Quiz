@@ -7,7 +7,8 @@ import BoardingPass from './tabs/Profile'; // Import Profile (or BoardingPass)
 import Colors from './constants/Colors';
 import { createStackNavigator } from '@react-navigation/stack';
 import QuizTopics from './tabs/QuizTopics';
-import QuizQuestions from './tabs/QuizQuestions'; // Make sure you import QuizQuestions
+import QuizQuestions from './tabs/QuizQuestions'; 
+import InitialiseLeaderboard from './tabs/Leaderboard'; 
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator(); // Create a Stack Navigator
@@ -28,6 +29,14 @@ const TabArr = [
     activeIcon: 'grid',
     inActiveIcon: 'grid-outline',
     component: HomeStack, // Use the stack navigator here
+  },
+  {
+    route: 'LeaderBoard',
+    label: 'LeaderBoard',
+    type: Icons.FontAwesome,
+    activeIcon: 'trophy',
+    inActiveIcon: 'trophy',
+    component: InitialiseLeaderboard,
   },
   {
     route: 'Account',
