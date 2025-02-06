@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image,Pressable } from 'react-native';
 import { getUserInfo } from './apiHandler';
+import Icon, { Icons } from '../components/Icons';
+import { useNavigation } from '@react-navigation/native'; // Import navigation hook
 
 // Function to get the current date in the format you need (e.g., "16 Jan 2025")
 const getCurrentDate = () => {
@@ -9,8 +11,9 @@ const getCurrentDate = () => {
   return today.toLocaleDateString('en-GB', options); // Format the date as "16 Jan 2025"
 };
 
-
-const BoardingPass = () => {
+const BoardingPass = ({ route }) => {
+  const { userEmail } = route.params || {}; // Ensure params exist
+  const navigation = useNavigation(); // Get navigation object
   const [passengerName, setPassengerName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,31 +21,33 @@ const BoardingPass = () => {
   const [rowData, setRowData] = useState([]);
   const [topRowData, setTopRowData] = useState([]);
   const [imageUrl, setImageUrl] = useState('');
-  username = 'John Doe'; // Replace with the actual username
-
+  console.log(userEmail);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userInfo = await getUserInfo(username);
-        setPassengerName(userInfo.passengerName);
+        const userInfo = await getUserInfo(userEmail);
+        setPassengerName(userInfo.name); // Corrected from passengerName to name
         setEmail(userInfo.email);
         setPassword(userInfo.password);
-        setPointsBalance(userInfo.pointsBalance);
-        setRowData(userInfo.userTopics);
+        setPointsBalance(userInfo.pointBalance); // Corrected from pointsBalance to pointBalance
+        setRowData([
+          userInfo.topicMap.currentTopic,
+          userInfo.topicMap.lastTopic
+        ]);
         setTopRowData([
           { title: 'School', subText: userInfo.school },
-          { title: userInfo.Rank, subText: '' },
+          { title: 'Rank', subText: userInfo.rank }, // Fixed case issue
           { title: '', subText: getCurrentDate() },
         ]);
-        setImageUrl({ uri: userInfo.avatarBLOB }); // Assuming avatarBLOB is a base64 image
+        setImageUrl({ uri: userInfo.avatarBlob }); // Fixed key name from avatarBLOB to avatarBlob
       } catch (error) {
         console.error('Error loading user data:', error);
       }
     };
-
+  
     fetchData();
-  }, [username]);
-
+  }, [userEmail]);
+  
   return (
     <View style={styles.container}>
       <View style={styles.backbBoardingPassContainer}>
@@ -84,8 +89,8 @@ const BoardingPass = () => {
               <View style={styles.dataSection}>
                 {rowData.slice(0, 1).map((data, index) => (
                   <View key={index}>
-                    <Text style={styles.boldText}>{data.currentTopicNum}</Text>
-                    <Text style={styles.topicNameText}>{data.currentTopicName}</Text>
+                    <Text style={styles.boldText}>{data.topicId}</Text>
+                    <Text style={styles.topicNameText}>{data.topic}</Text>
                   </View>
                 ))}
               </View>
@@ -99,8 +104,8 @@ const BoardingPass = () => {
               <View style={styles.dataSection}>
                 {rowData.slice(1, 2).map((data, index) => (
                   <View key={index}>
-                    <Text style={styles.boldText}>{data.LastTopicNum}</Text>
-                    <Text style={styles.topicNameText}>{data.LastTopicName}</Text>
+                    <Text style={styles.boldText}>{data.topicId}</Text>
+                    <Text style={styles.topicNameText}>{data.topic}</Text>
                   </View>
                 ))}
               </View>
@@ -136,19 +141,33 @@ const BoardingPass = () => {
 
           {/* Fourth Row */}
           <View style={styles.equalRow}>
-            <View style={styles.horizontalRow}>
-              <View style={styles.leftSide}>
-                <Text style={styles.boldTextLabel}>Email</Text>
-                <Text style={[styles.subText, styles.emailValue]}>{email}</Text>
-                <Text style={styles.boldTextLabel}>Password</Text>
+          <View style={styles.horizontalRow}>
+            {/* Left Side (Email, Password, and Reset Icon) */}
+            <View style={styles.leftSide}>
+              <Text style={styles.boldTextLabel}>Email</Text>
+              <Text style={[styles.subText, styles.emailValue]}>{email}</Text>
+
+              <Text style={styles.boldTextLabel}>Password</Text>
+              <View style={styles.passwordContainer}>
                 <Text style={styles.subText}>{password}</Text>
-              </View>
-              <View style={styles.rightSide}>
-                <Text style={styles.boldTextLabel}>Points Balance</Text>
-                <Text style={styles.subText}>{pointsBalance}</Text>
+                <Pressable
+                  onPress={() => {
+                    navigation.navigate('resetPassword');
+                  }}
+                  style={[styles.iconButton]}>
+                  <Icons.MaterialCommunityIcons name="lock-reset" size={30} color="#e0a100" />
+                </Pressable>
               </View>
             </View>
+
+            {/* Right Side (Points Balance) */}
+            <View style={styles.rightSide}>
+              <Text style={styles.boldTextLabel}>Points Balance</Text>
+              <Text style={styles.subText}>{pointsBalance}</Text>
+            </View>
           </View>
+        </View>
+
 
           {/* Fifth Row */}
           <View style={styles.fifthRow}>
@@ -173,7 +192,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#24496b',
   },
   backbBoardingPassContainer: {
-    flex: 2,
+    flex: 2.5,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#446d92',
@@ -311,6 +330,17 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     borderRadius: 10, // Optional: Add rounded corners to the placeholder image
   },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start', // Ensure text and icon are in a row
+    gap: 10, // Add space between text and icon
+  },
+  
+  iconButton: {
+    paddingLeft: 20, // Small spacing for better alignment
+  },
+  
 });
 
 export default BoardingPass;

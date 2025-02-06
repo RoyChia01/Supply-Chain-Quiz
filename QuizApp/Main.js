@@ -3,15 +3,17 @@ import React, { useEffect, useRef } from 'react';
 import { SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon, { Icons } from './components/Icons';
 import * as Animatable from 'react-native-animatable';
-import BoardingPass from './tabs/Profile'; // Import Profile (or BoardingPass)
 import Colors from './constants/Colors';
 import { createStackNavigator } from '@react-navigation/stack';
 import QuizTopics from './tabs/QuizTopics';
 import QuizQuestions from './tabs/QuizQuestions'; 
-import InitialiseLeaderboard from './tabs/Leaderboard'; 
+import InitialiseLeaderboard from './tabs/Leaderboard';
+import BoardingPass from './tabs/Profile';
+import resetPassword from './tabs/resetPassword';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator(); // Create a Stack Navigator
+const userEmail = "john.doe@example.com"; // Replace with the actual username
 
 // Stack Navigator for Home (QuizTopics -> QuizQuestions)
 const HomeStack = () => (
@@ -20,6 +22,14 @@ const HomeStack = () => (
     <Stack.Screen name="QuizQuestions" component={QuizQuestions} />
   </Stack.Navigator>
 );
+
+const ProfileStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="BoardingPass" component={BoardingPass} />
+    <Stack.Screen name="resetPassword" component={resetPassword} />
+  </Stack.Navigator>
+);
+
 
 const TabArr = [
   {
@@ -44,7 +54,8 @@ const TabArr = [
     type: Icons.FontAwesome,
     activeIcon: 'user-circle',
     inActiveIcon: 'user-circle-o',
-    component: BoardingPass,
+    component: ProfileStack,
+    options: { initialParams: { userEmail } },
   },
 ];
 
