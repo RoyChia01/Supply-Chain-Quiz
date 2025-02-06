@@ -27,7 +27,7 @@ export const fetchQuestions = async (topicUID) => {
 export const getUserInfo = async (userEmail) => {
   try {
     //const response = await fetch(`${BASE_URL}/user/${userEmail}`);
-    const response = await fetch(`http://10.132.0.62:5500/QuizApp/testing/data.json`);
+    const response = await fetch(`http://192.168.50.161:5500/QuizApp/testing/data.json`);
     const data = await response.json();
     console.log("Fetched User Info:", data);
 

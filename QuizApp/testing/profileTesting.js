@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image,Pressable } from 'react-native';
 
 const App = () => {
     const [passengerName, setPassengerName] = useState('');
@@ -43,6 +43,11 @@ const App = () => {
     return (
         <View style={styles.container}>
             <View style={styles.backbBoardingPassContainer}>
+            <View style={{ padding: 20,marginTop: 40}}>
+                      <Pressable onPress={() => this.props.navigation.goBack(null)}>
+                        <SvgIcon icon={'back'} width={30} height={30} />
+                      </Pressable>
+                    </View>
                 <Image
                     source={require('../images/rsaf.png')} // Replace with your actual path
                     style={styles.logoImage}

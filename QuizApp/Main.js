@@ -1,5 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon, { Icons } from './components/Icons';
 import * as Animatable from 'react-native-animatable';
@@ -10,10 +10,16 @@ import QuizQuestions from './tabs/QuizQuestions';
 import InitialiseLeaderboard from './tabs/Leaderboard';
 import BoardingPass from './tabs/Profile';
 import resetPassword from './tabs/resetPassword';
+import { StatusBar } from 'expo-status-bar';
+import { NavigationContainer } from '@react-navigation/native';
+import LoginScreen from './tabs/LoginScreen';
+import ForgetPasswordScreen from './tabs/ForgetPasswordScreen';
+import SignUpScreen from './tabs/SignUpScreen';
+import { onAuthStateChanged } from 'firebase/auth';
+import { FIREBASE_AUTH } from './tabs/firebase';
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator(); // Create a Stack Navigator
-const userEmail = "john.doe@example.com"; // Replace with the actual username
+const Stack = createStackNavigator();
 
 // Stack Navigator for Home (QuizTopics -> QuizQuestions)
 const HomeStack = () => (
@@ -29,7 +35,6 @@ const ProfileStack = () => (
     <Stack.Screen name="resetPassword" component={resetPassword} />
   </Stack.Navigator>
 );
-
 
 const TabArr = [
   {
@@ -55,7 +60,6 @@ const TabArr = [
     activeIcon: 'user-circle',
     inActiveIcon: 'user-circle-o',
     component: ProfileStack,
-    options: { initialParams: { userEmail } },
   },
 ];
 
@@ -81,7 +85,7 @@ const TabButton = (props) => {
   );
 };
 
-export default function AnimTab1() {
+const AnimTab1 = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Tab.Navigator
@@ -112,6 +116,39 @@ export default function AnimTab1() {
         })}
       </Tab.Navigator>
     </SafeAreaView>
+  );
+};
+
+export default function App() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, (user) => {
+      if (user) {
+        console.log('User logged in:', user);
+        setUser(user);
+      } else {
+        console.log('No user logged in');
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  return (
+    <NavigationContainer>
+      <StatusBar style="auto" />
+      <Stack.Navigator initialRouteName={user ? 'Home' : 'Login'}>
+        {/* Authentication Screens */}
+        <Stack.Screen options={{ headerShown: false }} name="Login" component={LoginScreen} />
+        <Stack.Screen options={{ headerShown: false }} name="SignUp"component={SignUpScreen} />
+        <Stack.Screen options={{ headerShown: false }} name="ForgetPassword" component={resetPassword} />
+
+        {/* Home Screens (Only shown when logged in) */}
+        <Stack.Screen name="Home" options={{ headerShown: false }} component={AnimTab1} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 

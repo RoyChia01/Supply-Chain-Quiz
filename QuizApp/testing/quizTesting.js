@@ -24,29 +24,27 @@ const QuizQuestions = ({ navigation, route }) => {
       };
     }, [navigation])
   );
-
-  // Fetch quiz questions from API
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await fetch("http://10.132.0.61:5500/QuizApp/testing/data.json");
+        const response = await fetch(`http://10.132.0.61:8080/quiz/topic/${documentId}/qna`);
         const data = await response.json();
-  
-        if (data.quizData) {
-          // Filter the questions based on the topicId
-          const filteredQuestions = data.quizData
-            .filter((item) => item.topicId === topicId) // Filter by topicId
-            .map(({ question, options, answer }) => ({
-              question,
-              options,
-              answer,
-            }));
-  
-          // Log the filtered questions to the console
+
+        if (data && data.questions) {
+          // Extract necessary fields from the questions array
+          const filteredQuestions = data.questions.map(({ question, options, answer }) => ({
+            question,
+            options,
+            answer,
+          }));
+
           console.log("Filtered Questions:", filteredQuestions);
-  
+
           // Set the state with the filtered questions
           setQuestions(filteredQuestions);
+        } else {
+          console.error("No questions found for this documentId:", documentId);
+          setQuestions([]); // Ensure the state is set even if no questions exist
         }
       } catch (error) {
         console.error("Error fetching questions:", error);
@@ -54,11 +52,12 @@ const QuizQuestions = ({ navigation, route }) => {
         setLoading(false);
       }
     };
-  
-    fetchQuestions();
-  }, [topicId]);
-  
-  
+
+    if (documentId) {
+      fetchQuestions();
+    }
+  }, [documentId]);
+
   const getRank = (score) =>
     score === questions.length
       ? 'Elite Pilot'

@@ -1,17 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
 
 // Local image import
 const placeholderImage = require('../images/soldier.png'); // Adjust the path as needed
 
-const topics = [
-  { id: 1, name: 'General Knowledge' },
-  { id: 2, name: 'Science' },
-  { id: 3, name: 'Safety' },
-  { id: 4, name: 'Aircraft' },
-];
-
 const StartQuiz = ({ navigation }) => {
+
+  const [topics, setTopics] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTopics = async () => {
+      try {
+        const response = await fetch("http://192.168.50.161:5500/QuizApp/testing/data.json");
+        const data = await response.json();
+        setTopics(data);
+        console.log(data);
+      } catch (error) {
+        console.error("Error fetching topics:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTopics();
+  }, []);
   return (
     <View style={styles.container}>
       {/* Image placeholder at the top (fixed) */}
@@ -29,11 +42,11 @@ const StartQuiz = ({ navigation }) => {
         <View style={styles.windowRow}>
           {topics.map((topic) => (
             <TouchableOpacity
-              key={topic.id}
+              key={topic.documentId}
               style={styles.windowButton}
-              onPress={() => navigation.navigate('Quiz', { topicId: topic.id })}
+              onPress={() => navigation.navigate('Quiz', { documentId : documentId})}
             >
-              <Text style={styles.windowNumber}>{topic.id}</Text>
+              <Text style={styles.windowNumber}>{topic.Id}</Text>
               <Text style={styles.windowText}>{topic.name}</Text>
             </TouchableOpacity>
           ))}

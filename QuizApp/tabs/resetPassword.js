@@ -1,56 +1,86 @@
-import React from 'react';
-import { Text, View, Pressable, StyleSheet, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import { Text, View, Pressable, StyleSheet, TextInput, Alert, KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { FIREBASE_AUTH } from '../tabs/firebase'; // Import Firebase auth instance
 import Fonts from '../common/fonts';
 import SvgIcon from '../common/SvgIcon';
 
 const ResetPasswordScreen = () => {
   const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+
+  const handleResetPassword = () => {
+    if (!email) {
+      Alert.alert('Error', 'Please enter your email.');
+      return;
+    }
+
+    sendPasswordResetEmail(FIREBASE_AUTH, email)
+      .then(() => {
+        Alert.alert('Success', 'Password reset email sent!');
+        navigation.reset({
+          index: 0, // 0 means the first screen in the stack
+          routes: [{ name: 'Login' }], // Replace 'Home' with the name of your initial screen
+        });
+      })
+      .catch((error) => {
+        Alert.alert('Error', error.message);
+      });
+  };
 
   return (
-    <View style={styles.mainCon}>
-      {/* Back Button */}
-      <View style={styles.header}>
-        <Pressable onPress={() => navigation.goBack()}>
-          <SvgIcon icon="back" width={30} height={30} fill="#e0a100" />
-        </Pressable>
-      </View>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.mainCon}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <View style={styles.mainCon}>
+            {/* Back Button */}
+            <View style={styles.header}>
+              <Pressable onPress={() => navigation.goBack()}>
+                <SvgIcon icon="back" width={30} height={30} fill="#e0a100" />
+              </Pressable>
+            </View>
 
-      {/* Main Content */}
-      <View style={styles.content}>
-        {/* Icon */}
-        <View style={styles.loginIcon}>
-          <SvgIcon icon="reset" width={300} height={300} />
-        </View>
+            {/* Main Content */}
+            <View style={styles.content}>
+              {/* Icon */}
+              <View style={styles.loginIcon}>
+                <SvgIcon icon="reset" width={200} height={200} />
+              </View>
 
-        {/* Form Container */}
-        <View style={styles.container}>
-          <View style={styles.loginLblCon}>
-            <Text style={styles.loginLbl}>Reset Password</Text>
-          </View>
+              {/* Form Container */}
+              <View style={styles.container}>
+                <View style={styles.loginLblCon}>
+                  <Text style={styles.loginLbl}>Reset Password</Text>
+                </View>
 
-          <View style={styles.formCon}>
-            <View style={styles.textBoxCon}>
-              <SvgIcon icon="lock" width={25} height={25} style={styles.icon} />
-              <TextInput
-                style={styles.textInput}
-                placeholder="Enter Email"
-                placeholderTextColor="#e0a100"
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
+                <View style={styles.formCon}>
+                  <View style={styles.textBoxCon}>
+                    <SvgIcon icon="lock" width={25} height={25} style={styles.icon} />
+                    <TextInput
+                      style={styles.textInput}
+                      placeholder="Enter Email"
+                      placeholderTextColor="#e0a100"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      value={email}
+                      onChangeText={setEmail}
+                    />
+                  </View>
+                </View>
+
+                {/* Submit Button */}
+                <View style={styles.loginCon}>
+                  <Pressable style={styles.LoginBtn} onPress={handleResetPassword}>
+                    <Text style={styles.loginBtnLbl}>Submit</Text>
+                  </Pressable>
+                </View>
+              </View>
             </View>
           </View>
-
-          {/* Submit Button */}
-          <View style={styles.loginCon}>
-            <Pressable style={styles.LoginBtn}>
-              <Text style={styles.loginBtnLbl}>Submit</Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
-    </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -63,18 +93,13 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    marginTop: 40,
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    bottom: 30,
   },
-  loginIcon: {
-    alignSelf: 'center',
-  },
+  loginIcon: {},
   container: {
     paddingHorizontal: 20,
     width: '100%',
@@ -98,7 +123,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
-    color: '#000',
+    color: '#e0a100',
     fontSize: 18,
     fontFamily: Fonts.type.NotoSansMedium,
     paddingVertical: 8,

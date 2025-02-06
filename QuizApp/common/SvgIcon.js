@@ -37,26 +37,35 @@ const icon = {
 export default class SvgIcon extends React.Component {
   constructor(props) {
     super(props);
-    this.setState = {
+    this.state = { // Correctly initialize the state here
       icon: this.props.icon,
       height: this.props.height,
       width: this.props.width,
     };
   }
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.setState({
-      icon: nextProps.icon,
-      height: nextProps.height,
-      width: nextProps.width,
-    });
+
+  // Use getDerivedStateFromProps instead of UNSAFE_componentWillReceiveProps
+  static getDerivedStateFromProps(nextProps, nextState) {
+    if (
+      nextProps.icon !== nextState.icon ||
+      nextProps.height !== nextState.height ||
+      nextProps.width !== nextState.width
+    ) {
+      return {
+        icon: nextProps.icon,
+        height: nextProps.height,
+        width: nextProps.width,
+      };
+    }
+    return null;
   }
 
   render() {
     return (
       <SvgXml
-        width={this.props.width}
-        height={this.props.height}
-        xml={icon[this.props.icon]}
+        width={this.state.width}
+        height={this.state.height}
+        xml={icon[this.state.icon]} // Assuming you're using an icon object
       />
     );
   }

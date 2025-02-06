@@ -1,2 +1,8 @@
-GET http://localhost:5500/QuizApp/testing/data.json?topicId=2
+### Get all topics
+GET http://10.132.0.61:8080/quiz/topic
 
+### Get all topics with Q&A
+GET http://10.132.0.61:8080/quiz/topic/with-qna
+
+### Get Q&A for a specific topic (replace {documentId} with an actual ID)
+//GET http://10.132.0.61:8080/quiz/topic/{{documentId}}/qna

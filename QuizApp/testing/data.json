@@ -1,64 +1,21 @@
-{
-    "quizData": [
-    {
-      "topicId": 1,
-      "topic": "Live-Fire Safety",
-      "question": "What is the first action to take in case of a live-fire accident?",
-      "options": [
-        "Secure your weapon",
-        "Check for casualties and call for help",
-        "Continue firing",
-        "Ignore the incident"
-      ],
-      "answer": "Check for casualties and call for help"
-    },
-    {
-      "topicId": 2,
-      "topic": "Weapon Malfunction",
-      "question": "How should you handle a misfire during a live-fire exercise?",
-      "options": [
-        "Immediately inspect the barrel",
-        "Keep the weapon pointed downrange and wait before clearing",
-        "Look inside the barrel to check",
-        "Ignore it and keep firing"
-      ],
-      "answer": "Keep the weapon pointed downrange and wait before clearing"
-    },
-    {
-      "topicId": 3,
-      "topic": "Heat Exhaustion",
-      "question": "What is the correct response if you see someone collapse due to heat exhaustion?",
-      "options": [
-        "Pour cold water on them immediately",
-        "Move them to shade, provide water, and call for medical help",
-        "Ignore and continue the activity",
-        "Force them to continue training"
-      ],
-      "answer": "Move them to shade, provide water, and call for medical help"
-    },
-    {
-      "topicId": 4,
-      "topic": "Explosives Safety",
-      "question": "What safety gear is essential when handling explosives?",
-      "options": [
-        "Ear protection and gloves",
-        "Helmet and body armor",
-        "All of the above",
-        "No safety gear needed"
-      ],
-      "answer": "All of the above"
-    },
-    {
-      "topicId": 5,
-      "topic": "Night Patrol Tactics",
-      "question": "During a night patrol, how should you use a flashlight to maintain stealth?",
-      "options": [
-        "Shine it directly ahead at full brightness",
-        "Use a red filter and keep it low",
-        "Flash it frequently to scare enemies",
-        "Never use it under any circumstances"
-      ],
-      "answer": "Use a red filter and keep it low"
-    }
-  ]
+{ 
+    "name": "John Doe", 
+    "email": "john.doe@example.com", 
+    "password": "********", 
+    "pointBalance": 1250, 
+    "school": "Supply Chain", 
+    "avatarBlob": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAGQCAYAAADhFprXAAAAOXRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjEuMiBodHRwOi8vbWF0cGxvdGxpYi5vcmcvbWF0cGxvdGxpYgA3J2ZB88wAAAACXBIWXMAAB7CAAAewgFu0HU+AAEAAElEQVR4nOzdd5gU5d7G8e+6Y0L1o9p1F3X6uVtv1LqSffJ6EpLRH8zLZX9wn2fUhhchhW4oaK7fqH1WWF0XUWXm1VflZbbXZ7uHp4HgX7SrxqQGyUdr5zwsG7O3Hi1YXwpXc9W1VXJwH+8fKXs2JQj8sOKa7hzU76pI/ppU1Yri0h9TK3wK8VjsCrDnxSje01bCBp5iQOZs7UO8kzKfh9vhn4FnPUJ3tM1dtpl0z9PysP7dqhb+/9fLP5sAl7abzwEs2D8nTHcsdRrFOfo+kVXjZ8g58H6R8g9mZYfp1/PoEGknwGKLrcKl1Xt5N7MIZa9gwe2lfVg4Xhn20bQw2yAEBKHrJdxmFeMgTt0ijF0aupy+vb5mm6cyzy93d+OV8iv+m9kvEkPj3j5TzM8McvSoqaJQe4N2fez3Ilz8h4pqTh0q3Q7ybJzMskRgMBhbJlvQ9EOrddLXYi9mjD5+UOpo9Ybqf3Pa2v8EgcWZ6ovh8DptTh0R2E5ldsj0B5mvfHEaWxxAmT8Jg9YoZzVmRSsTw8u95k71vMHK1s9XbjoK2y+9sB/7v1e39bA93MyCmImErpyI0pk5WG9yO3d6Tc4We5L+FfB/sWRm+/7Gi9hHXTlh1POndA3T1yTZrBpHg6oGx77f53zXmd8ir8FgVzUb7T4ST8BBgl2ZoNUoOb0i0pXKpMNcBAgImlTuAV5iVlwfg6qTITz9Y5ZGMPz5tPvD7sBNXN5u1wWoiRwlT2gdQY3kFm62Fb4PnUyFwlRMyO+O9YOjzDfhdbZ9MS2I+v7Zz6skwQg5ckw5ITqIiFX7DPB2hNTFfP75XbY/42jGhfyaVtKe45Ipr1Vg4gYBh1cXX4IFg3zTvlGHJpjlHpF48whQe3HnynvPiHjWgu4P5xEbnFQzbgJzX9mRAonq4kDewNwdfjZ4zXkPzj0l5Q==", 
+    "rank": "Captain", 
+    "topicMap": { 
+        "currentTopic": { 
+            "documentId": "OOVpC3kYERp3mJeS3tAO", 
+            "topicId": 1, 
+            "topic": "Live-Fire Safety" 
+        }, 
+        "lastTopic": { 
+            "documentId": "tZplYuU8HxuCPVrG3uax", 
+            "topicId": 2, 
+            "topic": "Weapon Malfunction" 
+        } 
+    } 
 }
