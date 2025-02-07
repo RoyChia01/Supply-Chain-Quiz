@@ -35,7 +35,7 @@ const LoginScreen = () => {
       <Text style={styles.title}>Login</Text>
       <View style={styles.inputContainer}>
         <View style={styles.input}>
-          <MaterialIcons name='mail' size={20} color='#666' />
+          <MaterialIcons name='mail' size={25} color='#666' />
           <TextInput
             placeholder="Email"
             value={email}
@@ -47,7 +47,7 @@ const LoginScreen = () => {
       </View>
       <View style={styles.inputContainer}>
         <View style={styles.input}>
-          <MaterialIcons name='lock' size={20} color='#666' />
+          <MaterialIcons name='lock' size={25} color='#666' />
           <TextInput
             placeholder="Password"
             value={password}
@@ -58,7 +58,7 @@ const LoginScreen = () => {
           />
         </View>
         <TouchableOpacity onPress={() => navigation.navigate('ForgetPassword')} style={{ marginTop: 10 }}>
-          <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#FFD700' }}>Forget Password?</Text>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#FFD700' }}>Forget Password?</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.buttonContainer}>
@@ -67,9 +67,9 @@ const LoginScreen = () => {
         </TouchableOpacity>
       </View>
       <View style={{ flexDirection: 'row', marginTop: 5 }}>
-        <Text style={{ fontSize: 16, color: '#000000' }}>New to the app?</Text>
+        <Text style={{ fontSize: 20, color: '#000000' }}>New to the app?</Text>
         <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-          <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#FFD700' }}> Register</Text>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#FFD700' }}> Register</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -116,13 +116,12 @@ const styles = StyleSheet.create({
   buttonOutlines: {
     backgroundColor: '#FFD700',
     marginTop: 5,
-    borderColor: '#000000',
-    borderWidth: 2,
   },
   buttonOutlineText: {
     color: '#000000',
     fontWeight: '700',
-    fontSize: 16,
+    fontSize: 20,
+    textAlign: 'center',
   },
 });
 
