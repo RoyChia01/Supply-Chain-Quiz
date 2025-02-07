@@ -1,8 +1,8 @@
-const BASE_URL = 'http://10.132.0.47:8080/quiz'
+const BASE_URL = 'http://10.132.0.55:8080'
 
 export const fetchTopics = async () => {
   try {
-    const response = await fetch(`${BASE_URL}/topic`);
+    const response = await fetch(`${BASE_URL}/quiz/topic`);
     const data = await response.json();
     console.log("Fetched Topics:", data);
     return { topics: data, loading: false };
@@ -14,7 +14,7 @@ export const fetchTopics = async () => {
 
 export const fetchQuestions = async (topicUID) => {
   try {
-    const response = await fetch(`${BASE_URL}/topic/${topicUID}/qna`);
+    const response = await fetch(`${BASE_URL}/quiz/topic/${topicUID}/qna`);
     const data = await response.json();
     //console.log("Fetched Questions:", data);
     return { questions: data, loading: false };
@@ -26,8 +26,7 @@ export const fetchQuestions = async (topicUID) => {
 
 export const getUserInfo = async (userEmail) => {
   try {
-    //const response = await fetch(`${BASE_URL}/user/${userEmail}`);
-    const response = await fetch(`http://192.168.50.161:5500/QuizApp/testing/data.json`);
+    const response = await fetch(`${BASE_URL}/user?email=${userEmail}`);
     const data = await response.json();
     console.log("Fetched User Info:", data);
 

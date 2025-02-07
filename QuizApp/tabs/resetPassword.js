@@ -37,7 +37,7 @@ const ResetPasswordScreen = () => {
             {/* Back Button */}
             <View style={styles.header}>
               <Pressable onPress={() => navigation.goBack()}>
-                <SvgIcon icon="back" width={30} height={30} fill="#e0a100" />
+                <SvgIcon icon="back" width={30} height={30} fill="#FFD700" />
               </Pressable>
             </View>
 
@@ -60,7 +60,7 @@ const ResetPasswordScreen = () => {
                     <TextInput
                       style={styles.textInput}
                       placeholder="Enter Email"
-                      placeholderTextColor="#e0a100"
+                      placeholderTextColor="#FFD700"
                       keyboardType="email-address"
                       autoCapitalize="none"
                       value={email}
@@ -89,7 +89,7 @@ export default ResetPasswordScreen;
 const styles = StyleSheet.create({
   mainCon: {
     flex: 1,
-    backgroundColor: '#3a506b',
+    backgroundColor: '#24496b',
   },
   header: {
     padding: 20,
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   loginLbl: {
-    color: '#e0a100',
+    color: '#FFD700',
     fontSize: 40,
     fontFamily: Fonts.type.NotoSansExtraBold,
     textAlign: 'center',
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
-    color: '#e0a100',
+    color: '#FFD700',
     fontSize: 18,
     fontFamily: Fonts.type.NotoSansMedium,
     paddingVertical: 8,
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   LoginBtn: {
-    backgroundColor: '#e0a100',
+    backgroundColor: '#FFD700',
     borderRadius: 20,
     paddingVertical: 12,
     paddingHorizontal: 50,

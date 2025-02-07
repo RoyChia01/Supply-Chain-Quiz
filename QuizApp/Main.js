@@ -17,6 +17,7 @@ import ForgetPasswordScreen from './tabs/ForgetPasswordScreen';
 import SignUpScreen from './tabs/SignUpScreen';
 import { onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from './tabs/firebase';
+import { UserProvider } from './tabs/userInfo';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -77,7 +78,7 @@ const TabButton = (props) => {
   }, [focused]);
 
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={1} style={[styles.container, { top: 0 }]}>
+    <TouchableOpacity onPress={onPress} activeOpacity={1} style={[styles.container, { top: 30 }]}>
       <Animatable.View ref={viewRef} duration={1000}>
         <Icon type={item.type} name={focused ? item.activeIcon : item.inActiveIcon} color={focused ? Colors.primary : Colors.primaryLite} />
       </Animatable.View>
@@ -137,18 +138,18 @@ export default function App() {
   }, []);
 
   return (
-    <NavigationContainer>
-      <StatusBar style="auto" />
-      <Stack.Navigator initialRouteName={user ? 'Home' : 'Login'}>
-        {/* Authentication Screens */}
-        <Stack.Screen options={{ headerShown: false }} name="Login" component={LoginScreen} />
-        <Stack.Screen options={{ headerShown: false }} name="SignUp"component={SignUpScreen} />
-        <Stack.Screen options={{ headerShown: false }} name="ForgetPassword" component={resetPassword} />
-
-        {/* Home Screens (Only shown when logged in) */}
-        <Stack.Screen name="Home" options={{ headerShown: false }} component={AnimTab1} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <UserProvider> {/* Wrap the entire app */}
+      <NavigationContainer>
+        <StatusBar style="auto" />
+        <Stack.Navigator initialRouteName={user ? 'Home' : 'Login'}>
+          <Stack.Screen options={{ headerShown: false }} name="Login" component={LoginScreen} />
+          <Stack.Screen options={{ headerShown: false }} name="SignUp" component={SignUpScreen} />
+          <Stack.Screen options={{ headerShown: false }} name="ForgetPassword" component={ForgetPasswordScreen} />
+          <Stack.Screen name="Home" options={{ headerShown: false }} component={AnimTab1} />
+          <Stack.Screen name="BoardingPass" options={{ headerShown: false }} component={BoardingPass} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </UserProvider>
   );
 }
 

@@ -4,19 +4,23 @@ import { FIREBASE_AUTH } from '../tabs/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useUser } from './userInfo'; // Import UserContext
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const { setUserEmail } = useUser(); // Get context function to set user email
 
   const signIn = async () => {
     setLoading(true);
     try {
       const response = await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
       console.log('User logged in:', response);
-      navigation.navigate('Home',{ email: email }); 
+      
+      setUserEmail(email); // Store email in context
+      navigation.navigate('Home'); 
     } catch (error) {
       console.error(error);
       alert('Sign in failed: ' + error.message);
@@ -27,67 +31,45 @@ const LoginScreen = () => {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
-      <Image
-        source={require('../images/AFTC.png')}  
-        style={{width: 150,   height: 150,  resizeMode: 'contain',}}
-      />
-      <Text
-        style={{
-          fontFamily: 'Roboto-medium',
-          fontSize: 28,
-          fontWeight: '500',
-          color: '#000',
-          fontWeight: 'bold',
-          marginBottom: 10,
-          }}>
-          Login
-        </Text>
+      <Image source={require('../images/AFTC.png')} style={{ width: 150, height: 150, resizeMode: 'contain' }} />
+      <Text style={styles.title}>Login</Text>
       <View style={styles.inputContainer}>
         <View style={styles.input}>
-          <MaterialIcons 
-          name='mail' 
-          size={20} 
-          color='#666' 
-          />
+          <MaterialIcons name='mail' size={20} color='#666' />
           <TextInput
-            placeholder= "Email"
+            placeholder="Email"
             value={email}
-            onChangeText={(text) => setEmail(text)}
-            width= {250}
-            height= {40}
+            onChangeText={setEmail}
+            width={250}
+            height={40}
           />
         </View>
       </View>
       <View style={styles.inputContainer}>
         <View style={styles.input}>
-          <MaterialIcons 
-            name='lock' 
-            size={20} 
-            color='#666' 
-          />
+          <MaterialIcons name='lock' size={20} color='#666' />
           <TextInput
             placeholder="Password"
             value={password}
-            onChangeText={(text) => setPassword(text)}
+            onChangeText={setPassword}
             secureTextEntry
-            width= {250}
-            height= {40}
+            width={250}
+            height={40}
           />
         </View>
-        <TouchableOpacity onPress={() => navigation.navigate('ForgetPassword')} style={{marginTop: 10}}>
-            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#FFD700' }}>Forget Password?</Text>
-          </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('ForgetPassword')} style={{ marginTop: 10 }}>
+          <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#FFD700' }}>Forget Password?</Text>
+        </TouchableOpacity>
       </View>
-
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={signIn} style={[styles.button, styles.buttonOutlines]}>
           <Text style={styles.buttonOutlineText}>Login</Text>
         </TouchableOpacity>
       </View>
-      <View style={{flexDirection:'row', marginTop: 5}}>
-      <Text style={{fontSize: 16, color: '#000000'}}>New to the app?</Text>
+      <View style={{ flexDirection: 'row', marginTop: 5 }}>
+        <Text style={{ fontSize: 16, color: '#000000' }}>New to the app?</Text>
         <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-          <Text style={{fontSize: 16, fontWeight: 'bold', color: '#FFD700'}}> Register</Text>
+          <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#FFD700' }}> Register</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -99,7 +81,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#2F4F6D'
+    backgroundColor: '#2F4F6D',
+  },
+  title: {
+    fontFamily: 'Roboto-medium',
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 10,
   },
   inputContainer: {
     width: '80%',
@@ -110,7 +99,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 10,
     marginTop: 5,
-    flexDirection:'row',
+    flexDirection: 'row',
     alignItems: 'center',
   },
   buttonContainer: {
@@ -129,11 +118,6 @@ const styles = StyleSheet.create({
     marginTop: 5,
     borderColor: '#000000',
     borderWidth: 2,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: '700',
-    fontSize: 16,
   },
   buttonOutlineText: {
     color: '#000000',

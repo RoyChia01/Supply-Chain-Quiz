@@ -150,6 +150,7 @@ const styles = StyleSheet.create({
       marginTop: 5,
       flexDirection:'row',
       alignItems: 'center',
+      color: '#666',
     },
     buttonContainer: {
       width: '70%',
