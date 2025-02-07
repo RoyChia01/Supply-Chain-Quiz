@@ -66,7 +66,7 @@ const SignUpScreen = () => {
                 <View style={styles.input}>
                     <MaterialIcons 
                       name='account-circle' 
-                      size={20} 
+                      size={25} 
                       color='#666' 
                     />
                     <TextInput
@@ -82,7 +82,7 @@ const SignUpScreen = () => {
                 <View style={styles.input}>
                     <MaterialIcons 
                       name='mail' 
-                      size={20} 
+                      size={25} 
                       color='#666' 
                     />
                     <TextInput
@@ -98,7 +98,7 @@ const SignUpScreen = () => {
                 <View style={styles.input}>
                     <MaterialIcons 
                         name='lock' 
-                        size={20} 
+                        size={25} 
                         color='#666' 
                     />
                     <TextInput
@@ -120,9 +120,9 @@ const SignUpScreen = () => {
                     <Text style={styles.buttonOutlineText}>Register</Text>
                 </TouchableOpacity>
                 <View style={{flexDirection:'row', marginTop: 5, justifyContent: 'center'}}>
-                      <Text style={{fontSize: 16, color: '#000000'}}>Already registered?</Text>
+                      <Text style={{fontSize: 20, color: '#000000'}}>Already registered?</Text>
                         <TouchableOpacity onPress={() => navigation.goBack()}>
-                          <Text style={{fontSize: 16, fontWeight: 'bold', color: '#FFD700'}}> Login</Text>
+                          <Text style={{fontSize: 20, fontWeight: 'bold', color: '#FFD700'}}> Login</Text>
                         </TouchableOpacity>
                       </View>
             </View>
@@ -166,17 +166,17 @@ const styles = StyleSheet.create({
     buttonOutlines: {
       backgroundColor: '#FFD700',
       marginTop: 5,
-      borderColor: '#000000',
-      borderWidth: 2,
+
     },
     buttonText: {
       color: 'white',
       fontWeight: '700',
-      fontSize: 16,
+      fontSize: 20,
     },
     buttonOutlineText: {
       color: '#000000',
       fontWeight: '700',
-      fontSize: 16,
+      fontSize: 20,
+      textAlign: 'center',
     },
   });
