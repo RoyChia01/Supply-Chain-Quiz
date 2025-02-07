@@ -20,7 +20,7 @@ const LoginScreen = () => {
       console.log('User logged in:', response);
       
       setUserEmail(email); // Store email in context
-      navigation.navigate('Home'); 
+      navigation.navigate('MainTabs'); 
     } catch (error) {
       console.error(error);
       alert('Sign in failed: ' + error.message);

@@ -37,7 +37,7 @@ const ResetPasswordScreen = () => {
             {/* Back Button */}
             <View style={styles.header}>
               <Pressable onPress={() => navigation.goBack()}>
-                <SvgIcon icon="back" width={30} height={30} fill="#FFD700" />
+                <SvgIcon icon="back" width={30} height={30} fill="#FFD700"/>
               </Pressable>
             </View>
 
@@ -90,14 +90,18 @@ const styles = StyleSheet.create({
   mainCon: {
     flex: 1,
     backgroundColor: '#24496b',
+    justifyContent: 'flex-start', // Align content to the top
   },
   header: {
+    marginTop: 40,
     padding: 20,
   },
   content: {
     flex: 1,
     alignItems: 'center',
     position: 'relative',
+    justifyContent: 'flex-start', // Keep the content aligned to the top
+    paddingTop: 40, // Adjust to move content lower
   },
   loginIcon: {},
   container: {
@@ -145,3 +149,4 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
 });
+
