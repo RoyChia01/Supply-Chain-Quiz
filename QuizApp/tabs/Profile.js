@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { getUserInfo } from './apiHandler';
-import Icon, { Icons } from '../components/Icons';
 import { useUser } from './userInfo';  // Import the hook
 
-// Function to get the current date in the format you need (e.g., "16 Jan 2025")
+// Function to get the current date in the format (e.g., "16 Jan 2025")
 const getCurrentDate = () => {
   const today = new Date();
   const options = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -20,27 +19,26 @@ const BoardingPass = ({ navigation }) => {
   const [rowData, setRowData] = useState([]);
   const [topRowData, setTopRowData] = useState([]);
   const [imageUrl, setImageUrl] = useState('');
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false); // State to manage password visibility
 
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const userInfo = await getUserInfo(userEmail);
-        setPassengerName(userInfo.name); // Corrected from passengerName to name
+        setPassengerName(userInfo.name);
         setEmail(userInfo.email);
         setPassword(userInfo.password);
-        setPointsBalance(userInfo.pointBalance); // Corrected from pointsBalance to pointBalance
+        setPointsBalance(userInfo.pointBalance);
         setRowData([
           userInfo.topicMap.currentTopic,
           userInfo.topicMap.lastTopic
         ]);
         setTopRowData([
           { title: 'School', subText: userInfo.school },
-          { title: 'Rank', subText: userInfo.rank }, // Fixed case issue
+          { title: 'Rank', subText: userInfo.rank }, 
           { title: '', subText: getCurrentDate() },
         ]);
-        setImageUrl({ uri: userInfo.avatarBlob }); // Fixed key name from avatarBLOB to avatarBlob
+        setImageUrl({ uri: userInfo.avatarBlob });
       } catch (error) {
         console.error('Error loading user data:', error);
       }
@@ -49,16 +47,11 @@ const BoardingPass = ({ navigation }) => {
     fetchData();
   }, [userEmail]);
 
-  // Function to toggle password visibility
-  const togglePasswordVisibility = () => {
-    setIsPasswordVisible(!isPasswordVisible);
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.backbBoardingPassContainer}>
         <Image
-          source={require('../images/rsaf.png')} // Replace with your actual path
+          source={require('../images/rsaf.png')}
           style={styles.logoImage}
         />
         <View style={styles.userBoardingPass}>
@@ -125,7 +118,7 @@ const BoardingPass = ({ navigation }) => {
               <View style={[styles.dataSection, styles.leftSection]}>
                 {rowData.slice(0, 1).map((data, index) => (
                   <View key={index}>
-                    <Text style={styles.boldTextLabel}>Passenger Name</Text>
+                    <Text style={styles.boldTextLabel}>Trainee Name</Text>
                     <Text style={styles.boldText}>{passengerName}</Text>
                   </View>
                 ))}
@@ -153,28 +146,13 @@ const BoardingPass = ({ navigation }) => {
                 <Text style={styles.boldTextLabel}>Email</Text>
                 <Text style={[styles.subText, styles.emailValue]}>{email}</Text>
 
-                <Text style={styles.boldTextLabel}>Password</Text>
-                <View style={styles.passwordContainer}>
-                  <Text style={styles.subText}>
-                    {isPasswordVisible ? password : '••••••••'} {/* Show password or masked text */}
+                <TouchableOpacity 
+                  onPress={() => navigation.navigate('resetPassword')} 
+                  style={styles.iconButton}>
+                  <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#FFD700' }}>
+                    Reset Password Here
                   </Text>
-                  <TouchableOpacity
-                    onPress={togglePasswordVisibility} // Toggle password visibility
-                    style={styles.iconButton}>
-                    <Icons.MaterialCommunityIcons
-                      name={isPasswordVisible ? 'eye-off' : 'eye'} // Toggle icon based on visibility
-                      size={35}
-                      color="#FFD700"
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      navigation.navigate('resetPassword');
-                    }}
-                    style={styles.iconButton}>
-                    <Icons.MaterialCommunityIcons name="lock-reset" size={35} color="#FFD700" />
-                  </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
               </View>
 
               {/* Right Side (Points Balance) */}
@@ -188,7 +166,7 @@ const BoardingPass = ({ navigation }) => {
           {/* Fifth Row */}
           <View style={styles.fifthRow}>
             <Image
-              source={require('../images/barcode.png')} // Replace with your actual path
+              source={require('../images/barcode.png')}
               style={styles.barcodeImage}
             />
             <View style={styles.semiCircleLeft}></View>
