@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { 
+  View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator, RefreshControl 
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { fetchTopics } from './apiHandler';
-import PropTypes from 'prop-types'; // For prop type checking
+import PropTypes from 'prop-types';
 
 // Local image import
 const placeholderImage = require('../images/soldier.png');
@@ -31,6 +33,8 @@ const QuizTopics = () => {
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false); // New state for refresh control
+
   const navigation = useNavigation();
 
   const loadTopics = useCallback(async () => {
@@ -48,6 +52,13 @@ const QuizTopics = () => {
   useEffect(() => {
     loadTopics();
   }, [loadTopics]);
+
+  // Function to handle pull-to-refresh
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadTopics();
+    setRefreshing(false);
+  };
 
   if (loading) {
     return (
@@ -76,14 +87,19 @@ const QuizTopics = () => {
 
       <Text style={styles.title}>Select a Topic</Text>
 
-      <ScrollView contentContainerStyle={styles.contentContainer}>
+      <ScrollView 
+        contentContainerStyle={styles.contentContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#FFD700']} />
+        }
+      >
         <View style={styles.windowRow}>
           {topics.map((topic) => (
             <TopicButton
-            key={topic.documentId}
-            topic={{ ...topic, topicId: String(topic.topicId) }} // Ensure topicId is a string
-            onPress={() => navigation.navigate('QuizQuestions', { documentId: topic.documentId })}
-          />
+              key={topic.documentId}
+              topic={{ ...topic, topicId: String(topic.topicId) }} // Ensure topicId is a string
+              onPress={() => navigation.navigate('QuizQuestions', { documentId: topic.documentId })}
+            />
           ))}
         </View>
       </ScrollView>
@@ -94,7 +110,7 @@ const QuizTopics = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2F4F6D', // Deep blue to reflect Air Force theme
+    backgroundColor: '#2F4F6D',
     alignItems: 'center',
     paddingTop: 40,
   },
@@ -111,12 +127,12 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     borderRadius: 10,
     borderWidth: 5,
-    borderColor: '#FFD700', // Gold border to match Air Force color
+    borderColor: '#FFD700', 
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#FFD700', // Gold color for emphasis
+    color: '#FFD700',
     marginBottom: 40,
     fontFamily: 'Arial',
   },
@@ -130,7 +146,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   windowButton: {
-    backgroundColor: '#3A5F77', // Navy blue background
+    backgroundColor: '#3A5F77',
     width: 140,
     height: 180,
     borderRadius: 20,
@@ -138,7 +154,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     margin: 15,
     borderWidth: 2,
-    borderColor: '#FFD700', // Gold border to give it a strong, military theme
+    borderColor: '#FFD700',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.3,

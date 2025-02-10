@@ -2,10 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
-import { fetchQuestions } from './apiHandler'; // Import useNavigation
+import { fetchQuestions, getUserInfo,postQuizResults } from './apiHandler'; 
+import { useUser } from './userInfo';  // Import the hook
 
-// Custom Hook for fetching quiz questions
-const useQuizQuestions = (documentId) => {
+const useQuizQuestions = (topicId) => {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,17 +14,18 @@ const useQuizQuestions = (documentId) => {
     const loadQuestions = async () => {
       setLoading(true);
       try {
-        const response = await fetchQuestions(documentId);
+        const response = await fetchQuestions(topicId);
         setQuestions(response.questions);
+        console.log("Loaded Questions:", response.questions);
       } catch (err) {
         setError(err);
       } finally {
         setLoading(false);
       }
     };
-
+  
     loadQuestions();
-  }, [documentId]);
+  }, [topicId]);
 
   return { questions, loading, error };
 };
@@ -72,39 +73,49 @@ const QuizQuestions = ({ navigation, route }) => {
   };
 
   const moveNextQuestion = () => {
+    console.log("Current Question:", currentQuestion, "Total Questions:", questions.length);
     if (currentQuestion + 1 < questions.length) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
       setAnswerLocked(false);
-    } else setShowScore(true);
+    } else {
+      setShowScore(true);
+    }
   };
 
   useEffect(() => {
     if (answerLocked) {
       const timeout = setTimeout(() => {
         moveNextQuestion();
-      }, 1000);
-      return () => clearTimeout(timeout);
+      }, 1000); // Ensure there's a 1-second delay after answering
+  
+      return () => clearTimeout(timeout); // Clear timeout when component unmounts or state changes
     }
-  }, [answerLocked, currentQuestion]);
-
+  }, [answerLocked, currentQuestion]); // Dependency on answerLocked and currentQuestion
   if (loading) return <Text style={styles.loadingText}>Loading...</Text>;
   if (error) return <Text style={styles.loadingText}>Error: {error.message}</Text>;
-
   return (
+    
     <View style={styles.container}>
       {!showScore && <ProgressBar currentQuestion={currentQuestion} totalQuestions={questions.length} />}
 
       {showScore ? (
-        <Score score={score} totalQuestions={questions.length} getRank={getRank} onRestart={handleRestart} />
-      ) : (
-        <QuestionCard
-          question={questions[currentQuestion]}
-          selectedAnswer={selectedAnswer}
-          answerLocked={answerLocked}
-          onAnswer={handleAnswer}
-        />
-      )}
+  <Score
+    score={score}
+    totalQuestions={questions.length}
+    getRank={getRank}
+    onRestart={handleRestart}
+    topicId={documentId} // Pass documentId here
+  />
+) : (
+  <QuestionCard
+    question={questions[currentQuestion]}
+    selectedAnswer={selectedAnswer}
+    answerLocked={answerLocked}
+    onAnswer={handleAnswer}
+  />
+)}
+
     </View>
   );
 };
@@ -188,16 +199,48 @@ const OptionButton = ({ option, selectedAnswer, isCorrect, onAnswer, answerLocke
     </TouchableOpacity>
   );
 };
-const Score = ({ score, totalQuestions, getRank, onRestart }) => (
-  <View style={styles.scoreContainer}>
-    <Text style={styles.rankText}>Rank: {getRank(score)}</Text>
-    <Image source={require('../images/soldier.png')} style={styles.avatar} />
-    <Text style={styles.scoreText}>Score: {score} / {totalQuestions}</Text>
-    <TouchableOpacity style={styles.resetButton} onPress={onRestart}>
-      <Text style={styles.resetButtonText}>Home</Text>
-    </TouchableOpacity>
-  </View>
-);
+const Score = ({ score, totalQuestions, getRank, onRestart, topicId }) => {
+  const { userEmail } = useUser(); // Get user email from context
+  const [userDocumentID, setUserDocumentID] = useState(null); // State to store user document ID
+  
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const userInfo = await getUserInfo(userEmail);
+        if (userInfo) {
+          setUserDocumentID(userInfo.documentId); // Store the document ID in state
+        } else {
+          console.log('Failed to retrieve user info.');
+        }
+      } catch (error) {
+        console.log('Error fetching user info:', error);
+      }
+    };
+
+    fetchUserInfo();
+  }, [userEmail]); // Only run effect when userEmail changes
+
+  if (!userDocumentID) {
+    return <Text style={styles.loadingText}>Loading user info...</Text>; // Optionally handle loading state
+  }
+
+  return (
+    <View style={styles.scoreContainer}>
+      <Text style={styles.rankText}>Rank: {getRank(score)}</Text>
+      <Image source={require('../images/soldier.png')} style={styles.avatar} />
+      <Text style={styles.scoreText}>Score: {score} / {totalQuestions}</Text>
+      <TouchableOpacity
+        style={styles.resetButton}
+        onPress={() => {
+          onRestart(score); 
+          postQuizResults(userDocumentID, topicId, score); // Use the fetched document ID
+        }}
+      >
+        <Text style={styles.resetButtonText}>Home</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
