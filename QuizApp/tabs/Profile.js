@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { getUserInfo } from './apiHandler';
 import { useUser } from './userInfo';  // Import the hook
+import { signOut } from 'firebase/auth';
+import { FIREBASE_AUTH } from './firebase';  // Assuming you have the firebase configuration
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 // Function to get the current date in the format (e.g., "16 Jan 2025")
 const getCurrentDate = () => {
@@ -20,6 +23,15 @@ const BoardingPass = ({ navigation }) => {
   const [topRowData, setTopRowData] = useState([]);
   const [imageUrl, setImageUrl] = useState('');
 
+  // Handle Sign Out
+  const handleSignOut = async () => {
+    try {
+      await signOut(FIREBASE_AUTH);  // Sign out from Firebase
+      navigation.replace('Login');  // Redirect to Login Screen
+    } catch (error) {
+      console.error('Error signing out: ', error);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,10 +62,17 @@ const BoardingPass = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.backbBoardingPassContainer}>
+        
+        {/* Exit Icon Button */}
+        <TouchableOpacity onPress={handleSignOut} style={styles.exitIconContainer}>
+          <Icon type="FontAwesome" name="sign-out" color="#FFD700" size={40} />
+        </TouchableOpacity>
+
         <Image
           source={require('../images/rsaf.png')}
           style={styles.logoImage}
         />
+        
         <View style={styles.userBoardingPass}>
           {/* First Row */}
           <View style={styles.shortRow}>
@@ -193,6 +212,14 @@ const styles = StyleSheet.create({
     width: '90%',
     margin: 100,
     borderRadius: 50,
+  },
+  exitIconContainer: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'transparent',
+    zIndex: 1,  // Ensures it's on top of other elements
+    padding: 10,
   },
   userBoardingPass: {
     backgroundColor: '#fff',
