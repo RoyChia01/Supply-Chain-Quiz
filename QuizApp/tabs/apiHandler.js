@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 
-const BASE_URL = 'http://10.132.0.75:8080'
+const BASE_URL = 'http://10.132.0.57:8080'
 
 //Fetch all the topics from the back end
 export const fetchTopics = async () => {
@@ -89,12 +89,15 @@ export const fetchLeaderboard = async () => {
     const response = await fetch(`${BASE_URL}/leaderboard`);
     const data = await response.json();
     console.log("Fetched Topics:", data);
-    return { topics: data, loading: false };
+
+    // Ensure it matches the expected structure
+    return data; // Should be { itemList: [...] }
   } catch (error) {
     console.error("Error fetching topics:", error);
-    return { topics: [], loading: false };
+    return { itemList: [] }; // Ensure itemList is always an array
   }
 };
+
 
 // export const VerifyUserInfo = async (userEmail,password) => {
 //   try {
