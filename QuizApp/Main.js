@@ -90,7 +90,7 @@ const TabButton = ({ item, onPress, accessibilityState }) => {
 };
 
 const AnimTab = () => (
-  <SafeAreaView style={{ flex: 1 }}>
+  <SafeAreaView style={{ flex: 1 ,backgroundColor: "#2F4F6D"}}>
     <Tab.Navigator screenOptions={{ headerShown: false, tabBarStyle: styles.tabBar }}>
       {TabArr.map((item, index) => (
         <Tab.Screen
@@ -121,7 +121,6 @@ export default function App() {
           <Stack.Screen name="SignUp" component={SignUpScreen} />
           <Stack.Screen name="ForgetPassword" component={resetPassword} />
           <Stack.Screen name="MainTabs" component={AnimTab} />
-          <Stack.Screen name="BoardingPass" component={BoardingPass} />
         </Stack.Navigator>
       </NavigationContainer>
     </UserProvider>
