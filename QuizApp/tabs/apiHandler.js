@@ -1,8 +1,8 @@
 import { Alert } from 'react-native';
 
-const BASE_URL = 'http://10.132.0.57:8080'
+const BASE_URL = 'http://10.132.0.57:8080';
 
-//Fetch all the topics from the back end
+// Fetch all the topics from the backend
 export const fetchTopics = async () => {
   try {
     const response = await fetch(`${BASE_URL}/quiz/topic`);
@@ -15,39 +15,37 @@ export const fetchTopics = async () => {
   }
 };
 
-//Fetch the questions for the selected topic
+// Fetch the questions for the selected topic
 export const fetchQuestions = async (topicUID) => {
   try {
     const response = await fetch(`${BASE_URL}/quiz/topic/${topicUID}/qna`);
     const data = await response.json();
-    //console.log("Fetched Questions:", data);
     return { questions: data, loading: false };
   } catch (error) {
-    console.error("Error fetching Questions:", error);
+    console.error("Error fetching questions:", error);
     return { questions: [], loading: false };
   }
 };
 
-//Get the user info from the back end
+// Get the user info from the backend
 export const getUserInfo = async (userEmail) => {
   try {
     const response = await fetch(`${BASE_URL}/user?email=${userEmail}`);
-    //const response = await fetch(`http://10.132.0.74:5500/QuizApp/testing/data.json`); //Local Testing
     const data = await response.json();
-    console.log("Fetched User Info:", data);
-
-    if (response.ok) {
-      return data;
-    } else {
+    
+    if (!response.ok) {
       throw new Error(data.message || 'Failed to fetch user info');
     }
+
+    console.log("Fetched User Info:", data);
+    return data;
   } catch (error) {
     console.error('Error fetching user info:', error);
     return null;
   }
 };
 
-//Post the quiz results to the back end
+// Post the quiz results to the backend
 export const postQuizResults = async (UserdocumentID, topicID, result) => {
   console.log("UserdocumentID:", UserdocumentID, "TopicID:", topicID, "Result:", result);
 
@@ -58,60 +56,63 @@ export const postQuizResults = async (UserdocumentID, topicID, result) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        score: result.toString(),   // Ensures result is a string
-        topicId: topicID.toString(), // Ensures topicID is a string
+        score: result.toString(),
+        topicId: topicID.toString(),
       }),
     });
 
-    // Check if the response is successful (status code 200-299)
     if (!response.ok) {
       throw new Error(`Request failed with status ${response.status}`);
     }
 
-    // Attempt to parse the response JSON if the response is successful
     const data = await response.json();
-
-    // Optionally, check the structure of the returned data (e.g., if `data.success` exists)
     console.log('Quiz result posted successfully:', data);
     return { success: true, data };
-    
+
   } catch (error) {
     console.error('Error posting quiz results:', error.message);
     Alert.alert('Error', 'Failed to post quiz results: ' + error.message);
-    return { success: false, error: error.message }; // Return the error message to provide more context
+    return { success: false, error: error.message };
   }
 };
 
-
-//Get all the users title and score from back end to display in leaderboard
+// Get all the users' title and score from the backend to display in the leaderboard
 export const fetchLeaderboard = async () => {
   try {
     const response = await fetch(`${BASE_URL}/leaderboard`);
     const data = await response.json();
-    console.log("Fetched Topics:", data);
-
-    // Ensure it matches the expected structure
-    return data; // Should be { itemList: [...] }
+    console.log("Fetched Leaderboard:", data);
+    return data;
   } catch (error) {
-    console.error("Error fetching topics:", error);
-    return { itemList: [] }; // Ensure itemList is always an array
+    console.error("Error fetching leaderboard:", error);
+    return { itemList: [] };  // Ensure itemList is always an array
   }
 };
 
+// Update selected title for the user
+export const updateSelectedTitle = async (UserdocumentID, title) => {
+  console.log("UserdocumentID:", UserdocumentID, "Title:", title);
 
-// export const VerifyUserInfo = async (userEmail,password) => {
-//   try {
-//     const response = await fetch(`${BASE_URL}/user/auth${}`);
-//     const data = await response.json();
-//     console.log("Fetched User Info:", data);
+  try {
+    const response = await fetch(`${BASE_URL}/user/title/${UserdocumentID}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ title: title.toString() }),
+    });
 
-//     if (response.ok) {
-//       return data;
-//     } else {
-//       throw new Error(data.message || 'Failed to fetch user info');
-//     }
-//   } catch (error) {
-//     console.error('Error fetching user info:', error);
-//     return null;
-//   }
-// };
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Title updated successfully:', data);
+    return { success: true, data };
+
+  } catch (error) {
+    console.error('Error updating title:', error.message);
+    Alert.alert('Error', 'Failed to update title: ' + error.message);
+    return { success: false, error: error.message };
+  }
+};

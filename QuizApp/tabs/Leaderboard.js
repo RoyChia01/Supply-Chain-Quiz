@@ -6,38 +6,59 @@ const InitialiseLeaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null); // New state to track error
 
-  // Function to fetch leaderboard data
+  // Hardcoded leaderboard data (sample data)
+  const hardcodedData = [
+    { name: 'Player1', rank: 'Gold', totalScore: 1500, position: 1 },
+    { name: 'Player2', rank: 'Silver', totalScore: 1400, position: 2 },
+    { name: 'Player3', rank: 'Bronze', totalScore: 1300, position: 3 },
+    { name: 'Player4', rank: 'Silver', totalScore: 1200, position: 4 },
+    { name: 'Player5', rank: 'Bronze', totalScore: 1100, position: 5 },
+    { name: 'Player6', rank: 'Silver', totalScore: 1000, position: 6 },
+    { name: 'Player7', rank: 'Gold', totalScore: 1900, position: 7 },
+    { name: 'Player8', rank: 'Bronze', totalScore: 800, position: 8 },
+    { name: 'Player9', rank: 'Silver', totalScore: 700, position: 9 },
+    { name: 'Player10', rank: 'Gold', totalScore: 600, position: 10 },
+  ];
+
+  // Fetch leaderboard data
   const getLeaderboardData = async () => {
     try {
+      // Simulating an API call
       const { itemList } = await fetchLeaderboard();
+
+      //Uncomment the above line and use the below code when you're ready to integrate with an API
       if (!itemList || !Array.isArray(itemList)) throw new Error('Invalid data format');
 
+      //const sortedData = hardcodedData
       const sortedData = itemList
-        .map(({ name, rank, totalScore }) => ({
-          id: name, // Using name as ID (assuming unique)
+        .sort((a, b) => a.position - b.position)
+        .map(({ name, rank, totalScore, position }) => ({
+          id: name,
           name,
           rank,
-          score: parseInt(totalScore, 10), // Ensure score is a number
-        }))
-        .sort((a, b) => b.score - a.score); // Sort by score in descending order
+          totalScore,
+          position,
+        }));
 
       setLeaderboardData(sortedData);
     } catch (error) {
       console.error('Failed to load leaderboard:', error);
+      setError('Failed to load leaderboard data. Please try again later.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Fetch leaderboard data on mount
     getLeaderboardData();
   }, []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await getLeaderboardData(); // Re-fetch the leaderboard data
+    setError(null); // Reset the error before refreshing
+    await getLeaderboardData();
     setRefreshing(false);
   };
 
@@ -59,6 +80,14 @@ const InitialiseLeaderboard = () => {
     );
   }
 
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorMessage}>{error}</Text>
+      </View>
+    );
+  }
+
   // Split data for top 3 and remaining leaderboard
   const topThree = leaderboardData.slice(0, 3);
   const remainingLeaderboard = leaderboardData.slice(3);
@@ -69,15 +98,17 @@ const InitialiseLeaderboard = () => {
       <View style={styles.topContainer}>
         {topThree.length === 3 &&
           [topThree[1], topThree[0], topThree[2]].map((player, index) => (
-            <View key={player.id} style={[styles.section, index === 1 ? styles.mainSection : styles.sideSection]}>
+            <View key={player.position} style={[styles.section, index === 1 ? styles.mainSection : styles.sideSection]}>
               <Image source={require('../images/soldier.png')} style={styles.icon} />
               <Text style={[styles.title, { fontSize: getFontSize(player.name) }]}>{player.name}</Text>
               <Text style={styles.subtitle}>{player.rank}</Text>
               <Text style={[styles.text, styles.number]}>
                 {index === 0 ? 2 : index === 1 ? 1 : 3}
-                <Text style={styles.suffix}>{getRankSuffix(index === 0 ? 2 : index === 1 ? 1 : 3)}</Text>
+                <Text style={styles.suffix}>
+                  {index === 0 ? 'nd' : index === 1 ? 'st' : 'rd'}
+                </Text>
               </Text>
-              <Text style={styles.score}>Score: {player.score}</Text>
+              <Text style={styles.score}>Score: {player.totalScore}</Text>
             </View>
           ))}
       </View>
@@ -86,7 +117,7 @@ const InitialiseLeaderboard = () => {
       <View style={styles.bottomContainer}>
         <FlatList
           data={remainingLeaderboard}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.position.toString()}
           renderItem={({ item, index }) => (
             <View style={styles.row}>
               <Text style={styles.rank}>{index + 4}</Text>
@@ -94,11 +125,11 @@ const InitialiseLeaderboard = () => {
                 <Text style={[styles.name, { fontSize: getFontSize(item.name) }]}>{item.name}</Text>
                 <Text style={styles.subtitle}>{item.rank}</Text>
               </View>
-              <Text style={styles.score}> {item.score}</Text>
+              <Text style={styles.score}>{item.totalScore}</Text>
             </View>
           )}
-          refreshing={refreshing} // Pull-to-refresh indicator
-          onRefresh={handleRefresh} // Refresh logic
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
         />
       </View>
     </View>
@@ -114,6 +145,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#2F4F6D',
   },
   loadingText: { color: 'white', fontSize: 20, marginTop: 10 },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#2F4F6D',
+  },
+  errorMessage: {
+    color: 'white',
+    fontSize: 20,
+    marginTop: 10,
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
   topContainer: {
     flex: 4,
     flexDirection: 'row',

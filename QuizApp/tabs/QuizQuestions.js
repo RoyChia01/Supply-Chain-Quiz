@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
-import { fetchQuestions, getUserInfo,postQuizResults } from './apiHandler'; 
+import { fetchQuestions, getUserInfo, postQuizResults } from './apiHandler';
 import { useUser } from './userInfo';  // Import the hook
 
+// Custom Hook for Fetching Quiz Questions with Error Handling
 const useQuizQuestions = (topicId) => {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,65 +16,51 @@ const useQuizQuestions = (topicId) => {
       setLoading(true);
       try {
         const response = await fetchQuestions(topicId);
+        if (!response || !response.questions) {
+          throw new Error('No questions found.');
+        }
         setQuestions(response.questions);
-        console.log("Loaded Questions:", response.questions);
       } catch (err) {
-        setError(err);
+        setError(err.message || 'An error occurred while fetching questions.');
       } finally {
         setLoading(false);
       }
     };
-  
+
     loadQuestions();
   }, [topicId]);
 
   return { questions, loading, error };
 };
 
+// Main Component for Quiz Questions
 const QuizQuestions = ({ navigation, route }) => {
+  const { documentId } = route.params;
+  const { questions, loading, error } = useQuizQuestions(documentId);
+
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [answerLocked, setAnswerLocked] = useState(false);
-  const { documentId } = route.params;
-  const { questions, loading, error } = useQuizQuestions(documentId);
 
+  // Handle TabBar Visibility
   useFocusEffect(
     useCallback(() => {
       navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
-      return () => {
-        navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex' } });
-      };
+      return () => navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex' } });
     }, [navigation])
   );
 
-  const getRank = (score) => {
-    if (score === questions.length) return 'Elite Pilot';
-    if (score >= questions.length - 2) return 'Veteran Pilot';
-    if (score >= questions.length - 4) return 'Cadet';
-    return 'Recruit';
-  };
-
+  // Handle Answer Selection
   const handleAnswer = (answer) => {
-    if (answer === questions[currentQuestion]?.answer) {
-      setScore((prev) => prev + 1);
-    }
+    if (answer === questions[currentQuestion]?.answer) setScore(prev => prev + 1);
     setSelectedAnswer(answer);
     setAnswerLocked(true);
   };
 
-  const handleRestart = () => {
-    setCurrentQuestion(0);
-    setScore(0);
-    setShowScore(false);
-    setAnswerLocked(false);
-    setSelectedAnswer(null);
-    navigation.goBack();
-  };
-
+  // Move to the Next Question
   const moveNextQuestion = () => {
-    console.log("Current Question:", currentQuestion, "Total Questions:", questions.length);
     if (currentQuestion + 1 < questions.length) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
@@ -83,43 +70,42 @@ const QuizQuestions = ({ navigation, route }) => {
     }
   };
 
+  // Restart Quiz and Go Back
+  const handleRestart = () => {
+    setCurrentQuestion(0);
+    setScore(0);
+    setShowScore(false);
+    setAnswerLocked(false);
+    setSelectedAnswer(null);
+    navigation.goBack();
+  };
+
+  // Auto-advance after Answer Selection
   useEffect(() => {
     if (answerLocked) {
-      const timeout = setTimeout(() => {
-        moveNextQuestion();
-      }, 1000); // Ensure there's a 1-second delay after answering
-  
-      return () => clearTimeout(timeout); // Clear timeout when component unmounts or state changes
+      const timeout = setTimeout(moveNextQuestion, 1000);
+      return () => clearTimeout(timeout);
     }
-  }, [answerLocked, currentQuestion]); // Dependency on answerLocked and currentQuestion
+  }, [answerLocked, currentQuestion]);
+
+  // Loading, Error Handling, and displaying messages
   if (loading) return <Text style={styles.loadingText}>Loading...</Text>;
-  if (error) return <Text style={styles.loadingText}>Error: {error.message}</Text>;
+  if (error) return <Text style={styles.errorText}>Error: {error}</Text>;
+
   return (
-    
     <View style={styles.container}>
       {!showScore && <ProgressBar currentQuestion={currentQuestion} totalQuestions={questions.length} />}
 
       {showScore ? (
-  <Score
-    score={score}
-    totalQuestions={questions.length}
-    getRank={getRank}
-    onRestart={handleRestart}
-    topicId={documentId} // Pass documentId here
-  />
-) : (
-  <QuestionCard
-    question={questions[currentQuestion]}
-    selectedAnswer={selectedAnswer}
-    answerLocked={answerLocked}
-    onAnswer={handleAnswer}
-  />
-)}
-
+        <Score score={score} totalQuestions={questions.length} onRestart={handleRestart} topicId={documentId} />
+      ) : (
+        <QuestionCard question={questions[currentQuestion]} selectedAnswer={selectedAnswer} answerLocked={answerLocked} onAnswer={handleAnswer} />
+      )}
     </View>
   );
 };
 
+// Progress Bar for Tracking Quiz Progress
 const ProgressBar = ({ currentQuestion, totalQuestions }) => {
   const progress = (currentQuestion / totalQuestions) * 100;
   const numOfDashes = 15;
@@ -138,6 +124,7 @@ const ProgressBar = ({ currentQuestion, totalQuestions }) => {
   );
 };
 
+// Display Question Card with Options
 const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer }) => {
   if (!question) return <Text style={styles.loadingText}>Loading question...</Text>;
 
@@ -165,64 +152,46 @@ const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer }) => {
   );
 };
 
-const OptionButton = ({ option, selectedAnswer, isCorrect, onAnswer, answerLocked }) => {
-  return (
-    <TouchableOpacity
-      onPress={() => onAnswer(option)}
-      style={[
-        styles.optionButton,
-        selectedAnswer === option
-          ? isCorrect
-            ? styles.correctOption
-            : styles.incorrectOption
-          : null,
-      ]}
-      disabled={answerLocked}
-    >
-      <Text
-        style={[
-          styles.optionsBox,
-          selectedAnswer === option && { marginRight: 35 },
-          selectedAnswer === option && { fontSize: 14 }, // Reduce font size when selected
-        ]}
-      >
-        {option}
-      </Text>
-      {selectedAnswer === option && (
-        <Icon
-          name={isCorrect ? 'check-circle' : 'times-circle'}
-          size={30}
-          color={isCorrect ? '#90EE90' : '#FF6F6F'}
-          style={[styles.icon, { right: 10, bottom: 10 }]} // Positioning the icon bottom-right
-        />
-      )}
-    </TouchableOpacity>
-  );
-};
-const Score = ({ score, totalQuestions, getRank, onRestart, topicId }) => {
-  const { userEmail } = useUser(); // Get user email from context
-  const [userDocumentID, setUserDocumentID] = useState(null); // State to store user document ID
-  
+// Option Button Component with Answer Feedback
+const OptionButton = ({ option, selectedAnswer, isCorrect, onAnswer, answerLocked }) => (
+  <TouchableOpacity
+    onPress={() => onAnswer(option)}
+    style={[styles.optionButton, selectedAnswer === option && (isCorrect ? styles.correctOption : styles.incorrectOption)]}
+    disabled={answerLocked}
+  >
+    <Text style={[styles.optionsBox, selectedAnswer === option && { marginRight: 35, fontSize: 14 }]}>
+      {option}
+    </Text>
+    {selectedAnswer === option && (
+      <Icon
+        name={isCorrect ? 'check-circle' : 'times-circle'}
+        size={30}
+        color={isCorrect ? '#90EE90' : '#FF6F6F'}
+        style={styles.icon}
+      />
+    )}
+  </TouchableOpacity>
+);
+
+// Score Component with Ranking and Restart Option
+const Score = ({ score, totalQuestions, onRestart, topicId }) => {
+  const { userEmail } = useUser();
+  const [userDocumentID, setUserDocumentID] = useState(null);
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
         const userInfo = await getUserInfo(userEmail);
-        if (userInfo) {
-          setUserDocumentID(userInfo.documentId); // Store the document ID in state
-        } else {
-          console.log('Failed to retrieve user info.');
-        }
+        if (userInfo) setUserDocumentID(userInfo.documentId);
       } catch (error) {
-        console.log('Error fetching user info:', error);
+        Alert.alert('Error', 'Unable to fetch user info. Please try again later.');
       }
     };
 
     fetchUserInfo();
-  }, [userEmail]); // Only run effect when userEmail changes
+  }, [userEmail]);
 
-  if (!userDocumentID) {
-    return <Text style={styles.loadingText}>Loading user info...</Text>; // Optionally handle loading state
-  }
+  if (!userDocumentID) return <Text style={styles.loadingText}>Loading user info...</Text>;
 
   return (
     <View style={styles.scoreContainer}>
@@ -232,8 +201,12 @@ const Score = ({ score, totalQuestions, getRank, onRestart, topicId }) => {
       <TouchableOpacity
         style={styles.resetButton}
         onPress={() => {
-          onRestart(score); 
-          postQuizResults(userDocumentID, topicId, score); // Use the fetched document ID
+          try {
+            postQuizResults(userDocumentID, topicId, score);
+            onRestart(score);
+          } catch (error) {
+            Alert.alert('Error', 'Unable to submit your results. Please try again later.');
+          }
         }}
       >
         <Text style={styles.resetButtonText}>Home</Text>
@@ -242,141 +215,28 @@ const Score = ({ score, totalQuestions, getRank, onRestart, topicId }) => {
   );
 };
 
+// Styles for the Components
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1e3c62',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: '10%',
-    width: '100%',
-  },
-  questionText: {
-    fontSize: 36,
-    textAlign: 'center',
-    color: 'white',
-    fontWeight: 'bold',
-    fontFamily: 'Roboto',
-    marginBottom: 20, // Added margin to space out from options
-  },
-  optionsContainer: {
-    marginVertical: 20,
-    width: '100%',
-    alignItems: 'center', // Ensures options are centered
-  },
-  optionButton: {
-    backgroundColor: '#5b7c99',
-    borderRadius: 20,
-    padding: 10,
-    marginVertical: 10,
-    width: '100%',
-    maxWidth: 300, // Ensures buttons don't stretch too wide
-    alignItems: 'center',
-    position: 'relative', // Ensures that the icon is positioned relative to this container
-  },
-  
-  optionsBox: {
-    color: 'white',
-    padding: 5,
-    marginVertical: 10,
-    textAlign: 'center',
-    fontSize: 18,
-    borderRadius: 20,
-    width: '100%',
-  },
-  correctOption: {
-    borderWidth: 3,
-    borderColor: '#90EE90',
-    backgroundColor: '#5b7c99',
-    borderRadius: 20,
-    padding: 5,
-  },
-  incorrectOption: {
-    borderWidth: 3,
-    borderColor: '#FF6F6F',
-    backgroundColor: '#5b7c99',
-    borderRadius: 20,
-    padding: 5,
-  },
-  icon: {
-    position: 'absolute', // Positioning absolutely within the optionButton
-    bottom: 10,           // Position at the bottom
-    right: 10,            // Position at the right
-  },
-  loadingText: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  resetButton: {
-    backgroundColor: '#e0a100',
-    padding: 15,
-    borderRadius: 10,
-    width: '90%',
-    alignItems: 'center',
-    marginVertical: '5%',
-  },
-  resetButtonText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  scoreContainer: {
-    backgroundColor: '#3a506b',
-    padding: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    width: '90%',
-  },
-  rankText: {
-    color: '#FFD700',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#ccc',
-    marginBottom: 20,
-  },
-  scoreText: {
-    fontSize: 28,
-    color: 'white',
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  progressBarContainer: {
-    position: 'absolute',
-    top: 50,
-    width: '90%',
-    height: 60,
-    backgroundColor: '#071f35',
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  progressBar: {
-    position: 'relative',
-    width: '100%',
-    height: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dash: {
-    position: 'absolute',
-    top: '50%',
-    width: 10,
-    height: 6,
-    backgroundColor: 'white',
-    borderRadius: 2,
-    transform: [{ translateY: -2 }, { translateX: 7 }],
-  },
-  planeIcon: {
-    position: 'absolute',
-    color: '#FFD700',
-    top: 0,
-  },
+  container: { flex: 1, backgroundColor: '#1e3c62', alignItems: 'center', justifyContent: 'center', paddingTop: '10%', width: '100%' },
+  questionText: { fontSize: 36, textAlign: 'center', color: 'white', fontWeight: 'bold', fontFamily: 'Roboto', marginBottom: 20 },
+  optionsContainer: { marginVertical: 20, width: '100%', alignItems: 'center' },
+  optionButton: { backgroundColor: '#5b7c99', borderRadius: 20, padding: 10, marginVertical: 10, width: '100%', maxWidth: 300, alignItems: 'center', position: 'relative' },
+  optionsBox: { color: 'white', padding: 5, marginVertical: 10, textAlign: 'center', fontSize: 18, borderRadius: 20, width: '100%' },
+  correctOption: { borderWidth: 3, borderColor: '#90EE90', backgroundColor: '#5b7c99', borderRadius: 20, padding: 5 },
+  incorrectOption: { borderWidth: 3, borderColor: '#FF6F6F', backgroundColor: '#5b7c99', borderRadius: 20, padding: 5 },
+  icon: { position: 'absolute', bottom: 10, right: 10 },
+  loadingText: { color: 'white', fontSize: 20, fontWeight: 'bold' },
+  errorText: { color: 'red', fontSize: 20, fontWeight: 'bold' },
+  resetButton: { backgroundColor: '#e0a100', padding: 15, borderRadius: 10, width: '90%', alignItems: 'center', marginVertical: '5%' },
+  resetButtonText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
+  scoreContainer: { backgroundColor: '#3a506b', padding: 40, borderRadius: 20, alignItems: 'center', width: '90%' },
+  rankText: { color: '#FFD700', fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
+  avatar: { width: 120, height: 120, borderRadius: 60, backgroundColor: '#ccc', marginBottom: 20 },
+  scoreText: { fontSize: 28, color: 'white', fontWeight: 'bold', marginBottom: 20 },
+  progressBarContainer: { position: 'absolute', top: 50, width: '90%', height: 60, backgroundColor: '#071f35', borderRadius: 10, overflow: 'hidden' },
+  progressBar: { position: 'relative', width: '100%', height: '100%' },
+  dash: { position: 'absolute', top: 28, width: 10, height: 2, backgroundColor: '#ffffff' },
+  planeIcon: { position: 'absolute', top: -20, zIndex: 1 },
 });
 
 export default QuizQuestions;
