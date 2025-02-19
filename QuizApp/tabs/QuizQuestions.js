@@ -16,10 +16,11 @@ const useQuizQuestions = (topicId) => {
       setLoading(true);
       try {
         const response = await fetchQuestions(topicId);
-        if (!response || !response.questions) {
+        console.log("Fetched Questions:", response);
+        if (!response || !response.questionsData || response.questionsData.length === 0) {
           throw new Error('No questions found.');
         }
-        setQuestions(response.questions);
+        setQuestions(response.questionsData);  // Set the correct questionsData
       } catch (err) {
         setError(err.message || 'An error occurred while fetching questions.');
       } finally {
@@ -33,10 +34,12 @@ const useQuizQuestions = (topicId) => {
   return { questions, loading, error };
 };
 
+
 // Main Component for Quiz Questions
 const QuizQuestions = ({ navigation, route }) => {
-  const { documentId } = route.params;
-  const { questions, loading, error } = useQuizQuestions(documentId);
+  const { id } = route.params; // Destructure 'id' from route.params
+  console.log("Received ID:", id); // Log to check if it comes through correctly
+  const { questions, loading, error } = useQuizQuestions(id);
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -97,9 +100,14 @@ const QuizQuestions = ({ navigation, route }) => {
       {!showScore && <ProgressBar currentQuestion={currentQuestion} totalQuestions={questions.length} />}
 
       {showScore ? (
-        <Score score={score} totalQuestions={questions.length} onRestart={handleRestart} topicId={documentId} />
+        <Score score={score} totalQuestions={questions.length} onRestart={handleRestart} topicId={id} />
       ) : (
-        <QuestionCard question={questions[currentQuestion]} selectedAnswer={selectedAnswer} answerLocked={answerLocked} onAnswer={handleAnswer} />
+        <QuestionCard
+          question={questions[currentQuestion]}
+          selectedAnswer={selectedAnswer}
+          answerLocked={answerLocked}
+          onAnswer={handleAnswer}
+        />
       )}
     </View>
   );
@@ -133,8 +141,8 @@ const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer }) => {
       <Text style={[styles.questionText, { fontSize: 40 }]}>{question?.question || 'Loading question...'}</Text>
 
       <View style={styles.optionsContainer}>
-        {question.optionList?.length ? (
-          question.optionList.map((option, index) => (
+        {question.options?.length ? (
+          question.options.map((option, index) => (
             <OptionButton
               key={index}
               option={option}
@@ -156,10 +164,18 @@ const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer }) => {
 const OptionButton = ({ option, selectedAnswer, isCorrect, onAnswer, answerLocked }) => (
   <TouchableOpacity
     onPress={() => onAnswer(option)}
-    style={[styles.optionButton, selectedAnswer === option && (isCorrect ? styles.correctOption : styles.incorrectOption)]}
+    style={[
+      styles.optionButton,
+      selectedAnswer === option && (isCorrect ? styles.correctOption : styles.incorrectOption)
+    ]}
     disabled={answerLocked}
   >
-    <Text style={[styles.optionsBox, selectedAnswer === option && { marginRight: 35, fontSize: 14 }]}>
+    <Text
+      style={[
+        styles.optionsBox,
+        selectedAnswer === option && { marginRight: 35, fontSize: 14 }
+      ]}
+    >
       {option}
     </Text>
     {selectedAnswer === option && (
@@ -217,7 +233,7 @@ const Score = ({ score, totalQuestions, onRestart, topicId }) => {
 
 // Styles for the Components
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1e3c62', alignItems: 'center', justifyContent: 'center', paddingTop: '10%', width: '100%' },
+  container: { flex: 1, backgroundColor: '#2F4F6D', alignItems: 'center', justifyContent: 'center', paddingTop: '10%', width: '100%' },
   questionText: { fontSize: 36, textAlign: 'center', color: 'white', fontWeight: 'bold', fontFamily: 'Roboto', marginBottom: 20 },
   optionsContainer: { marginVertical: 20, width: '100%', alignItems: 'center' },
   optionButton: { backgroundColor: '#5b7c99', borderRadius: 20, padding: 10, marginVertical: 10, width: '100%', maxWidth: 300, alignItems: 'center', position: 'relative' },
@@ -233,10 +249,10 @@ const styles = StyleSheet.create({
   rankText: { color: '#FFD700', fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
   avatar: { width: 120, height: 120, borderRadius: 60, backgroundColor: '#ccc', marginBottom: 20 },
   scoreText: { fontSize: 28, color: 'white', fontWeight: 'bold', marginBottom: 20 },
-  progressBarContainer: { position: 'absolute', top: 50, width: '90%', height: 60, backgroundColor: '#071f35', borderRadius: 10, overflow: 'hidden' },
+  progressBarContainer: { position: 'absolute', top: 30, width: '90%', height: 60, backgroundColor: '#071f35', borderRadius: 10, overflow: 'hidden' },
   progressBar: { position: 'relative', width: '100%', height: '100%' },
   dash: { position: 'absolute', top: 28, width: 10, height: 2, backgroundColor: '#ffffff' },
-  planeIcon: { position: 'absolute', top: -20, zIndex: 1 },
+  planeIcon: { position: 'absolute', zIndex: 1 , color: '#FFD700' },
 });
 
 export default QuizQuestions;

@@ -1,49 +1,80 @@
 import { Alert } from 'react-native';
 
-const BASE_URL = 'http://10.132.0.57:8080';
+const BASE_URL = 'http://10.132.0.71:8080';
 
 // Fetch all the topics from the backend
 export const fetchTopics = async () => {
   try {
     const response = await fetch(`${BASE_URL}/quiz/topic`);
     const data = await response.json();
-    console.log("Fetched Topics:", data);
-    return { topics: data, loading: false };
+
+    console.log(data);
+    return data;
   } catch (error) {
-    console.error("Error fetching topics:", error);
-    return { topics: [], loading: false };
+    console.error('Error fetching topics:', error);
   }
 };
+
 
 // Fetch the questions for the selected topic
 export const fetchQuestions = async (topicUID) => {
   try {
-    const response = await fetch(`${BASE_URL}/quiz/topic/${topicUID}/qna`);
+    const response = await fetch(`${BASE_URL}/quiz/${topicUID}/qna`);
     const data = await response.json();
-    return { questions: data, loading: false };
+
+    // Map the response data to match the required structure
+    const questionsData = data.qnaList.map(({ question, optionList, answer }) => ({
+      question,
+      options: optionList,
+      answer,
+    }));
+
+    return { questionsData, loading: false };
   } catch (error) {
     console.error("Error fetching questions:", error);
-    return { questions: [], loading: false };
+    return { questionsData: [], loading: false };
   }
 };
+
+
 
 // Get the user info from the backend
 export const getUserInfo = async (userEmail) => {
+  console.log("📢 Fetching User Info for:", userEmail);
+
+  if (!userEmail) {
+    console.error("❌ Email is required");
+    return null;
+  }
+
   try {
     const response = await fetch(`${BASE_URL}/user?email=${userEmail}`);
-    const data = await response.json();
-    
+
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch user info');
+      const errorMessage = await response.text();
+      console.error("❌ Error:", errorMessage);
+      throw new Error(errorMessage || "Failed to fetch user info");
     }
 
-    console.log("Fetched User Info:", data);
-    return data;
+    // Read the raw response text first to inspect the body
+    const responseText = await response.text();
+
+    if (!responseText) {
+      console.error("❌ Empty response body received.");
+      return null;
+    }
+
+    return responseText;
+
   } catch (error) {
-    console.error('Error fetching user info:', error);
+    console.error("❌ Error fetching user info:", error);
     return null;
   }
 };
+
+
+
+
 
 // Post the quiz results to the backend
 export const postQuizResults = async (UserdocumentID, topicID, result) => {
@@ -81,13 +112,19 @@ export const fetchLeaderboard = async () => {
   try {
     const response = await fetch(`${BASE_URL}/leaderboard`);
     const data = await response.json();
-    console.log("Fetched Leaderboard:", data);
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch leaderboard');
+    }
+
+    console.log("Fetched Leaderboard Data:", data);
     return data;
   } catch (error) {
-    console.error("Error fetching leaderboard:", error);
-    return { itemList: [] };  // Ensure itemList is always an array
+    console.error('Error fetching leaderboard:', error);
+    return null;
   }
 };
+
 
 // Update selected title for the user
 export const updateSelectedTitle = async (UserdocumentID, title) => {

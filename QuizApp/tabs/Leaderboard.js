@@ -25,23 +25,30 @@ const InitialiseLeaderboard = () => {
   // Fetch leaderboard data
   const getLeaderboardData = async () => {
     try {
-      // Simulating an API call
-      const { itemList } = await fetchLeaderboard();
-
-      //Uncomment the above line and use the below code when you're ready to integrate with an API
-      if (!itemList || !Array.isArray(itemList)) throw new Error('Invalid data format');
-
-      //const sortedData = hardcodedData
-      const sortedData = itemList
-        .sort((a, b) => a.position - b.position)
-        .map(({ name, rank, totalScore, position }) => ({
-          id: name,
-          name,
-          rank,
-          totalScore,
-          position,
-        }));
-
+      const leaderboard = await fetchLeaderboard(); // Assuming fetchLeaderboard() returns the data
+      console.log('Leaderboard Raw Response:', leaderboard);
+  
+      // Ensure the leaderboard is an array
+      if (!Array.isArray(leaderboard)) {
+        throw new Error('Invalid data format: leaderboard is not an array');
+      }
+  
+      // Process the leaderboard data
+      const sortedData = leaderboard.map(({ user, positionIndex }) => {
+        if (!user || !user.name) {
+          throw new Error('User information is incomplete');
+        }
+  
+        return {
+          id: user.name,  // Assuming the user's name is unique as an ID
+          name: user.name,
+          rank: user.rank?.selectedTitle || "N/A", // Default to "N/A" if rank is missing
+          totalScore: user.pointBalance || 0, // Ensure point balance is present, default to 0
+          position: positionIndex, // Assuming positionIndex is available in the response
+        };
+      });
+  
+      // Update the state with the processed leaderboard data
       setLeaderboardData(sortedData);
     } catch (error) {
       console.error('Failed to load leaderboard:', error);

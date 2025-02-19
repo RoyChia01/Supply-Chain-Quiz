@@ -11,20 +11,17 @@ const placeholderImage = require('../images/soldier.png');
 
 // Functional Component for each Topic Button
 const TopicButton = ({ topic, onPress }) => (
-  <TouchableOpacity
-    style={styles.windowButton}
-    onPress={onPress}
-  >
-    <Text style={styles.windowNumber}>{topic.topicId}</Text>
-    <Text style={styles.windowText}>{topic.topic}</Text>
+  <TouchableOpacity style={styles.windowButton} onPress={onPress}>
+    <Text style={styles.windowNumber}>{topic.index}</Text>
+    <Text style={styles.windowText}>{topic.name}</Text>
   </TouchableOpacity>
 );
 
 TopicButton.propTypes = {
   topic: PropTypes.shape({
-    topicId: PropTypes.string.isRequired,
-    topic: PropTypes.string.isRequired,
-    documentId: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,     // Correct field for topic identifier
+    name: PropTypes.string.isRequired,   // Correct field for the name of the topic
+    index: PropTypes.number.isRequired,  // Correct field for the index of the topic
   }).isRequired,
   onPress: PropTypes.func.isRequired,
 };
@@ -33,27 +30,39 @@ const QuizTopics = () => {
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [refreshing, setRefreshing] = useState(false); // New state for refresh control
+  const [refreshing, setRefreshing] = useState(false);
 
   const navigation = useNavigation();
 
+  // Load topics function
   const loadTopics = useCallback(async () => {
     setLoading(true);
     try {
-      const { topics } = await fetchTopics();
-      setTopics(topics);
+      const topicsData = await fetchTopics(); // Fetch topics data
+      
+      // Extract both id and topicList from each item in the fetched topics data
+      const extractedTopics = topicsData.map(item => ({
+        id: item.id,
+        topicList: item.topicList,
+      }));
+      
+      console.log("Fetched Topics:", extractedTopics);
+  
+      // Set the topics with their ids and topicList in state
+      setTopics(extractedTopics);  
+      setError(null); // Clear previous errors on successful fetch
     } catch (err) {
+      console.error(err);
       setError('Failed to load topics. Please try again later.');
     } finally {
       setLoading(false);
     }
   }, []);
-
+  
   useEffect(() => {
     loadTopics();
   }, [loadTopics]);
 
-  // Function to handle pull-to-refresh
   const onRefresh = async () => {
     setRefreshing(true);
     await loadTopics();
@@ -72,6 +81,9 @@ const QuizTopics = () => {
     return (
       <View style={styles.container}>
         <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={loadTopics}>
+          <Text style={styles.retryText}>Retry</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -79,28 +91,30 @@ const QuizTopics = () => {
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        <Image
-          source={placeholderImage}
-          style={styles.image}
-        />
+        <Image source={placeholderImage} style={styles.image} />
       </View>
 
       <Text style={styles.title}>Select a Topic</Text>
 
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.contentContainer}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#FFD700']} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#FFD700']} />}
       >
         <View style={styles.windowRow}>
-          {topics.map((topic) => (
-            <TopicButton
-              key={topic.documentId}
-              topic={{ ...topic, topicId: String(topic.topicId) }} // Ensure topicId is a string
-              onPress={() => navigation.navigate('QuizQuestions', { documentId: topic.documentId })}
-            />
-          ))}
+          {topics.map((topic) => {
+            // Now iterating over the topicList to display its name and index
+            return topic.topicList.map((item, index) => (
+              <TopicButton
+                key={item.id} // Assuming each item in topicList has a unique id
+                topic={{
+                  id: item.id, // Pass the full topic object, including id, name, and index
+                  name: item.name,
+                  index: index + 1, // Assuming index is 1-based
+                }}
+                onPress={() => navigation.navigate('QuizQuestions', { id: topic.id })} // Use the outer topic's id
+              />
+            ));
+          })}
         </View>
       </ScrollView>
     </View>
@@ -127,7 +141,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     borderRadius: 10,
     borderWidth: 5,
-    borderColor: '#FFD700', 
+    borderColor: '#FFD700',
   },
   title: {
     fontSize: 32,
@@ -178,6 +192,17 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     marginTop: 20,
+  },
+  retryButton: {
+    marginTop: 20,
+    backgroundColor: '#FFD700',
+    padding: 10,
+    borderRadius: 5,
+  },
+  retryText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
   },
 });
 
