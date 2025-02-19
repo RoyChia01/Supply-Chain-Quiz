@@ -83,6 +83,11 @@ const QuizQuestions = ({ navigation, route }) => {
     navigation.goBack();
   };
 
+  //shuffle questions
+  const shuffleQuestions = (array) => {
+    return array.sort(() => Math.random() - 0.5);
+  };
+
   // Auto-advance after Answer Selection
   useEffect(() => {
     if (answerLocked) {
@@ -135,7 +140,6 @@ const ProgressBar = ({ currentQuestion, totalQuestions }) => {
 // Display Question Card with Options
 const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer }) => {
   if (!question) return <Text style={styles.loadingText}>Loading question...</Text>;
-
   return (
     <>
       <Text style={[styles.questionText, { fontSize: 40 }]}>{question?.question || 'Loading question...'}</Text>
@@ -198,7 +202,8 @@ const Score = ({ score, totalQuestions, onRestart, topicId }) => {
     const fetchUserInfo = async () => {
       try {
         const userInfo = await getUserInfo(userEmail);
-        if (userInfo) setUserDocumentID(userInfo.documentId);
+        console.log('User Info:', userInfo.id);
+        if (userInfo) setUserDocumentID(userInfo.id);
       } catch (error) {
         Alert.alert('Error', 'Unable to fetch user info. Please try again later.');
       }
@@ -207,21 +212,30 @@ const Score = ({ score, totalQuestions, onRestart, topicId }) => {
     fetchUserInfo();
   }, [userEmail]);
 
+  useEffect(() => {
+    if (userDocumentID && topicId !== undefined && score !== undefined) {
+      try {
+        console.log('Submitting quiz results...', userDocumentID, topicId, score);
+        postQuizResults(userDocumentID, topicId, score);
+      } catch (error) {
+        Alert.alert('Error', 'Unable to submit your results. Please try again later.');
+      }
+    }
+  }, [userDocumentID, topicId, score]); // Dependency array ensures postQuizResults is called only when userDocumentID is set
+
   if (!userDocumentID) return <Text style={styles.loadingText}>Loading user info...</Text>;
 
   return (
     <View style={styles.scoreContainer}>
-      <Text style={styles.rankText}>Rank: {getRank(score)}</Text>
       <Image source={require('../images/soldier.png')} style={styles.avatar} />
       <Text style={styles.scoreText}>Score: {score} / {totalQuestions}</Text>
       <TouchableOpacity
         style={styles.resetButton}
         onPress={() => {
           try {
-            postQuizResults(userDocumentID, topicId, score);
             onRestart(score);
           } catch (error) {
-            Alert.alert('Error', 'Unable to submit your results. Please try again later.');
+            Alert.alert('Error', 'Unable to restart. Please try again later.');
           }
         }}
       >
@@ -245,7 +259,7 @@ const styles = StyleSheet.create({
   errorText: { color: 'red', fontSize: 20, fontWeight: 'bold' },
   resetButton: { backgroundColor: '#e0a100', padding: 15, borderRadius: 10, width: '90%', alignItems: 'center', marginVertical: '5%' },
   resetButtonText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
-  scoreContainer: { backgroundColor: '#3a506b', padding: 40, borderRadius: 20, alignItems: 'center', width: '90%' },
+  scoreContainer: { backgroundColor: '#2F4F6D', padding: 40, borderRadius: 20, alignItems: 'center', width: '90%' },
   rankText: { color: '#FFD700', fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
   avatar: { width: 120, height: 120, borderRadius: 60, backgroundColor: '#ccc', marginBottom: 20 },
   scoreText: { fontSize: 28, color: 'white', fontWeight: 'bold', marginBottom: 20 },

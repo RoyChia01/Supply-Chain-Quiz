@@ -65,6 +65,7 @@ export const getUserInfo = async (userEmail) => {
 
     // Restructuring response to match the desired format
     return {
+      id: data.id,
       name: data.name,
       email: data.email,
       pointBalance: data.pointBalance,
@@ -118,16 +119,16 @@ export const postUser = async (username,email) => {
 
 // Post the quiz results to the backend
 export const postQuizResults = async (UserdocumentID, quizID, result) => {
-  console.log("UserdocumentID:", UserdocumentID, "TopicID:", topicID, "Result:", result);
+  console.log("UserdocumentID:", UserdocumentID, "TopicID:", quizID, "Result:", result);
   try {
-    const response = await fetch(`${BASE_URL}/user/quiz-result/${UserdocumentID}`, {
+    const response = await fetch(`${BASE_URL}/user/${UserdocumentID}/quiz-result`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         score: result.toString(),
-        quizID: quizID.toString(),
+        quizId: quizID.toString(),
       }),
     });
 
@@ -141,7 +142,6 @@ export const postQuizResults = async (UserdocumentID, quizID, result) => {
 
   } catch (error) {
     console.error('Error posting quiz results:', error.message);
-    Alert.alert('Error', 'Failed to post quiz results: ' + error.message);
     return { success: false, error: error.message };
   }
 };

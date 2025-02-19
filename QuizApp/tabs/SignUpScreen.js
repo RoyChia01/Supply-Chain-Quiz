@@ -71,7 +71,7 @@ const SignUpScreen = () => {
         </View>
         <View style={styles.inputField}>
           <MaterialIcons name='mail' size={25} color='#666' />
-          <TextInput placeholder='Email' value={email} onChangeText={setEmail} style={styles.input} keyboardType='email-address' />
+          <TextInput placeholder='Email' value={email} onChangeText={(text) => setEmail(text.toLowerCase())} style={styles.input} keyboardType='email-address' />
         </View>
         <View style={styles.inputField}>
           <MaterialIcons name='lock' size={25} color='#666' />
