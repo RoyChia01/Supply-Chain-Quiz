@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback,useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
@@ -83,11 +83,6 @@ const QuizQuestions = ({ navigation, route }) => {
     navigation.goBack();
   };
 
-  //shuffle questions
-  const shuffleQuestions = (array) => {
-    return array.sort(() => Math.random() - 0.5);
-  };
-
   // Auto-advance after Answer Selection
   useEffect(() => {
     if (answerLocked) {
@@ -139,14 +134,30 @@ const ProgressBar = ({ currentQuestion, totalQuestions }) => {
 
 // Display Question Card with Options
 const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer }) => {
+
+  const [shuffledOptions, setShuffledOptions] = useState([]);
+  const shuffleArray = (array) => {
+    let shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+  useEffect(() => {
+    if (question?.options) {
+      setShuffledOptions(shuffleArray(question.options));
+    }
+  }, [question]);
+  
   if (!question) return <Text style={styles.loadingText}>Loading question...</Text>;
   return (
     <>
       <Text style={[styles.questionText, { fontSize: 40 }]}>{question?.question || 'Loading question...'}</Text>
 
       <View style={styles.optionsContainer}>
-        {question.options?.length ? (
-          question.options.map((option, index) => (
+        {shuffledOptions.length > 0 ? (
+          shuffledOptions.map((option, index) => (
             <OptionButton
               key={index}
               option={option}
