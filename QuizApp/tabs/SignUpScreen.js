@@ -42,13 +42,13 @@ const SignUpScreen = () => {
 
     setLoading(true);
     try {
-      // const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
-      // const user = userCredential.user;
+      const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
+      const user = userCredential.user;
 
-      // await sendEmailVerification(user);
-      // Alert.alert('Verification Email Sent', 'Please check your inbox to verify your email.');
+      await sendEmailVerification(user);
+      Alert.alert('Verification Email Sent', 'Please check your inbox to verify your email.');
 
-      // await setDoc(doc(FIRESTORE_DB, 'users', user.uid), { username, email, points: 0 });
+      await setDoc(doc(FIRESTORE_DB, 'users', user.uid), { username, email, points: 0 });
       postUser(username, email); // Post the user data to the backend
       navigation.goBack();
     } catch (error) {
