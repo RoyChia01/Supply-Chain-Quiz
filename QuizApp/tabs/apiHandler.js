@@ -93,15 +93,32 @@ export const getUserInfo = async (userEmail) => {
   }
 };
 
+// Post the user data to the backend
+export const postUser = async (username,email) => {
+  try {
+    const response = await fetch(`${BASE_URL}/user/create`, {
+      method: 'POST', // Specify that it's a POST request
+      headers: {
+        'Content-Type': 'application/json' // Set the content type to JSON
+      },
+      body: JSON.stringify({
+        name: username,  // Replace with your actual data
+        email: email
+      }) // Include the body data
+    });
 
+    const data = await response.json();
 
-
-
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error('Error posting user:', error);
+  }
+};
 
 // Post the quiz results to the backend
-export const postQuizResults = async (UserdocumentID, topicID, result) => {
+export const postQuizResults = async (UserdocumentID, quizID, result) => {
   console.log("UserdocumentID:", UserdocumentID, "TopicID:", topicID, "Result:", result);
-
   try {
     const response = await fetch(`${BASE_URL}/user/quiz-result/${UserdocumentID}`, {
       method: 'POST',
@@ -110,7 +127,7 @@ export const postQuizResults = async (UserdocumentID, topicID, result) => {
       },
       body: JSON.stringify({
         score: result.toString(),
-        topicId: topicID.toString(),
+        quizID: quizID.toString(),
       }),
     });
 

@@ -15,6 +15,7 @@ import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/
 import { doc, setDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import { FIREBASE_AUTH, FIRESTORE_DB } from '../tabs/firebase';
+import { postUser } from './apiHandler';
 
 const SignUpScreen = () => {
   const [email, setEmail] = useState('');
@@ -41,13 +42,14 @@ const SignUpScreen = () => {
 
     setLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
-      const user = userCredential.user;
+      // const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
+      // const user = userCredential.user;
 
-      await sendEmailVerification(user);
-      Alert.alert('Verification Email Sent', 'Please check your inbox to verify your email.');
+      // await sendEmailVerification(user);
+      // Alert.alert('Verification Email Sent', 'Please check your inbox to verify your email.');
 
-      await setDoc(doc(FIRESTORE_DB, 'users', user.uid), { username, email, points: 0 });
+      // await setDoc(doc(FIRESTORE_DB, 'users', user.uid), { username, email, points: 0 });
+      postUser(username, email); // Post the user data to the backend
       navigation.goBack();
     } catch (error) {
       setError(error.message);
