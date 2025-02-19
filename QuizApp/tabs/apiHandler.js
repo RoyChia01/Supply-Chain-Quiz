@@ -56,21 +56,43 @@ export const getUserInfo = async (userEmail) => {
       throw new Error(errorMessage || "Failed to fetch user info");
     }
 
-    // Read the raw response text first to inspect the body
-    const responseText = await response.text();
+    const data = await response.json(); // Parse response as JSON
 
-    if (!responseText) {
-      console.error("❌ Empty response body received.");
+    if (!data) {
+      console.error("❌ Empty response received.");
       return null;
     }
 
-    return responseText;
+    // Restructuring response to match the desired format
+    return {
+      name: data.name,
+      email: data.email,
+      pointBalance: data.pointBalance,
+      school: data.school,
+      avatarBlob: data.avatarBlob,
+      rank: {
+        title: data.rank?.title,
+        specialTitle: data.rank?.specialTitle || [],
+        selectedTitle: data.rank?.selectedTitle
+      },
+      progress: {
+        currentTopic: {
+          index: data.progress?.currentTopic?.index || 0,
+          name: data.progress?.currentTopic?.name || "Unknown"
+        },
+        latestTopic: {
+          index: data.progress?.latestTopic?.index || 0,
+          name: data.progress?.latestTopic?.name || "Unknown"
+        }
+      }
+    };
 
   } catch (error) {
     console.error("❌ Error fetching user info:", error);
     return null;
   }
 };
+
 
 
 

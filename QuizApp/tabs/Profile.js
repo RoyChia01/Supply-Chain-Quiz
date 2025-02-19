@@ -15,8 +15,9 @@ const getCurrentDate = () => {
 
 const BoardingPass = ({ navigation }) => {
   const [refresh, setRefresh] = useState(false);
-  //const { userEmail } = "john.doe@example.com"; // Get user email from context
-  const { userEmail } = useUser(); // Get user email from context
+  //const { userEmail } = useUser(); // Get user email from context
+  const  userEmail  = "Wax1@Wai.mail.coxm"
+  const [userInfo, setUserInfo] = useState(null);
   const [passengerName, setPassengerName] = useState('');
   const [email, setEmail] = useState('');
   const [pointsBalance, setPointsBalance] = useState(0);
@@ -27,30 +28,40 @@ const BoardingPass = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedTitle, setSelectedTitle] = useState('');  // Store selected title
 
-  const hardcodedData = { 
-    name: "John Doe", 
-    email: "john.doe@example.com", 
-    pointBalance: 1250, 
-    avatarBlob: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAGQCAYAAADhFprXAAAAOXRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjEuMiBodHRwOi8vbWF0cGxvdGxpYi5vcmcvbWF0cGxvdGxpYgA3J2ZB88wAAAACXBIWXMAAB7CAAAewgFu0HU+AAEAAElEQVR4nOzdd5gU5d7G8e+6Y0L1o9p1F3X6uVtv1LqSffJ6EpLRH8zLZX9wn2fUhhchhW4oaK7fqH1WWF0XUWXm1VflZbbXZ7uHp4HgX7SrxqQGyUdr5zwsG7O3Hi1YXwpXc9W1VXJwH+8fKXs2JQj8sOKa7hzU76pI/ppU1Yri0h9TK3wK8VjsCrDnxSje01bCBp5iQOZs7UO8kzKfh9vhn4FnPUJ3tM1dtpl0z9PysP7dqhb+/9fLP5sAl7abzwEs2D8nTHcsdRrFOfo+kVXjZ8g58H6R8g9mZYfp1/PoEGknwGKLrcKl1Xt5N7MIZa9gwe2lfVg4Xhn20bQw2yAEBKHrJdxmFeMgTt0ijF0aupy+vb5mm6cyzy93d+OV8iv+m9kvEkPj3j5TzM8McvSoqaJQe4N2fez3Ilz8h4pqTh0q3Q7ybJzMskRgMBhbJlvQ9EOrddLXYi9mjD5+UOpo9Ybqf3Pa2v8EgcWZ6ovh8DptTh0R2E5ldsj0B5mvfHEaWxxAmT8Jg9YoZzVmRSsTw8u95k71vMHK1s9XbjoK2y+9sB/7v1e39bA93MyCmImErpyI0pk5WG9yO3d6Tc4We5L+FfB/sWRm+/7Gi9hHXTlh1POndA3T1yTZrBpHg6oGx77f53zXmd8ir8FgVzUb7T4ST8BBgl2ZoNUoOb0i0pXKpMNcBAgImlTuAV5iVlwfg6qTITz9Y5ZGMPz5tPvD7sBNXN5u1wWoiRwlT2gdQY3kFm62Fb4PnUyFwlRMyO+O9YOjzDfhdbZ9MS2I+v7Zz6skwQg5ckw5ITqIiFX7DPB2hNTFfP75XbY/42jGhfyaVtKe45Ipr1Vg4gYBh1cXX4IFg3zTvlGHJpjlHpF48whQe3HnynvPiHjWgu4P5xEbnFQzbgJzX9mRAonq4kDewNwdfjZ4zXkPzj0l5Q==", 
-    school: "Supply Chain", 
-    rank: { 
-      title: "Captain", 
-      specialTitle: ["MVP", "Fastest"],
-      selectedTitle: "SelectedCaptain",
-    },
-    topicMap: { 
-        currentTopic: { 
-            documentId: "OOVpC3kYERp3mJeS3tAO", 
-            topicId: 1, 
-            topic: "Live-Fire Safety" 
-        }, 
-        lastTopic: { 
-            documentId: "tZplYuU8HxuCPVrG3uax", 
-            topicId: 2, 
-            topic: "Weapon Malfunction" 
-        } 
-    } 
-};
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log("Fetching user data for profile:", userEmail);
+        const data = await getUserInfo(userEmail);
+    
+        if (!data) {
+          console.error("❌ No user data received.");
+          return;
+        }
+    
+        setUserInfo(data);  // Store user data in state
+    
+        setPassengerName(data.name || "Unknown");
+        setEmail(data.email || "No email provided");
+        setPointsBalance(data.pointBalance ?? 0);
+        setRowData([
+          data.progress?.currentTopic || { index: 0, name: "Unknown" },
+          data.progress?.latestTopic || { index: 0, name: "Unknown" }
+        ]);
+        setTopRowData([
+          { title: "School", subText: data.school || "N/A" },
+          { title: "Rank", subText: data.rank?.selectedTitle || "Unranked" },
+          { title: "", subText: getCurrentDate() }
+        ]);
+        setImageUrl({ uri: data.avatarBlob || "" });
+    
+      } catch (error) {
+        console.error("❌ Error loading user data:", error);
+      }
+    };
+  
+    fetchData();
+  }, [refresh, userEmail]);
 
   // Handle Sign Out
   const handleSignOut = async () => {
@@ -84,32 +95,6 @@ const BoardingPass = ({ navigation }) => {
     setModalVisible(false);
     
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        //const userInfo = await getUserInfo(userEmail);
-        const userInfo = hardcodedData;
-        setPassengerName(userInfo.name);
-        setEmail(userInfo.email);
-        setPointsBalance(userInfo.pointBalance);
-        setRowData([
-          userInfo.topicMap.currentTopic,
-          userInfo.topicMap.lastTopic
-        ]);
-        setTopRowData([
-          { title: 'School', subText: userInfo.school },
-          { title: 'Rank', subText: userInfo.rank.selectedTitle }, 
-          { title: '', subText: getCurrentDate() },
-        ]);
-        setImageUrl({ uri: userInfo.avatarBlob });
-      } catch (error) {
-        console.error('Error loading user data:', error);
-      }
-    };
-
-    fetchData();
-  }, [refresh, userEmail]);
   
   const handleRefresh = () => {
     setRefresh(!refresh);  // Toggle the refresh state
@@ -157,43 +142,48 @@ const BoardingPass = ({ navigation }) => {
             </View>
           </View>
 
-          {/* Modal for Title Selection */}
-          <Modal
-            visible={isModalVisible}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={() => setModalVisible(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Select a Title</Text>
-                
-                <FlatList
-                  data={[hardcodedData.rank.title, ...hardcodedData.rank.specialTitle]}
-                  keyExtractor={(item, index) => index.toString()}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity onPress={() => handleSelectTitle(item)}>
-                      <Text style={styles.modalOption}>{item}</Text>
-                    </TouchableOpacity>
-                  )}
-                />
+        {/* Modal for Title Selection */}
+        <Modal
+  visible={isModalVisible}
+  transparent={true}
+  animationType="fade"
+  onRequestClose={() => setModalVisible(false)}
+>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContent}>
+      <Text style={styles.modalTitle}>Select a Title</Text>
+      
+      {/* Check if userInfo is available before rendering the FlatList */}
+      {userInfo && userInfo.rank ? (
+        <FlatList
+          data={[userInfo.rank.title, ...userInfo.rank.specialTitle]}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => handleSelectTitle(item)}>
+              <Text style={styles.modalOption}>{item}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      ) : (
+        <Text>Loading titles...</Text>
+      )}
 
-                {/* If the title is successfully updated, show a confirmation message */}
-                {selectedTitle && (
-                  <View style={styles.confirmationMessageContainer}>
-                    <Text style={styles.confirmationMessage}>Title changed to: {selectedTitle}</Text>
-                  </View>
-                )}
+      {/* If the title is successfully updated, show a confirmation message */}
+      {selectedTitle && (
+        <View style={styles.confirmationMessageContainer}>
+          <Text style={styles.confirmationMessage}>Title changed to: {selectedTitle}</Text>
+        </View>
+      )}
 
-                <TouchableOpacity
-                  onPress={() => setModalVisible(false)}
-                  style={styles.modalCloseButton}
-                >
-                  <Text style={styles.modalCloseButtonText}>Close</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
+      <TouchableOpacity
+        onPress={() => setModalVisible(false)}
+        style={styles.modalCloseButton}
+      >
+        <Text style={styles.modalCloseButtonText}>Close</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
 
           {/* Second Row */}
           <View style={styles.equalRow}>
@@ -202,8 +192,8 @@ const BoardingPass = ({ navigation }) => {
               <View style={styles.dataSection}>
                 {rowData.slice(0, 1).map((data, index) => (
                   <View key={index}>
-                    <Text style={styles.boldText}>{data.topicId}</Text>
-                    <Text style={styles.topicNameText}>{data.topic}</Text>
+                    <Text style={styles.boldText}>{data.index}</Text>
+                    <Text style={styles.topicNameText}>{data.name}</Text>
                   </View>
                 ))}
               </View>
@@ -217,8 +207,8 @@ const BoardingPass = ({ navigation }) => {
               <View style={styles.dataSection}>
                 {rowData.slice(1, 2).map((data, index) => (
                   <View key={index}>
-                    <Text style={styles.boldText}>{data.topicId}</Text>
-                    <Text style={styles.topicNameText}>{data.topic}</Text>
+                    <Text style={styles.boldText}>{data.index}</Text>
+                    <Text style={styles.topicNameText}>{data.name}</Text>
                   </View>
                 ))}
               </View>
@@ -375,7 +365,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   topicNameText: {
-    fontSize: 20,
+    fontSize: 16,
     color: '#666',
   },
   planeLogo: {
