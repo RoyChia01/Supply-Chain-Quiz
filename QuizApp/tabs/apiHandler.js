@@ -170,12 +170,10 @@ export const updateSelectedTitle = async (UserdocumentID, title) => {
   console.log("UserdocumentID:", UserdocumentID, "Title:", title);
 
   try {
-    const response = await fetch(`${BASE_URL}/user/title/${UserdocumentID}`, {
-      method: 'POST',
+    const response = await fetch(`${BASE_URL}/user/${UserdocumentID}/title?selectedTitle=${title}`, {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ title: title.toString() }),
     });
 
     if (!response.ok) {

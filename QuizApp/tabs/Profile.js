@@ -74,31 +74,51 @@ const BoardingPass = ({ navigation }) => {
   };
 
   const handleSelectTitle = async (title) => {
+    console.log('Selected title:', title);
     // Update the local state with the selected title
     setSelectedTitle(title);
-  
-    // Call the API to update the title on the server
-    const result = await updateSelectedTitle(userDocumentID, title);
-  
-    // Check the result of the API call
-    if (result.success) {
-      // Successfully updated the title on the server
-      console.log('Title updated successfully!');
-    } else {
-      // Handle error if title update fails
-      console.error('Failed to update title:', result.error);
-      Alert.alert('Error', 'Failed to update title: ' + result.error);
-    }
-  
     // Close the modal after selection
     handleRefresh();
     setModalVisible(false);
-    
   };
   
   const handleRefresh = () => {
     setRefresh(!refresh);  // Toggle the refresh state
   };
+
+// Function to update the selected title for the user
+  async function updateTitle(userDocumentID, title) {
+    try {
+      const result = await updateSelectedTitle(userDocumentID, title);
+      console.log(userDocumentID, title);
+  
+      // Check the result of the API call
+      if (result.success) {
+        // Successfully updated the title on the server
+        console.log('Title updated successfully!');
+        // Reset states after successful title update
+      setUserInfo(null);  // Clear user info
+      setPassengerName('');  // Clear passenger name
+      setEmail('');  // Clear email
+      setPointsBalance(0);  // Reset points balance
+      setRowData([]);  // Clear row data
+      setTopRowData([]);  // Clear top row data
+      setImageUrl('');  // Clear image URL
+
+      // Toggle the refresh state to trigger useEffect and re-fetch the data
+      setRefresh(prev => !prev);  // Toggling refresh triggers useEffect
+      } else {
+        // Handle error if title update fails
+        console.error('Failed to update title:', result.error);
+        Alert.alert('Error', 'Failed to update title: ' + result.error);
+      }
+    } catch (error) {
+      // Handle any unexpected errors that may occur during the update process
+      console.error('Error updating title:', error);
+      Alert.alert('Error', 'An unexpected error occurred: ' + error.message);
+    }
+  }
+  
 
   return (
     <View style={styles.container}>
@@ -159,7 +179,12 @@ const BoardingPass = ({ navigation }) => {
           data={[userInfo.rank.title, ...userInfo.rank.specialTitle]}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => handleSelectTitle(item)}>
+            <TouchableOpacity 
+            onPress={() => {
+              handleSelectTitle(item);
+              updateTitle(userInfo.id, item);
+            }}
+          >
               <Text style={styles.modalOption}>{item}</Text>
             </TouchableOpacity>
           )}
