@@ -1,6 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React, { useEffect, useRef, useState } from 'react';
-import { SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView, StyleSheet, TouchableOpacity, Dimensions, PixelRatio } from 'react-native';
 import Icon, { Icons } from './components/Icons';
 import * as Animatable from 'react-native-animatable';
 import Colors from './constants/Colors';
@@ -17,6 +17,10 @@ import SignUpScreen from './tabs/SignUpScreen';
 import { onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from './tabs/firebase';
 import { UserProvider } from './tabs/userInfo';
+import { Platform } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
+const scaleFont = (size) => size * PixelRatio.getFontScale();
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -42,7 +46,7 @@ const TabArr = [
     type: Icons.Ionicons,
     activeIcon: 'grid',
     inActiveIcon: 'grid-outline',
-    component: HomeStack, // Use the stack navigator here
+    component: HomeStack,
   },
   {
     route: 'LeaderBoard',
@@ -68,21 +72,21 @@ const TabButton = ({ item, onPress, accessibilityState }) => {
 
   useEffect(() => {
     viewRef.current?.animate({
-      0: { scale: focused ? 0.5 : 1.5, rotate: '0deg' },
-      1: { scale: focused ? 1.5 : 1, rotate: '360deg' },
+      0: { scale: focused ? 0.5 : 1.2, rotate: '0deg' },
+      1: { scale: focused ? 1.2 : 1, rotate: '360deg' },
     });
   }, [focused]);
 
   const iconName = focused ? item.activeIcon : item.inActiveIcon;
-  console.log(`Icon name: ${iconName}`);  // Debugging line to check which icon is being used
 
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={1} style={[styles.container, { top: 20 }]}>
-      <Animatable.View ref={viewRef} duration={1000}>
+    <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={styles.tabButton}>
+      <Animatable.View ref={viewRef} duration={800}>
         <Icon 
           type={item.type} 
           name={iconName} 
           color={focused ? Colors.primary : Colors.primaryLite} 
+          size={width * 0.07} // Responsive icon size
         />
       </Animatable.View>
     </TouchableOpacity>
@@ -90,7 +94,7 @@ const TabButton = ({ item, onPress, accessibilityState }) => {
 };
 
 const AnimTab = () => (
-  <SafeAreaView style={{ flex: 1 ,backgroundColor: "#2F4F6D"}}>
+  <SafeAreaView style={styles.safeArea}>
     <Tab.Navigator screenOptions={{ headerShown: false, tabBarStyle: styles.tabBar }}>
       {TabArr.map((item, index) => (
         <Tab.Screen
@@ -115,7 +119,7 @@ export default function App() {
   return (
     <UserProvider>
       <NavigationContainer>
-        <StatusBar style="auto" />
+        <StatusBar style="light" />
         <Stack.Navigator initialRouteName={user ? 'MainTabs' : 'Login'} screenOptions={{ headerShown: false, gestureEnabled: false }}>
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="SignUp" component={SignUpScreen} />
@@ -128,18 +132,21 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 60,
-    top:20,
+    backgroundColor: '#2F4F6D',
   },
   tabBar: {
-    height: 60,
     position: 'absolute',
-    margin: 16,
+    bottom: 0,
+    height: Platform.OS === 'ios' ? height * 0.09 : height * 0.08,
     borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: Platform.OS === 'ios' ? 20 : 0, // Adjusts for iOS safe area
+  },
+  tabButton: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },

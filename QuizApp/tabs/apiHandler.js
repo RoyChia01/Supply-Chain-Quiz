@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 
-const BASE_URL = 'http://10.132.0.71:8080';
+const BASE_URL = 'http://10.132.0.50:8080';
 
 // Fetch all the topics from the backend
 export const fetchTopics = async () => {

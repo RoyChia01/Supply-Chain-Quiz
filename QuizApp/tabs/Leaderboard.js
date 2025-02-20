@@ -1,54 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, FlatList, ActivityIndicator, Dimensions, PixelRatio, SafeAreaView } from 'react-native';
 import { fetchLeaderboard } from './apiHandler';
+
+const { width, height } = Dimensions.get('window');
+const scaleSize = (size) => size * (width / 375); // Base size scaling
+const scaleFont = (size) => size * PixelRatio.getFontScale(); // Font scaling
 
 const InitialiseLeaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState(null); // New state to track error
+  const [error, setError] = useState(null);
 
-  // Hardcoded leaderboard data (sample data)
-  const hardcodedData = [
-    { name: 'Player1', rank: 'Gold', totalScore: 1500, position: 1 },
-    { name: 'Player2', rank: 'Silver', totalScore: 1400, position: 2 },
-    { name: 'Player3', rank: 'Bronze', totalScore: 1300, position: 3 },
-    { name: 'Player4', rank: 'Silver', totalScore: 1200, position: 4 },
-    { name: 'Player5', rank: 'Bronze', totalScore: 1100, position: 5 },
-    { name: 'Player6', rank: 'Silver', totalScore: 1000, position: 6 },
-    { name: 'Player7', rank: 'Gold', totalScore: 1900, position: 7 },
-    { name: 'Player8', rank: 'Bronze', totalScore: 800, position: 8 },
-    { name: 'Player9', rank: 'Silver', totalScore: 700, position: 9 },
-    { name: 'Player10', rank: 'Gold', totalScore: 600, position: 10 },
-  ];
-
-  // Fetch leaderboard data
   const getLeaderboardData = async () => {
     try {
-      const leaderboard = await fetchLeaderboard(); // Assuming fetchLeaderboard() returns the data
-      console.log('Leaderboard Raw Response:', leaderboard);
-  
-      // Ensure the leaderboard is an array
-      if (!Array.isArray(leaderboard)) {
-        throw new Error('Invalid data format: leaderboard is not an array');
-      }
-  
-      // Process the leaderboard data
-      const sortedData = leaderboard.map(({ user, positionIndex }) => {
-        if (!user || !user.name) {
-          throw new Error('User information is incomplete');
-        }
-  
-        return {
-          id: user.name,  // Assuming the user's name is unique as an ID
-          name: user.name,
-          rank: user.rank?.selectedTitle || "N/A", // Default to "N/A" if rank is missing
-          totalScore: user.pointBalance || 0, // Ensure point balance is present, default to 0
-          position: positionIndex, // Assuming positionIndex is available in the response
-        };
-      });
-  
-      // Update the state with the processed leaderboard data
+      const leaderboard = await fetchLeaderboard();
+      if (!Array.isArray(leaderboard)) throw new Error('Invalid leaderboard format');
+
+      const sortedData = leaderboard.map(({ user, positionIndex }) => ({
+        id: user?.name || positionIndex.toString(),
+        name: user?.name || "Unknown",
+        rank: user?.rank?.selectedTitle || "N/A",
+        totalScore: user?.pointBalance || 0,
+        position: positionIndex,
+      }));
+
       setLeaderboardData(sortedData);
     } catch (error) {
       console.error('Failed to load leaderboard:', error);
@@ -64,7 +40,7 @@ const InitialiseLeaderboard = () => {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    setError(null); // Reset the error before refreshing
+    setError(null);
     await getLeaderboardData();
     setRefreshing(false);
   };
@@ -76,70 +52,64 @@ const InitialiseLeaderboard = () => {
     return 'th';
   };
 
-  const getFontSize = (name) => (name.length > 10 ? 18 : 25);
-
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <SafeAreaView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#FFD700" />
         <Text style={styles.loadingText}>Loading Leaderboard...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.errorContainer}>
+      <SafeAreaView style={styles.errorContainer}>
         <Text style={styles.errorMessage}>{error}</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
-  // Split data for top 3 and remaining leaderboard
   const topThree = leaderboardData.slice(0, 3);
   const remainingLeaderboard = leaderboardData.slice(3);
 
   return (
-    <View style={styles.container}>
-      {/* Top 3 Players */}
+    <SafeAreaView style={styles.container}>
       <View style={styles.topContainer}>
         {topThree.length === 3 &&
           [topThree[1], topThree[0], topThree[2]].map((player, index) => (
             <View key={player.position} style={[styles.section, index === 1 ? styles.mainSection : styles.sideSection]}>
               <Image source={require('../images/soldier.png')} style={styles.icon} />
-              <Text style={[styles.title, { fontSize: getFontSize(player.name) }]}>{player.name}</Text>
+              <Text style={[styles.title, { fontSize: scaleFont(18) }]}>{player.name}</Text>
               <Text style={styles.subtitle}>{player.rank}</Text>
               <Text style={[styles.text, styles.number]}>
                 {index === 0 ? 2 : index === 1 ? 1 : 3}
-                <Text style={styles.suffix}>
-                  {index === 0 ? 'nd' : index === 1 ? 'st' : 'rd'}
-                </Text>
+                <Text style={styles.suffix}>{getRankSuffix(index === 0 ? 2 : index === 1 ? 1 : 3)}</Text>
               </Text>
               <Text style={styles.score}>Score: {player.totalScore}</Text>
             </View>
           ))}
       </View>
 
-      {/* Remaining Leaderboard */}
       <View style={styles.bottomContainer}>
-        <FlatList
-          data={remainingLeaderboard}
-          keyExtractor={(item) => item.position.toString()}
-          renderItem={({ item, index }) => (
-            <View style={styles.row}>
-              <Text style={styles.rank}>{index + 4}</Text>
-              <View style={styles.nameContainer}>
-                <Text style={[styles.name, { fontSize: getFontSize(item.name) }]}>{item.name}</Text>
-                <Text style={styles.subtitle}>{item.rank}</Text>
-              </View>
-              <Text style={styles.score}>{item.totalScore}</Text>
+      <FlatList
+        data={remainingLeaderboard}
+        keyExtractor={(item) => item.position.toString()}
+        renderItem={({ item, index }) => (
+          <View style={styles.row}>
+            <Text style={styles.rank}>{index + 4}</Text>
+            <View style={styles.nameContainer}>
+              <Text style={[styles.name, { fontSize: scaleFont(18) }]}>{item.name}</Text>
+              <Text style={styles.subtitle}>{item.rank}</Text>
             </View>
-          )}
-          refreshing={refreshing}
-          onRefresh={handleRefresh}
-        />
+            <Text style={styles.score}>{item.totalScore}</Text>
+          </View>
+        )}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
+        contentContainerStyle={{ paddingBottom: scaleSize(50) }} // Adds bottom padding
+      />
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -151,7 +121,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#2F4F6D',
   },
-  loadingText: { color: 'white', fontSize: 20, marginTop: 10 },
+  loadingText: { color: 'white', fontSize: scaleFont(20), marginTop: 10 },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -160,10 +130,10 @@ const styles = StyleSheet.create({
   },
   errorMessage: {
     color: 'white',
-    fontSize: 20,
+    fontSize: scaleFont(18),
     marginTop: 10,
     textAlign: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: scaleSize(20),
   },
   topContainer: {
     flex: 4,
@@ -175,50 +145,51 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingTop: 10,
+    paddingTop: scaleSize(10),
     height: '100%',
-    borderBottomWidth: 4,
+    borderBottomWidth: scaleSize(4),
     borderColor: '#FFD700',
   },
   mainSection: { backgroundColor: '#5B7F94' },
   sideSection: {
     flex: 0.8,
-    paddingTop: 60,
+    paddingTop: scaleSize(60),
     backgroundColor: '#2F4F6D',
   },
-  icon: { width: 120, height: 120 },
+  icon: { width: scaleSize(100), height: scaleSize(100) },
   bottomContainer: {
     flex: 6,
     backgroundColor: '#2F4F6D',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: scaleSize(20),
   },
   row: {
     flexDirection: 'row',
-    width: '100%',
+    width: '95%',
+    marginLeft: '2.5%',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
+    padding: scaleSize(15),
     backgroundColor: '#3A5F77',
-    marginBottom: 10,
-    borderRadius: 10,
+    marginBottom: scaleSize(10),
+    borderRadius: scaleSize(10),
   },
   rank: {
     color: '#FFD700',
-    fontSize: 25,
+    fontSize: scaleFont(25),
     fontWeight: 'bold',
-    width: 40,
+    width: scaleSize(40),
     textAlign: 'center',
   },
-  nameContainer: { flex: 1, paddingLeft: 10 },
-  name: { color: 'white', fontSize: 20, textAlign: 'left' },
-  subtitle: { color: '#FFD700', fontSize: 16, textAlign: 'left' },
-  score: { color: '#FFD700', fontSize: 25, fontWeight: 'bold', textAlign: 'right' },
-  text: { color: 'white', fontSize: 80, fontWeight: 'bold' },
-  number: { fontSize: 90, color: '#FFD700' },
+  nameContainer: { flex: 1, paddingLeft: scaleSize(10) },
+  name: { color: 'white', textAlign: 'left' },
+  subtitle: { color: '#FFD700', fontSize: scaleFont(16), textAlign: 'left' },
+  score: { color: '#FFD700', fontSize: scaleFont(25), fontWeight: 'bold', textAlign: 'right' },
+  text: { color: 'white', fontSize: scaleFont(50), fontWeight: 'bold' },
+  number: { fontSize: scaleFont(50), color: '#FFD700' },
   title: { color: 'white', fontWeight: 'normal' },
-  suffix: { fontSize: 40, color: '#FFD700' },
+  suffix: { fontSize: scaleFont(20), color: '#FFD700' },
 });
 
 export default InitialiseLeaderboard;

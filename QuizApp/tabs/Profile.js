@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, FlatList } from 'react-native';
-import { getUserInfo,updateSelectedTitle } from './apiHandler';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, FlatList, Dimensions } from 'react-native';
+import { getUserInfo, updateSelectedTitle } from './apiHandler';
 import { useUser } from './userInfo';  // Import the hook
 import { signOut } from 'firebase/auth';
 import { FIREBASE_AUTH } from './firebase';  // Assuming you have the firebase configuration
 import Icon from 'react-native-vector-icons/FontAwesome';
+
+// Get device width and height
+const { width, height } = Dimensions.get('window');
 
 // Function to get the current date in the format (e.g., "16 Jan 2025")
 const getCurrentDate = () => {
@@ -15,8 +18,7 @@ const getCurrentDate = () => {
 
 const BoardingPass = ({ navigation }) => {
   const [refresh, setRefresh] = useState(false);
-  //const { userEmail } = useUser(); // Get user email from context
-  const  userEmail  = "Wax1@Wai.mail.coxm"
+  const { userEmail } = useUser(); // Get user email from context
   const [userInfo, setUserInfo] = useState(null);
   const [passengerName, setPassengerName] = useState('');
   const [email, setEmail] = useState('');
@@ -28,19 +30,21 @@ const BoardingPass = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedTitle, setSelectedTitle] = useState('');  // Store selected title
 
+  const fontSizeFactor = width / 375; // Scale factor based on device width
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         console.log("Fetching user data for profile:", userEmail);
         const data = await getUserInfo(userEmail);
-    
+
         if (!data) {
           console.error("❌ No user data received.");
           return;
         }
-    
+
         setUserInfo(data);  // Store user data in state
-    
+
         setPassengerName(data.name || "Unknown");
         setEmail(data.email || "No email provided");
         setPointsBalance(data.pointBalance ?? 0);
@@ -54,12 +58,12 @@ const BoardingPass = ({ navigation }) => {
           { title: "", subText: getCurrentDate() }
         ]);
         setImageUrl({ uri: data.avatarBlob || "" });
-    
+
       } catch (error) {
         console.error("❌ Error loading user data:", error);
       }
     };
-  
+
     fetchData();
   }, [refresh, userEmail]);
 
@@ -81,32 +85,32 @@ const BoardingPass = ({ navigation }) => {
     handleRefresh();
     setModalVisible(false);
   };
-  
+
   const handleRefresh = () => {
     setRefresh(!refresh);  // Toggle the refresh state
   };
 
-// Function to update the selected title for the user
+  // Function to update the selected title for the user
   async function updateTitle(userDocumentID, title) {
     try {
       const result = await updateSelectedTitle(userDocumentID, title);
       console.log(userDocumentID, title);
-  
+
       // Check the result of the API call
       if (result.success) {
         // Successfully updated the title on the server
         console.log('Title updated successfully!');
         // Reset states after successful title update
-      setUserInfo(null);  // Clear user info
-      setPassengerName('');  // Clear passenger name
-      setEmail('');  // Clear email
-      setPointsBalance(0);  // Reset points balance
-      setRowData([]);  // Clear row data
-      setTopRowData([]);  // Clear top row data
-      setImageUrl('');  // Clear image URL
+        setUserInfo(null);  // Clear user info
+        setPassengerName('');  // Clear passenger name
+        setEmail('');  // Clear email
+        setPointsBalance(0);  // Reset points balance
+        setRowData([]);  // Clear row data
+        setTopRowData([]);  // Clear top row data
+        setImageUrl('');  // Clear image URL
 
-      // Toggle the refresh state to trigger useEffect and re-fetch the data
-      setRefresh(prev => !prev);  // Toggling refresh triggers useEffect
+        // Toggle the refresh state to trigger useEffect and re-fetch the data
+        setRefresh(prev => !prev);  // Toggling refresh triggers useEffect
       } else {
         // Handle error if title update fails
         console.error('Failed to update title:', result.error);
@@ -118,7 +122,6 @@ const BoardingPass = ({ navigation }) => {
       Alert.alert('Error', 'An unexpected error occurred: ' + error.message);
     }
   }
-  
 
   return (
     <View style={styles.container}>
@@ -126,171 +129,74 @@ const BoardingPass = ({ navigation }) => {
         
         {/* Exit Icon Button */}
         <TouchableOpacity onPress={handleSignOut} style={styles.exitIconContainer}>
-          <Icon type="FontAwesome" name="sign-out" color="#FFD700" size={40} />
+          <Icon type="FontAwesome" name="sign-out" color="#FFD700" size={40 * fontSizeFactor} />
         </TouchableOpacity>
 
         <Image
           source={require('../images/rsaf.png')}
           style={styles.logoImage}
         />
-        
+
         <View style={styles.userBoardingPass}>
           {/* First Row */}
-          <View style={styles.shortRow}>
-            <View style={styles.horizontalRow}>
-              {topRowData.map((item, index) => (
-                <View
-                  style={[styles.rowItem, index === 1 && styles.rankCenter]}
-                  key={index}
-                >
-                  {item.title && (
-                    <Text style={styles.boldTextSmall}>{item.title}</Text>
-                  )}
-                  {item.subText && (
-                    <TouchableOpacity 
-                      onPress={() => {
-                        if (item.title === 'Rank') {
-                          setModalVisible(true); // Open modal on rank tap
-                        }
-                      }}
-                    >
-                      <Text style={styles.subText}>{item.subText}</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              ))}
-            </View>
-          </View>
-
-        {/* Modal for Title Selection */}
-        <Modal
-  visible={isModalVisible}
-  transparent={true}
-  animationType="fade"
-  onRequestClose={() => setModalVisible(false)}
->
-  <View style={styles.modalOverlay}>
-    <View style={styles.modalContent}>
-      <Text style={styles.modalTitle}>Select a Title</Text>
-      
-      {/* Check if userInfo is available before rendering the FlatList */}
-      {userInfo && userInfo.rank ? (
-        <FlatList
-          data={[userInfo.rank.title, ...userInfo.rank.specialTitle]}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity 
-            onPress={() => {
-              handleSelectTitle(item);
-              updateTitle(userInfo.id, item);
-            }}
+          <FirstRow topRowData={topRowData} setModalVisible={setModalVisible} fontSizeFactor={fontSizeFactor} />
+          
+          {/* Modal for Title Selection */}
+          <Modal
+            visible={isModalVisible}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setModalVisible(false)}
           >
-              <Text style={styles.modalOption}>{item}</Text>
-            </TouchableOpacity>
-          )}
-        />
-      ) : (
-        <Text>Loading titles...</Text>
-      )}
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Text style={[styles.modalTitle, { fontSize: 18 * fontSizeFactor }]}>Select a Title</Text>
 
-      {/* If the title is successfully updated, show a confirmation message */}
-      {selectedTitle && (
-        <View style={styles.confirmationMessageContainer}>
-          <Text style={styles.confirmationMessage}>Title changed to: {selectedTitle}</Text>
-        </View>
-      )}
-
-      <TouchableOpacity
-        onPress={() => setModalVisible(false)}
-        style={styles.modalCloseButton}
-      >
-        <Text style={styles.modalCloseButtonText}>Close</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-</Modal>
-
-          {/* Second Row */}
-          <View style={styles.equalRow}>
-            <View style={styles.splitRow}>
-              {/* Left Section */}
-              <View style={styles.dataSection}>
-                {rowData.slice(0, 1).map((data, index) => (
-                  <View key={index}>
-                    <Text style={styles.boldText}>{data.index}</Text>
-                    <Text style={styles.topicNameText}>{data.name}</Text>
-                  </View>
-                ))}
-              </View>
-
-              {/* Center Section */}
-              <View style={styles.planeLogoSection}>
-                <Text style={styles.planeLogo}>✈️</Text>
-              </View>
-
-              {/* Right Section */}
-              <View style={styles.dataSection}>
-                {rowData.slice(1, 2).map((data, index) => (
-                  <View key={index}>
-                    <Text style={styles.boldText}>{data.index}</Text>
-                    <Text style={styles.topicNameText}>{data.name}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          </View>
-
-          {/* Third Row */}
-          <View style={styles.equalRow}>
-            <View style={styles.splitRow}>
-              {/* Left Section */}
-              <View style={[styles.dataSection, styles.leftSection]}>
-                {rowData.slice(0, 1).map((data, index) => (
-                  <View key={index}>
-                    <Text style={styles.boldTextLabel}>Trainee Name</Text>
-                    <Text style={styles.boldText}>{passengerName}</Text>
-                  </View>
-                ))}
-              </View>
-
-              {/* Image Placeholder Section */}
-              <View style={[styles.dataSection, styles.imagePlaceholder]}>
-                {imageUrl ? (
-                  <Image
-                    source={imageUrl} // Use the local image URL
-                    style={styles.placeholderImage}
+                {/* Check if userInfo is available before rendering the FlatList */}
+                {userInfo && userInfo.rank ? (
+                  <FlatList
+                    data={[userInfo.rank.title, ...userInfo.rank.specialTitle]}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity 
+                        onPress={() => {
+                          handleSelectTitle(item);
+                          updateTitle(userInfo.id, item);
+                        }}
+                      >
+                        <Text style={[styles.modalOption, { fontSize: 16 * fontSizeFactor, color: 'blue' }]}>{item}</Text>
+                      </TouchableOpacity>
+                    )}
                   />
                 ) : (
-                  <Text>Loading image...</Text>  // Show loading text if the image is not yet available
+                  <Text>Loading titles...</Text>
                 )}
-              </View>
-            </View>
-          </View>
 
-          {/* Fourth Row */}
-          <View style={styles.equalRow}>
-            <View style={styles.horizontalRow}>
-              {/* Left Side (Email, Password, and Reset Icon) */}
-              <View style={styles.leftSide}>
-                <Text style={styles.boldTextLabel}>Email</Text>
-                <Text style={[styles.subText, styles.emailValue]}>{email}</Text>
+                {/* If the title is successfully updated, show a confirmation message */}
+                {selectedTitle && (
+                  <View style={styles.confirmationMessageContainer}>
+                    <Text style={[styles.confirmationMessage, { fontSize: 14 * fontSizeFactor }]}>Title changed to: {selectedTitle}</Text>
+                  </View>
+                )}
 
-                <TouchableOpacity 
-                  onPress={() => navigation.navigate('resetPassword')} 
-                  style={styles.iconButton}>
-                  <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#FFD700' }}>
-                    Reset Password Here
-                  </Text>
+                <TouchableOpacity
+                  onPress={() => setModalVisible(false)}
+                  style={styles.modalCloseButton}
+                >
+                  <Text style={[styles.modalCloseButtonText, { fontSize: 16 * fontSizeFactor }]}>Close</Text>
                 </TouchableOpacity>
               </View>
-
-              {/* Right Side (Points Balance) */}
-              <View style={styles.rightSide}>
-                <Text style={styles.boldTextLabel}>Points Balance</Text>
-                <Text style={styles.subText}>{pointsBalance}</Text>
-              </View>
             </View>
-          </View>
+          </Modal>
+
+          {/* Second Row */}
+          <SecondRow rowData={rowData} fontSizeFactor={fontSizeFactor} />
+
+          {/* Third Row */}
+          <ThirdRow passengerName={passengerName} imageUrl={imageUrl} fontSizeFactor={fontSizeFactor} />
+
+          {/* Fourth Row */}
+          <FourthRow email={email} pointsBalance={pointsBalance} navigation={navigation} fontSizeFactor={fontSizeFactor} />
 
           {/* Fifth Row */}
           <View style={styles.fifthRow}>
@@ -298,14 +204,111 @@ const BoardingPass = ({ navigation }) => {
               source={require('../images/barcode.png')}
               style={styles.barcodeImage}
             />
-            <View style={styles.semiCircleLeft}></View>
-            <View style={styles.semiCircleRight}></View>
           </View>
         </View>
       </View>
     </View>
   );
 };
+
+// Components for each row
+
+const FirstRow = ({ topRowData, setModalVisible, fontSizeFactor }) => (
+  <View style={styles.shortRow}>
+    <View style={styles.horizontalRow}>
+      {topRowData.map((item, index) => (
+        <View
+          style={[styles.rowItem, index === 1 && styles.rankCenter]}
+          key={index}
+        >
+          {item.title && (
+            <Text style={[styles.boldTextSmall, { fontSize: 14 * fontSizeFactor }]}>{item.title}</Text>
+          )}
+          {item.subText && (
+            <TouchableOpacity 
+              onPress={() => {
+                if (item.title === 'Rank') {
+                  setModalVisible(true); // Open modal on rank tap
+                }
+              }}
+            >
+              <Text style={[styles.subText, { fontSize: 14 * fontSizeFactor }]}>{item.subText}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      ))}
+    </View>
+  </View>
+);
+
+const SecondRow = ({ rowData, fontSizeFactor }) => (
+  <View style={styles.equalRow}>
+    <View style={styles.splitRow}>
+      <View style={styles.dataSection}>
+        {rowData.slice(0, 1).map((data, index) => (
+          <View key={index}>
+            <Text style={[styles.boldText, { fontSize: 48 * fontSizeFactor }]}>{data.index}</Text>
+            <Text style={[styles.topicNameText, { fontSize: 12 * fontSizeFactor }]}>{data.name}</Text>
+          </View>
+        ))}
+      </View>
+      <View style={styles.planeLogoSection}>
+        <Text style={[styles.planeLogo, { fontSize: 48 * fontSizeFactor }]}>✈️</Text>
+      </View>
+      <View style={styles.dataSection}>
+        {rowData.slice(1, 2).map((data, index) => (
+          <View key={index}>
+            <Text style={[styles.boldText, { fontSize: 48 * fontSizeFactor }]}>{data.index}</Text>
+            <Text style={[styles.topicNameText, { fontSize: 12 * fontSizeFactor }]}>{data.name}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  </View>
+);
+
+const ThirdRow = ({ passengerName, imageUrl, fontSizeFactor }) => (
+  <View style={styles.equalRow}>
+    <View style={styles.splitRow}>
+      <View style={[styles.dataSection, styles.leftSection]}>
+        <Text style={[styles.boldTextLabel, { fontSize: 16 * fontSizeFactor }]}>Trainee Name</Text>
+        <Text style={[styles.boldText, { fontSize: 24 * fontSizeFactor }]}>{passengerName}</Text>
+      </View>
+      <View style={[styles.dataSection, styles.imagePlaceholder]}>
+        {imageUrl ? (
+          <Image
+            source={imageUrl} // Use the local image URL
+            style={[styles.placeholderImage, { width: 90 * fontSizeFactor, height: 90 * fontSizeFactor }]}
+          />
+        ) : (
+          <Text>Loading image...</Text>
+        )}
+      </View>
+    </View>
+  </View>
+);
+
+const FourthRow = ({ email, pointsBalance, navigation, fontSizeFactor }) => (
+  <View style={styles.equalRow}>
+    <View style={styles.horizontalRow}>
+      <View style={styles.leftSide}>
+        <Text style={[styles.boldTextLabel, { fontSize: 16 * fontSizeFactor }]}>Email</Text>
+        <Text style={[styles.subText, { fontSize: 14 * fontSizeFactor }]}>{email}</Text>
+        <TouchableOpacity 
+          onPress={() => navigation.navigate('resetPassword')} 
+          style={styles.iconButton}>
+          <Text style={{ fontSize: 20 * fontSizeFactor, fontWeight: 'bold', color: '#FFD700' }}>
+            Reset Password Here
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.rightSide}>
+        <Text style={[styles.boldTextLabel, { fontSize: 16 * fontSizeFactor }]}>Points Balance</Text>
+        <Text style={[styles.subText, { fontSize: 14 * fontSizeFactor }]}>{pointsBalance}</Text>
+      </View>
+    </View>
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -329,7 +332,7 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
     backgroundColor: 'transparent',
-    zIndex: 1,  // Ensures it's on top of other elements
+    zIndex: 1,
     padding: 10,
   },
   userBoardingPass: {
@@ -375,149 +378,91 @@ const styles = StyleSheet.create({
   },
   rowItem: {
     alignItems: 'center',
-    flex: 1,
+    justifyContent: 'center',
   },
   rankCenter: {
-    justifyContent: 'center',
     alignItems: 'center',
   },
-  boldText: {
-    fontSize: 48,
-    fontWeight: 'bold',
-  },
   boldTextSmall: {
-    fontSize: 20,
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  subText: {
+    color: 'gray',
+  },
+  boldText: {
     fontWeight: 'bold',
   },
   topicNameText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  planeLogo: {
-    fontSize: 60,
-  },
-  boldTextDisplayContainer: {
-    width: '90%',
-    padding: 5,
-    alignItems: 'flex-start',
-  },
-  boldTextLabel: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#A1A2A4',
-  },
-  subText: {
-    fontSize: 18,
-    color: '#444',
-  },
-  fifthRow: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderTopWidth: 2,
-    borderColor: '#ccc',
-    marginTop: 20,
-    position: 'relative',
-  },
-  semiCircleLeft: {
-    position: 'absolute',
-    top: -30,
-    left: -35,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#2F4F6D',
-  },
-  semiCircleRight: {
-    position: 'absolute',
-    top: -30,
-    right: -35,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#2F4F6D',
-  },
-  barcodeImage: {
-    width: 300,
-    height: 200,
-  },
-  logoImage: {
-    width: 120,
-    height: 100,
-  },
-  emailValue: {
-    marginBottom: 15,
-  },
-  leftSection: {
-    flex: 0.55, // 55% width for the left section
-  },
-  imagePlaceholder: {
-    flex: 0.45, // 45% width for the image placeholder
-    alignItems: 'center',
-    justifyContent: 'center',
+    color: '#333',
+    textAlign: 'center',
   },
   placeholderImage: {
-    width: 100, // Adjust width of the placeholder image
-    height: 100, // Adjust height of the placeholder image
-    resizeMode: 'contain',
-    borderRadius: 10, // Optional: Add rounded corners to the placeholder image
+    borderRadius: 45,
+    borderWidth: 2,
+    borderColor: 'gray',
   },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start', // Ensure text and icon are in a row
-    gap: 10, // Add space between text and icon
+  imagePlaceholder: {
+    marginLeft: 10,
   },
-  iconButton: {
-    paddingLeft: 10, // Small spacing for better alignment
+  boldTextLabel: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  leftSide: {
+    flex: 0.6,
+  },
+  rightSide: {
+    flex: 0.4,
+  },
+  confirmationMessageContainer: {
+    marginTop: 10,
+  },
+  confirmationMessage: {
+    color: 'green',
+    fontSize: 12,
   },
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
     width: '80%',
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
+    alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
+    fontSize: 18,
   },
   modalOption: {
-    fontSize: 16,
-    marginVertical: 5,
-    color: '#007bff',
+    paddingVertical: 10,
   },
   modalCloseButton: {
-    marginTop: 15,
+    marginTop: 20,
     backgroundColor: '#FFD700',
     padding: 10,
-    alignItems: 'center',
     borderRadius: 5,
   },
   modalCloseButtonText: {
-    fontSize: 16,
     fontWeight: 'bold',
+    color: '#fff',
   },
-  confirmationMessageContainer: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#4CAF50',  // Green background for success
-    borderRadius: 5,
+  barcodeImage: {
+    width: 300,
+    height: 60,
+    alignSelf: 'center',
     marginBottom: 10,
-    alignItems: 'center',
   },
-  confirmationMessage: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
+  logoImage: {
+    height: 70,
+    width: 70,
   },
 });
 
-export default BoardingPass;
 
+export default BoardingPass;
