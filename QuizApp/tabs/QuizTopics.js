@@ -109,7 +109,7 @@ const QuizTopics = () => {
                 topic={{
                   id: item.id, // Pass the full topic object, including id, name, and index
                   name: item.name,
-                  index: index + 1, // Assuming index is 1-based
+                  index: item.index, // Assuming index is 1-based
                 }}
                 onPress={() => navigation.navigate('QuizQuestions', { id: topic.id })} // Use the outer topic's id
               />
