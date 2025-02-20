@@ -1,10 +1,19 @@
 import React, { useState, useEffect, useCallback,useMemo } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Image, Alert } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image, Alert,Dimensions,Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
 import { fetchQuestions, getUserInfo, postQuizResults } from './apiHandler';
 import { useUser } from './userInfo';  // Import the hook
 
+// Get the device screen width and height
+const { width, height } = Dimensions.get('window');
+const getFontSize = (size) => {
+  const baseScale = 375;  // base screen width
+  return size * (width / baseScale);
+};
+
+// Adjust font sizes and layout based on screen size
+const scale = width / 375; // 375 is the base width for standard screen size (like iPhone 6)
 // Custom Hook for Fetching Quiz Questions with Error Handling
 const useQuizQuestions = (topicId) => {
   const [questions, setQuestions] = useState([]);
@@ -153,7 +162,7 @@ const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer }) => {
   if (!question) return <Text style={styles.loadingText}>Loading question...</Text>;
   return (
     <>
-      <Text style={[styles.questionText, { fontSize: 40 }]}>{question?.question || 'Loading question...'}</Text>
+      <Text style={[styles.questionText, { fontSize: 24 }]}>{question?.question || 'Loading question...'}</Text>
 
       <View style={styles.optionsContainer}>
         {shuffledOptions.length > 0 ? (
@@ -258,26 +267,140 @@ const Score = ({ score, totalQuestions, onRestart, topicId }) => {
 
 // Styles for the Components
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#2F4F6D', alignItems: 'center', justifyContent: 'center', paddingTop: '10%', width: '100%' },
-  questionText: { fontSize: 36, textAlign: 'center', color: 'white', fontWeight: 'bold', fontFamily: 'Roboto', marginBottom: 20 },
-  optionsContainer: { marginVertical: 20, width: '100%', alignItems: 'center' },
-  optionButton: { backgroundColor: '#5b7c99', borderRadius: 20, padding: 10, marginVertical: 10, width: '100%', maxWidth: 300, alignItems: 'center', position: 'relative' },
-  optionsBox: { color: 'white', padding: 5, marginVertical: 10, textAlign: 'center', fontSize: 18, borderRadius: 20, width: '100%' },
-  correctOption: { borderWidth: 3, borderColor: '#90EE90', backgroundColor: '#5b7c99', borderRadius: 20, padding: 5 },
-  incorrectOption: { borderWidth: 3, borderColor: '#FF6F6F', backgroundColor: '#5b7c99', borderRadius: 20, padding: 5 },
-  icon: { position: 'absolute', bottom: 10, right: 10 },
-  loadingText: { color: 'white', fontSize: 20, fontWeight: 'bold' },
-  errorText: { color: 'red', fontSize: 20, fontWeight: 'bold' },
-  resetButton: { backgroundColor: '#e0a100', padding: 15, borderRadius: 10, width: '90%', alignItems: 'center', marginVertical: '5%' },
-  resetButtonText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
-  scoreContainer: { backgroundColor: '#2F4F6D', padding: 40, borderRadius: 20, alignItems: 'center', width: '90%' },
-  rankText: { color: '#FFD700', fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
-  avatar: { width: 120, height: 120, borderRadius: 60, backgroundColor: '#ccc', marginBottom: 20 },
-  scoreText: { fontSize: 28, color: 'white', fontWeight: 'bold', marginBottom: 20 },
-  progressBarContainer: { position: 'absolute', top: 30, width: '90%', height: 60, backgroundColor: '#071f35', borderRadius: 10, overflow: 'hidden' },
-  progressBar: { position: 'relative', width: '100%', height: '100%' },
-  dash: { position: 'absolute', top: 28, width: 10, height: 2, backgroundColor: '#ffffff' },
-  planeIcon: { position: 'absolute', zIndex: 1 , color: '#FFD700' },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#2F4F6D', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    paddingTop: height * 0.1, // 10% of screen height
+    width: '100%' 
+  },
+  questionText: { 
+    fontSize: getFontSize(36), // Scale font size dynamically
+    textAlign: 'center', 
+    color: 'white', 
+    fontWeight: 'bold', 
+    fontFamily: 'Roboto', 
+    marginBottom: 20
+  },
+  optionsContainer: { 
+    marginVertical: 20, 
+    width: '100%', 
+    alignItems: 'center' 
+  },
+  optionButton: { 
+    backgroundColor: '#5b7c99', 
+    borderRadius: 20, 
+    padding: 10, 
+    marginVertical: 10, 
+    width: '80%',  // Adjust width relative to screen size
+    maxWidth: 300, 
+    alignItems: 'center', 
+    position: 'relative' 
+  },
+  optionsBox: { 
+    color: 'white', 
+    padding: 5, 
+    marginVertical: 10, 
+    textAlign: 'center', 
+    fontSize: getFontSize(18),  // Scale the font size dynamically
+    borderRadius: 20, 
+    width: '100%' 
+  },
+  correctOption: { 
+    borderWidth: 3, 
+    borderColor: '#90EE90', 
+    backgroundColor: '#5b7c99', 
+    borderRadius: 20, 
+    padding: 5 
+  },
+  incorrectOption: { 
+    borderWidth: 3, 
+    borderColor: '#FF6F6F', 
+    backgroundColor: '#5b7c99', 
+    borderRadius: 20, 
+    padding: 5 
+  },
+  icon: { 
+    position: 'absolute', 
+    bottom: 10, 
+    right: 10 
+  },
+  loadingText: { 
+    color: 'white', 
+    fontSize: getFontSize(20), // Scale font size dynamically
+    fontWeight: 'bold' 
+  },
+  errorText: { 
+    color: 'red', 
+    fontSize: getFontSize(20), 
+    fontWeight: 'bold' 
+  },
+  resetButton: { 
+    backgroundColor: '#e0a100', 
+    padding: 15, 
+    borderRadius: 10, 
+    width: '90%',  // Make button width relative
+    alignItems: 'center', 
+    marginVertical: '5%' 
+  },
+  resetButtonText: { 
+    color: '#fff', 
+    fontSize: getFontSize(20),  // Scale button text dynamically
+    fontWeight: 'bold' 
+  },
+  scoreContainer: { 
+    backgroundColor: '#2F4F6D', 
+    padding: 40, 
+    borderRadius: 20, 
+    alignItems: 'center', 
+    width: '90%' 
+  },
+  rankText: { 
+    color: '#FFD700', 
+    fontSize: getFontSize(24),  // Scale rank text dynamically
+    fontWeight: 'bold', 
+    marginBottom: 10 
+  },
+  avatar: { 
+    width: getFontSize(120), 
+    height: getFontSize(120), 
+    borderRadius: getFontSize(60), 
+    backgroundColor: '#ccc', 
+    marginBottom: 20 
+  },
+  scoreText: { 
+    fontSize: getFontSize(28), 
+    color: 'white', 
+    fontWeight: 'bold', 
+    marginBottom: 20 
+  },
+  progressBarContainer: { 
+    position: 'absolute', 
+    top: 30, 
+    width: '90%', 
+    height: getFontSize(60), 
+    backgroundColor: '#071f35', 
+    borderRadius: 10, 
+    overflow: 'hidden' 
+  },
+  progressBar: { 
+    position: 'relative', 
+    width: '100%', 
+    height: '100%' 
+  },
+  dash: { 
+    position: 'absolute', 
+    top: getFontSize(28), 
+    width: 10, 
+    height: 2, 
+    backgroundColor: '#ffffff' 
+  },
+  planeIcon: { 
+    position: 'absolute', 
+    zIndex: 1 , 
+    color: '#FFD700' 
+  },
 });
 
 export default QuizQuestions;
