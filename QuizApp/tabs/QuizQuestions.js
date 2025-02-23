@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback,useMemo } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Image, Alert,Dimensions,Platform } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image, Alert,Dimensions,ScrollView  } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
 import { fetchQuestions, getUserInfo, postQuizResults } from './apiHandler';
@@ -143,8 +143,8 @@ const ProgressBar = ({ currentQuestion, totalQuestions }) => {
 
 // Display Question Card with Options
 const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer }) => {
-
   const [shuffledOptions, setShuffledOptions] = useState([]);
+
   const shuffleArray = (array) => {
     let shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -153,18 +153,22 @@ const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer }) => {
     }
     return shuffled;
   };
+
   useEffect(() => {
     if (question?.options) {
       setShuffledOptions(shuffleArray(question.options));
     }
   }, [question]);
-  
+
   if (!question) return <Text style={styles.loadingText}>Loading question...</Text>;
+
   return (
     <>
       <Text style={[styles.questionText, { fontSize: 24 }]}>{question?.question || 'Loading question...'}</Text>
-
-      <View style={styles.optionsContainer}>
+      
+      <Text style={styles.scrollHint}>Scroll to see more options ↓</Text>
+      
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.optionsContainer}>
         {shuffledOptions.length > 0 ? (
           shuffledOptions.map((option, index) => (
             <OptionButton
@@ -179,7 +183,7 @@ const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer }) => {
         ) : (
           <Text style={styles.loadingText}>No options available</Text>
         )}
-      </View>
+      </ScrollView>
     </>
   );
 };
@@ -281,7 +285,7 @@ const styles = StyleSheet.create({
     color: 'white', 
     fontWeight: 'bold', 
     fontFamily: 'Roboto', 
-    marginBottom: 20
+    marginBottom: 100
   },
   optionsContainer: { 
     marginVertical: 20, 
@@ -400,6 +404,20 @@ const styles = StyleSheet.create({
     position: 'absolute', 
     zIndex: 1 , 
     color: '#FFD700' 
+  },
+  scrollView: {
+    width: '100%',
+    maxHeight: '60%', // Adjust max height to fit screen
+  },
+  optionsContainer: {
+    alignItems: 'center',
+    paddingBottom: 20, // Ensure some space at bottom for scrolling
+  },
+  scrollHint: {
+    fontSize: 16,
+    color: '#aaa',
+    textAlign: 'center',
+    marginBottom: 5,
   },
 });
 

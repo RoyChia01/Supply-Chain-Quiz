@@ -1,6 +1,4 @@
-import { Alert } from 'react-native';
-
-const BASE_URL = 'http://10.132.0.50:8080';
+const BASE_URL = 'http://192.168.50.161:8080';
 
 // Fetch all the topics from the backend
 export const fetchTopics = async () => {
@@ -11,7 +9,7 @@ export const fetchTopics = async () => {
     console.log(data);
     return data;
   } catch (error) {
-    console.error('Error fetching topics:', error);
+    //console.error('Error fetching topics:', error);
   }
 };
 
@@ -31,7 +29,7 @@ export const fetchQuestions = async (topicUID) => {
 
     return { questionsData, loading: false };
   } catch (error) {
-    console.error("Error fetching questions:", error);
+    //console.error("Error fetching questions:", error);
     return { questionsData: [], loading: false };
   }
 };
@@ -43,7 +41,7 @@ export const getUserInfo = async (userEmail) => {
   console.log("📢 Fetching User Info for:", userEmail);
 
   if (!userEmail) {
-    console.error("❌ Email is required");
+    //console.error("❌ Email is required");
     return null;
   }
 
@@ -52,14 +50,14 @@ export const getUserInfo = async (userEmail) => {
 
     if (!response.ok) {
       const errorMessage = await response.text();
-      console.error("❌ Error:", errorMessage);
+      //console.error("❌ Error:", errorMessage);
       throw new Error(errorMessage || "Failed to fetch user info");
     }
 
     const data = await response.json(); // Parse response as JSON
 
     if (!data) {
-      console.error("❌ Empty response received.");
+      //console.error("❌ Empty response received.");
       return null;
     }
 
@@ -89,7 +87,7 @@ export const getUserInfo = async (userEmail) => {
     };
 
   } catch (error) {
-    console.error("❌ Error fetching user info:", error);
+    //console.error("❌ Error fetching user info:", error);
     return null;
   }
 };
@@ -113,7 +111,7 @@ export const postUser = async (username,email) => {
     console.log(data);
     return data;
   } catch (error) {
-    console.error('Error posting user:', error);
+    //console.error('Error posting user:', error);
   }
 };
 
@@ -141,7 +139,7 @@ export const postQuizResults = async (UserdocumentID, quizID, result) => {
     return { success: true, data };
 
   } catch (error) {
-    console.error('Error posting quiz results:', error.message);
+    //onsole.error('Error posting quiz results:', error.message);
     return { success: false, error: error.message };
   }
 };
@@ -159,7 +157,7 @@ export const fetchLeaderboard = async () => {
     console.log("Fetched Leaderboard Data:", data);
     return data;
   } catch (error) {
-    console.error('Error fetching leaderboard:', error);
+    //console.error('Error fetching leaderboard:', error);
     return null;
   }
 };
@@ -185,8 +183,8 @@ export const updateSelectedTitle = async (UserdocumentID, title) => {
     return { success: true, data };
 
   } catch (error) {
-    console.error('Error updating title:', error.message);
-    Alert.alert('Error', 'Failed to update title: ' + error.message);
+    //console.error('Error updating title:', error.message);
+    //Alert.alert('Error', 'Failed to update title: ' + error.message);
     return { success: false, error: error.message };
   }
 };
