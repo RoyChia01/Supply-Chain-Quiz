@@ -9,6 +9,16 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 // Get device width and height
 const { width, height } = Dimensions.get('window');
 
+const images = {
+  SCEngineer: require('../images/Engineer.jpg'),
+  TeamIC: require('../images/TeamIC.jpg'),
+  FlightLead: require('../images/FlightLead.jpg'),
+  OC: require('../images/OC.jpg'),
+  CO: require('../images/CO.jpg'),
+  Commander: require('../images/Commander.jpg'),
+  Trainee: require('../images/Trainee.jpg'), // Added fallback image
+};
+
 // Function to get the current date in the format (e.g., "16 Jan 2025")
 const getCurrentDate = () => {
   const today = new Date();
@@ -25,7 +35,7 @@ const BoardingPass = ({ navigation }) => {
   const [pointsBalance, setPointsBalance] = useState(0);
   const [rowData, setRowData] = useState([]);
   const [topRowData, setTopRowData] = useState([]);
-  const [imageUrl, setImageUrl] = useState('');
+  const [imageUrl, setImageUrl] = useState();
 
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedTitle, setSelectedTitle] = useState('');  // Store selected title
@@ -57,7 +67,8 @@ const BoardingPass = ({ navigation }) => {
           { title: "Rank", subText: data.rank?.selectedTitle || "Unranked" },
           { title: "", subText: getCurrentDate() }
         ]);
-        setImageUrl({ uri: data.avatarBlob || "" });
+        //setImageUrl(images[data.rank] || images.Trainee);
+        setImageUrl(images['Commander'] || images.Trainee);
 
       } catch (error) {
         console.error("❌ Error loading user data:", error);

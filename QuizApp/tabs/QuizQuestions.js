@@ -12,6 +12,16 @@ const getFontSize = (size) => {
   return size * (width / baseScale);
 };
 
+const images = {
+  SCEngineer: require('../images/Engineer.jpg'),
+  TeamIC: require('../images/TeamIC.jpg'),
+  FlightLead: require('../images/FlightLead.jpg'),
+  OC: require('../images/OC.jpg'),
+  CO: require('../images/CO.jpg'),
+  Commander: require('../images/Commander.jpg'),
+  Trainee: require('../images/Trainee.jpg'), // Added fallback image
+};
+
 // Adjust font sizes and layout based on screen size
 const scale = width / 375; // 375 is the base width for standard screen size (like iPhone 6)
 // Custom Hook for Fetching Quiz Questions with Error Handling
@@ -221,13 +231,18 @@ const OptionButton = ({ option, selectedAnswer, isCorrect, onAnswer, answerLocke
 const Score = ({ score, totalQuestions, onRestart, topicId }) => {
   const { userEmail } = useUser();
   const [userDocumentID, setUserDocumentID] = useState(null);
+  const [imageSource, setImageSource] = useState(require('../images/Trainee.jpg')); // Default image
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
         const userInfo = await getUserInfo(userEmail);
         console.log('User Info:', userInfo.id);
-        if (userInfo) setUserDocumentID(userInfo.id);
+        console.log('User Info:', userInfo.rank.selectedTitle);
+        if (userInfo) {
+          setUserDocumentID(userInfo.id);
+          setImageSource(images[userInfo.rank.selectedTitle] || images.Trainee);
+        }
       } catch (error) {
         Alert.alert('Error', 'Unable to fetch user info. Please try again later.');
       }
@@ -251,7 +266,7 @@ const Score = ({ score, totalQuestions, onRestart, topicId }) => {
 
   return (
     <View style={styles.scoreContainer}>
-      <Image source={require('../images/soldier.png')} style={styles.avatar} />
+      <Image source={imageSource} style={styles.avatar} />
       <Text style={styles.scoreText}>Score: {score} / {totalQuestions}</Text>
       <TouchableOpacity
         style={styles.resetButton}
@@ -355,7 +370,7 @@ const styles = StyleSheet.create({
   },
   scoreContainer: { 
     backgroundColor: '#2F4F6D', 
-    padding: 40, 
+    padding: 30, 
     borderRadius: 20, 
     alignItems: 'center', 
     width: '90%' 
@@ -367,8 +382,8 @@ const styles = StyleSheet.create({
     marginBottom: 10 
   },
   avatar: { 
-    width: getFontSize(120), 
-    height: getFontSize(120), 
+    width: getFontSize(150), 
+    height: getFontSize(150), 
     borderRadius: getFontSize(60), 
     backgroundColor: '#ccc', 
     marginBottom: 20 

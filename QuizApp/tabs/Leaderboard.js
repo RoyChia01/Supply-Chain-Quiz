@@ -6,11 +6,23 @@ const { width, height } = Dimensions.get('window');
 const scaleSize = (size) => size * (width / 375); // Base size scaling
 const scaleFont = (size) => size * PixelRatio.getFontScale(); // Font scaling
 
+const images = {
+
+  SCEngineer: require('../images/Engineer.jpg'),
+  TeamIC: require('../images/TeamIC.jpg'),
+  FlightLead: require('../images/FlightLead.jpg'),
+  OC: require('../images/OC.jpg'),
+  CO: require('../images/CO.jpg'),
+  Commander: require('../images/Commander.jpg'),
+  default: require('../images/Trainee.jpg'), // Default image in case no rank matches
+};
+
 const InitialiseLeaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+
 
   const getLeaderboardData = async () => {
     try {
@@ -78,7 +90,7 @@ const InitialiseLeaderboard = () => {
         {topThree.length === 3 &&
           [topThree[1], topThree[0], topThree[2]].map((player, index) => (
             <View key={player.position} style={[styles.section, index === 1 ? styles.mainSection : styles.sideSection]}>
-              <Image source={require('../images/soldier.png')} style={styles.icon} />
+             <Image source={images[player.rank] || images.default} style={styles.image} />
               <Text style={[styles.title, { fontSize: scaleFont(18) }]}>{player.name}</Text>
               <Text style={styles.subtitle}>{player.rank}</Text>
               <Text style={[styles.text, styles.number]}>
@@ -181,6 +193,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     width: scaleSize(40),
     textAlign: 'center',
+  },
+  image: {
+    width: scaleSize(90), 
+    height: scaleSize(90), 
+    borderRadius: scaleSize(50), 
+    marginBottom: scaleSize(10), 
+    borderWidth: scaleSize(2), 
+    borderColor: '#FFD700', 
+    resizeMode: 'cover', 
   },
   nameContainer: { flex: 1, paddingLeft: scaleSize(10) },
   name: { color: 'white', textAlign: 'left' },
