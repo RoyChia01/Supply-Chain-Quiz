@@ -1,4 +1,4 @@
-const BASE_URL = 'http://192.168.50.161:8080';
+const BASE_URL = 'http://10.132.0.74:8080';
 
 // Fetch all the topics from the backend
 export const fetchTopics = async () => {
@@ -188,3 +188,32 @@ export const updateSelectedTitle = async (UserdocumentID, title) => {
     return { success: false, error: error.message };
   }
 };
+
+export const getUserTitle = async (userEmail) => {
+  console.log("📢 Fetching User Info for:", userEmail);
+
+  if (!userEmail) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}/user?email=${userEmail}`);
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      throw new Error(errorMessage || "Failed to fetch user info");
+    }
+
+    const data = await response.json();
+
+    if (!data) {
+      return null;
+    }
+
+    // Return only the selectedTitle
+    return data.rank?.selectedTitle || null;
+  } catch (error) {
+    return null;
+  }
+};
+

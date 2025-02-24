@@ -1,15 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator, RefreshControl, useWindowDimensions 
+  View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator, RefreshControl, useWindowDimensions 
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { fetchTopics } from './apiHandler';
+import { fetchTopics, getUserTitle } from './apiHandler';
 import PropTypes from 'prop-types';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScaledSheet, moderateScale } from 'react-native-size-matters';
+import { ScaledSheet } from 'react-native-size-matters';
+import { useUser } from './userInfo';  // Import the hook
 
 // Local image import
-const placeholderImage = require('../images/soldier.png');
+const images = {
+  SCEngineer: require('../images/Engineer.jpg'),
+  TeamIC: require('../images/TeamIC.jpg'),
+  FlightLead: require('../images/FlightLead.jpg'),
+  OC: require('../images/OC.jpg'),
+  CO: require('../images/CO.jpg'),
+  Commander: require('../images/Commander.jpg'),
+  Trainee: require('../images/Trainee.jpg'), // Added fallback image
+};
 
 // Functional Component for each Topic Button
 const TopicButton = ({ topic, onPress }) => (
@@ -33,9 +42,11 @@ const QuizTopics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
-
+  const [imageSource, setImageSource] = useState(require('../images/Trainee.jpg')); // Default image
+  const [userRank, setUserRank] = useState(null);
   const navigation = useNavigation();
-  const { width, height } = useWindowDimensions(); // Get screen dimensions
+  const { width } = useWindowDimensions(); // Get screen dimensions
+  const { userEmail } = useUser(); // Get user email from context
 
   // Load topics function
   const loadTopics = useCallback(async () => {
@@ -56,10 +67,34 @@ const QuizTopics = () => {
       setLoading(false);
     }
   }, []);
-  
+
+  // Fetch user data and rank
   useEffect(() => {
-    loadTopics();
-  }, [loadTopics]);
+    const fetchUserData = async () => {
+      if (!userEmail) return;
+
+      try {
+        const rank = await getUserTitle(userEmail); // Get user rank from API
+        console.log("User Rank:", rank);
+        if (rank) {
+          setUserRank(rank);
+          // Dynamically set the image based on rank
+          setImageSource(images[rank] || images.Trainee); 
+        }
+      } catch (err) {
+        console.error("Error fetching user rank:", err);
+      }
+    };
+
+    fetchUserData();
+  }, [userEmail]);
+
+  // Fetch topics data once the user rank is set
+  useEffect(() => {
+    if (userRank) {
+      loadTopics();
+    }
+  }, [userRank, loadTopics]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -67,6 +102,7 @@ const QuizTopics = () => {
     setRefreshing(false);
   };
 
+  // If loading data, show a loading spinner
   if (loading) {
     return (
       <View style={styles.container}>
@@ -75,6 +111,7 @@ const QuizTopics = () => {
     );
   }
 
+  // If there's an error, show an error message and retry button
   if (error) {
     return (
       <View style={styles.container}>
@@ -88,12 +125,14 @@ const QuizTopics = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Display the rank image */}
       <View style={styles.imageContainer}>
-        <Image source={placeholderImage} style={styles.image} />
+        <Image source={imageSource} style={styles.image} />
       </View>
 
-      <Text style={styles.title}>Select a Topic</Text>
+      <Text style={styles.title}>Welcome, Select a Topic</Text>
 
+      {/* Topic buttons */}
       <ScrollView
         contentContainerStyle={styles.contentContainer}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#FFD700']} />}
@@ -124,11 +163,10 @@ const styles = ScaledSheet.create({
     flex: 1,
     backgroundColor: '#2F4F6D',
     alignItems: 'center',
-    paddingTop: '40@ms',
   },
   imageContainer: {
-    width: '40%',  
-    height: '150@ms', 
+    width: '50%', // Adjusted size to fit better
+    aspectRatio: 1, // Maintains square aspect ratio for the image
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: '20@ms',
@@ -136,9 +174,9 @@ const styles = ScaledSheet.create({
   image: {
     width: '100%',
     height: '100%',
-    resizeMode: 'contain',
-    borderRadius: '10@ms',
-    borderWidth: '3@ms',
+    resizeMode: 'cover', // Makes sure the image fills the space while maintaining its aspect ratio
+    borderRadius: '15@ms',
+    borderWidth: '4@ms',
     borderColor: '#FFD700',
   },
   title: {
