@@ -90,7 +90,7 @@ const LoginScreen = () => {
         style={styles.container} 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <Image source={require('../images/AFTC.png')} style={styles.logo} />
+        <Image source={require('../images/IconSC.png')} style={styles.logo} />
         
         <Text style={styles.title}>Login</Text>
         
@@ -150,22 +150,19 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#2F4F6D',
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 350,
+    height: 350,
     resizeMode: 'contain',
-    marginBottom: 10,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#FFD700',
     marginBottom: 10,
-
   },
   inputContainer: {
     width: '80%',

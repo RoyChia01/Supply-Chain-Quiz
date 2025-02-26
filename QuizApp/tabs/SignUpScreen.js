@@ -71,7 +71,7 @@ const SignUpScreen = () => {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior='padding'>
-      <Image source={require('../images/AFTC.png')} style={styles.logo} />
+      <Image source={require('../images/IconSC.png')} style={styles.logo} />
       <Text style={styles.title}>Register</Text>
       {error ? <Text style={styles.errorText}>{error}</Text> : null} 
       
@@ -114,8 +114,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 250,
+    height: 250,
     resizeMode: 'contain',
     marginBottom: 10,
   },

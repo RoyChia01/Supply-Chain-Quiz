@@ -43,13 +43,13 @@ const scaleSize = (size) => size * (width / 375); // Base size scaling
 
 // Local image import
 const images = {
-  SCEngineer: require('../images/Engineer.jpg'),
-  TeamIC: require('../images/TeamIC.jpg'),
-  FlightLead: require('../images/FlightLead.jpg'),
-  OC: require('../images/OC.jpg'),
-  CO: require('../images/CO.jpg'),
-  Commander: require('../images/Commander.jpg'),
-  Trainee: require('../images/Trainee.jpg'), // Added fallback image
+  SCEngineer: require('../images/AvatarProgression/Engineer.jpg'),
+  TeamIC: require('../images/AvatarProgression/TeamIC.jpg'),
+  FlightLead: require('../images/AvatarProgression/FlightLead.jpg'),
+  OC: require('../images/AvatarProgression/OC.jpg'),
+  CO: require('../images/AvatarProgression/CO.jpg'),
+  Commander: require('../images/AvatarProgression/Commander.jpg'),
+  Trainee: require('../images/AvatarProgression/Trainee.jpg'), // Added fallback image
 };
 
 // Functional Component for each Topic Button
@@ -74,7 +74,7 @@ const QuizTopics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [imageSource, setImageSource] = useState(require('../images/Trainee.jpg')); // Default image
+  const [imageSource, setImageSource] = useState(require('../images/AvatarProgression/Trainee.jpg')); // Default image
   const [userRank, setUserRank] = useState(null);
   const navigation = useNavigation();
   const { width } = useWindowDimensions(); // Get screen dimensions

@@ -42,13 +42,13 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 const { width, height } = Dimensions.get('window');
 
 const images = {
-  SCEngineer: require('../images/Engineer.jpg'),
-  TeamIC: require('../images/TeamIC.jpg'),
-  FlightLead: require('../images/FlightLead.jpg'),
-  OC: require('../images/OC.jpg'),
-  CO: require('../images/CO.jpg'),
-  Commander: require('../images/Commander.jpg'),
-  Trainee: require('../images/Trainee.jpg'), // Added fallback image
+  SCEngineer: require('../images/AvatarProgression/Engineer.jpg'),
+  TeamIC: require('../images/AvatarProgression/TeamIC.jpg'),
+  FlightLead: require('../images/AvatarProgression/FlightLead.jpg'),
+  OC: require('../images/AvatarProgression/OC.jpg'),
+  CO: require('../images/AvatarProgression/CO.jpg'),
+  Commander: require('../images/AvatarProgression/Commander.jpg'),
+  Trainee: require('../images/AvatarProgression/Trainee.jpg'), // Added fallback image
 };
 
 // Function to get the current date in the format (e.g., "16 Jan 2025")
@@ -175,7 +175,7 @@ const BoardingPass = ({ navigation }) => {
         </TouchableOpacity>
 
         <Image
-          source={require('../images/rsaf.png')}
+          source={require('../images/IconSC.png')}
           style={styles.logoImage}
         />
 

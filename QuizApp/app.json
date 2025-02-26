@@ -4,11 +4,11 @@
     "slug": "QuizApp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./images/AFTCicon.jpg",
+    "icon": "./images/IconSC.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./images/AFTCicon.jpg",
+      "image": "./images/IconSC.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,12 +17,12 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./images/AFTCicon.jpg",
+        "foregroundImage": "./images/IconSC.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
-      "favicon": "./images/AFTCicon.jpg"
+      "favicon": "./images/IconSC.png"
     }
   }
 }

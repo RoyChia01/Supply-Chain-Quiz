@@ -40,13 +40,13 @@ const scaleFont = (size) => {
 
 const images = {
 
-  SCEngineer: require('../images/Engineer.jpg'),
-  TeamIC: require('../images/TeamIC.jpg'),
-  FlightLead: require('../images/FlightLead.jpg'),
-  OC: require('../images/OC.jpg'),
-  CO: require('../images/CO.jpg'),
-  Commander: require('../images/Commander.jpg'),
-  default: require('../images/Trainee.jpg'), // Default image in case no rank matches
+  SCEngineer: require('../images/AvatarProgression/Engineer.jpg'),
+  TeamIC: require('../images/AvatarProgression/TeamIC.jpg'),
+  FlightLead: require('../images/AvatarProgression/FlightLead.jpg'),
+  OC: require('../images/AvatarProgression/OC.jpg'),
+  CO: require('../images/AvatarProgression/CO.jpg'),
+  Commander: require('../images/AvatarProgression/Commander.jpg'),
+  default: require('../images/AvatarProgression/Trainee.jpg'), // Default image in case no rank matches
 };
 
 const InitialiseLeaderboard = () => {

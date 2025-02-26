@@ -43,13 +43,13 @@ const getFontSize = (size) => {
 const getscaleSize = (size) => size * (width / 375); // Base size scaling
 
 const images = {
-  SCEngineer: require('../images/Engineer.jpg'),
-  TeamIC: require('../images/TeamIC.jpg'),
-  FlightLead: require('../images/FlightLead.jpg'),
-  OC: require('../images/OC.jpg'),
-  CO: require('../images/CO.jpg'),
-  Commander: require('../images/Commander.jpg'),
-  Trainee: require('../images/Trainee.jpg'), // Added fallback image
+  SCEngineer: require('../images/AvatarProgression/Engineer.jpg'),
+  TeamIC: require('../images/AvatarProgression/TeamIC.jpg'),
+  FlightLead: require('../images/AvatarProgression/FlightLead.jpg'),
+  OC: require('../images/AvatarProgression/OC.jpg'),
+  CO: require('../images/AvatarProgression/CO.jpg'),
+  Commander: require('../images/AvatarProgression/Commander.jpg'),
+  Trainee: require('../images/AvatarProgression/Trainee.jpg'), // Added fallback image
 };
 
 // Adjust font sizes and layout based on screen size
@@ -261,7 +261,7 @@ const OptionButton = ({ option, selectedAnswer, isCorrect, onAnswer, answerLocke
 const Score = ({ score, totalQuestions, onRestart, topicId }) => {
   const { userEmail } = useUser();
   const [userDocumentID, setUserDocumentID] = useState(null);
-  const [imageSource, setImageSource] = useState(require('../images/Trainee.jpg')); // Default image
+  const [imageSource, setImageSource] = useState(require('../images/AvatarProgression/Trainee.jpg')); // Default image
 
   useEffect(() => {
     const fetchUserInfo = async () => {

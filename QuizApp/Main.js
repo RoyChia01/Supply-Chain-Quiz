@@ -34,6 +34,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import QuizTopics from './tabs/QuizTopics';
 import QuizQuestions from './tabs/QuizQuestions'; 
 import InitialiseLeaderboard from './tabs/Leaderboard';
+import ProductsList from './tabs/ShopScreen'; 
 import BoardingPass from './tabs/Profile';
 import resetPassword from './tabs/resetPassword';
 import { StatusBar } from 'expo-status-bar';
@@ -81,6 +82,14 @@ const TabArr = [
     activeIcon: 'trophy',
     inActiveIcon: 'trophy',
     component: InitialiseLeaderboard,
+  },
+  {
+    route: 'Shop',
+    label: 'Shop',
+    type: Icons.FontAwesome,
+    activeIcon: 'fa-shopping-cart',
+    inActiveIcon: 'fa-shopping-cart',
+    component: ProductsList,
   },
   {
     route: 'Account',
