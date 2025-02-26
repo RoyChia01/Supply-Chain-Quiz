@@ -114,8 +114,8 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 350,
-    height: 350,
-    resizeMode: 'contain',
+    height: 300,
+    resizeMode: 'cover',
   },
   title: {
     fontSize: 32,

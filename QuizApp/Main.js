@@ -87,8 +87,8 @@ const TabArr = [
     route: 'Shop',
     label: 'Shop',
     type: Icons.FontAwesome,
-    activeIcon: 'fa-shopping-cart',
-    inActiveIcon: 'fa-shopping-cart',
+    activeIcon: 'shopping-cart',
+    inActiveIcon: 'shopping-cart',
     component: ProductsList,
   },
   {
