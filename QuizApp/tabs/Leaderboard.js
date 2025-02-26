@@ -1,3 +1,32 @@
+/**
+ * Leaderboard Component
+ * 
+ * This component fetches and displays the leaderboard rankings from the API.
+ * 
+ * Features:
+ * - Displays the **top 3 users** in a horizontal row, with the highest-ranked user centered.
+ * - Shows the **remaining users** in a vertical list with rank, name, and total score.
+ * - Assigns proper rank suffixes ("st", "nd", "rd", "th") based on position.
+ * - Displays user profile images, with a default image if unavailable.
+ * - Supports **pull-to-refresh** to update the leaderboard data.
+ * - Handles **loading states and errors** while fetching data.
+ * - Ensures proper layout using `SafeAreaView` for compatibility across devices.
+ * 
+ * Data Flow:
+ * - Uses `fetchLeaderboard` from `apiHandler.js` to get data.
+ * - Stores leaderboard data in state (`leaderboardData`).
+ * - Sets `loading` while fetching, and updates `refreshing` on pull-to-refresh.
+ * 
+ * Functions:
+ * - `getLeaderboardData()`: Fetches and updates leaderboard data on mount.
+ * - `handleRefresh()`: Refreshes data when the user pulls down.
+ * - `getRankSuffix(rank)`: Returns the appropriate rank suffix for display.
+ * 
+ * UI:
+ * - Uses `FlatList` to display leaderboard entries.
+ * - Shows user image, rank, name, and total score.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, FlatList, ActivityIndicator, Dimensions, PixelRatio, SafeAreaView } from 'react-native';
 import { fetchLeaderboard } from './apiHandler';

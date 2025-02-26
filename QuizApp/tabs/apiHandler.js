@@ -1,4 +1,7 @@
-const BASE_URL = 'http://10.132.0.74:8080';
+//This file handles all the request to the backend server and returns the response
+//The server is hosted on a local machine and the IP address is used to connect to the server
+
+const BASE_URL = 'http://10.132.0.50:8080';
 
 // Fetch all the topics from the backend
 export const fetchTopics = async () => {
@@ -12,7 +15,6 @@ export const fetchTopics = async () => {
     //console.error('Error fetching topics:', error);
   }
 };
-
 
 // Fetch the questions for the selected topic
 export const fetchQuestions = async (topicUID) => {
@@ -33,8 +35,6 @@ export const fetchQuestions = async (topicUID) => {
     return { questionsData: [], loading: false };
   }
 };
-
-
 
 // Get the user info from the backend
 export const getUserInfo = async (userEmail) => {
@@ -162,7 +162,6 @@ export const fetchLeaderboard = async () => {
   }
 };
 
-
 // Update selected title for the user
 export const updateSelectedTitle = async (UserdocumentID, title) => {
   console.log("UserdocumentID:", UserdocumentID, "Title:", title);
@@ -217,3 +216,56 @@ export const getUserTitle = async (userEmail) => {
   }
 };
 
+export const getUserPowerups = async (userDocumentID) => {
+  console.log("Fetching Power-Ups for User:", userDocumentID);
+
+  try {
+    const response = await fetch(`${BASE_URL}/powerupUsed/${userDocumentID}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('User Power-Ups Retrieved:', data);
+    return { success: true, data };
+
+  } catch (error) {
+    console.error('Error fetching power-ups:', error.message);
+    return { success: false, error: error.message };
+  }
+};
+
+export const purchasePowerup = async (userDocumentID, powerupType, targetID = null) => {
+  console.log("Purchasing Power-Up:", powerupType, "For User:", userDocumentID, "Target:", targetID);
+
+  try {
+    const response = await fetch(`${BASE_URL}/powerupPurchased/${userDocumentID}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        powerupType: powerupType, // "Shield", "Sabotage", or "Multiplier"
+        targetID: targetID, // Only required for Sabotage, otherwise null
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Power-Up Purchased Successfully:', data);
+    return { success: true, data };
+
+  } catch (error) {
+    console.error('Error purchasing power-up:', error.message);
+    return { success: false, error: error.message };
+  }
+};

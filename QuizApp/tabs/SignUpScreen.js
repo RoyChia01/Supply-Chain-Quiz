@@ -18,6 +18,7 @@ import { FIREBASE_AUTH, FIRESTORE_DB } from '../tabs/firebase';
 import { postUser } from './apiHandler';
 
 const SignUpScreen = () => {
+  // State variables for form data and loading/error management
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
@@ -25,36 +26,46 @@ const SignUpScreen = () => {
   const [error, setError] = useState('');
   const navigation = useNavigation();
 
+  // Function to validate user input fields
   const validateInputs = () => {
-    if (!username.trim()) return 'Please enter a valid name.';
-    if (!email.includes('@')) return 'Please enter a valid email address.';
-    if (password.length < 6) return 'Password must be at least 6 characters long.';
+    if (!username.trim()) return 'Please enter a valid name.';  // Check for username
+    if (!email.includes('@')) return 'Please enter a valid email address.';  // Check for valid email
+    if (password.length < 6) return 'Password must be at least 6 characters long.';  // Check password length
     return null;
   };
 
+  // Function to handle user registration
   const signUp = async () => {
-    setError('');
-    const validationError = validateInputs();
+    setError(''); // Reset any previous error messages
+    const validationError = validateInputs();  // Validate input fields
     if (validationError) {
-      setError(validationError);
+      setError(validationError);  // Show validation error if any
       return;
     }
 
-    setLoading(true);
+    setLoading(true);  // Start loading state
     try {
+      // Create user with email and password using Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
       const user = userCredential.user;
 
+      // Send email verification after successful registration
       await sendEmailVerification(user);
       Alert.alert('Verification Email Sent', 'Please check your inbox to verify your email.');
 
+      // Save user data in Firestore database
       await setDoc(doc(FIRESTORE_DB, 'users', user.uid), { username, email, points: 0 });
-      postUser(username, email); // Post the user data to the backend
+
+      // Post user data to the backend
+      postUser(username, email); 
+
+      // Navigate back to the login screen after successful registration
       navigation.goBack();
     } catch (error) {
+      // Handle and display any errors that occur during registration
       setError(error.message);
     } finally {
-      setLoading(false);
+      setLoading(false);  // Stop loading state
     }
   };
 
@@ -62,7 +73,7 @@ const SignUpScreen = () => {
     <KeyboardAvoidingView style={styles.container} behavior='padding'>
       <Image source={require('../images/AFTC.png')} style={styles.logo} />
       <Text style={styles.title}>Register</Text>
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      {error ? <Text style={styles.errorText}>{error}</Text> : null} 
       
       <View style={styles.inputContainer}>
         <View style={styles.inputField}>
@@ -93,6 +104,7 @@ const SignUpScreen = () => {
   );
 };
 
+// Styles for the components
 const styles = StyleSheet.create({
   container: {
     flex: 1,

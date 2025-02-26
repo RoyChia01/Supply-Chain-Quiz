@@ -1,3 +1,35 @@
+/**
+ * BoardingPass Component also known as profile screen
+ *
+ * This React Native component serves as a virtual boarding pass for users, displaying key information 
+ * such as name, email, rank, progress, and points balance. It also provides interactive features 
+ * like updating the user's title, logging out, and navigating to a reset password screen.
+ *
+ * Features:
+ * - Retrieves user data from Firebase and displays it.
+ * - Allows users to select and update their rank/title through a modal.
+ * - Displays progress information (current and latest topic).
+ * - Shows a dynamically loaded image based on the user's rank.
+ * - Includes a sign-out button to log out the user.
+ * - Provides a reset password navigation option.
+ * - Uses responsive font scaling based on device width for UI consistency.
+ *
+ * Dependencies:
+ * - React & React Native components (useState, useEffect, Dimensions, etc.)
+ * - Firebase authentication for sign-out functionality.
+ * - `useUser` custom hook to fetch user data.
+ * - API functions `getUserInfo` and `updateSelectedTitle` for data fetching and updates.
+ * - `FontAwesome` icons for UI elements.
+ *
+ * Structure:
+ * - The UI consists of five rows displaying different sets of user-related data.
+ * - Uses `useEffect` to fetch user data when the component mounts or refreshes.
+ * - Implements a modal for selecting and updating the user's title.
+ *
+ * Usage:
+ * - This component should be used inside a navigation stack to allow redirection after sign-out.
+ * - The `navigation` prop enables screen transitions.
+ */
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, FlatList, Dimensions } from 'react-native';
 import { getUserInfo, updateSelectedTitle } from './apiHandler';

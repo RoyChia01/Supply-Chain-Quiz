@@ -1,3 +1,35 @@
+/**
+ * ResetPasswordScreen Component
+ * -----------------------------
+ * This screen allows users to reset their password by entering their email.
+ * A password reset email is sent via Firebase Authentication.
+ * 
+ * Features:
+ * - Validates email input before submission.
+ * - Sends a password reset email using Firebase Auth.
+ * - Displays success and error messages based on Firebase response.
+ * - Uses React Native UI components for a smooth user experience.
+ * - Handles keyboard behavior for better accessibility.
+ * 
+ * Dependencies:
+ * - `firebase/auth` for authentication handling.
+ * - `react-navigation` for navigation.
+ * - `react-native` components for UI and interaction.
+ * - `SvgIcon` for vector icons.
+ * - `Fonts` for consistent typography.
+ * 
+ * UI Components:
+ * - `TextInput`: User inputs email for password reset.
+ * - `Pressable`: Button for submitting the request.
+ * - `SvgIcon`: Displays icons for visual cues.
+ * - `KeyboardAvoidingView`: Adjusts UI for keyboard interactions.
+ * 
+ * Behavior:
+ * - If the email is invalid or empty, an alert prompts the user.
+ * - If the email exists, Firebase sends a reset link.
+ * - Error messages handle cases like invalid emails, user not found, or network failures.
+ * - On success, navigates back to the login screen.
+ */
 import React, { useState } from 'react';
 import { 
   Text, View, Pressable, StyleSheet, TextInput, Alert, 

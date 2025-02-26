@@ -1,3 +1,40 @@
+/**
+ * LoginScreen Component
+ * 
+ * This component handles user authentication by allowing users to sign in using their email and password.
+ * It integrates Firebase authentication and manages UI elements for user-friendly interaction.
+ * 
+ * Features:
+ * - Email and password input fields with validation and error handling.
+ * - Firebase authentication using `signInWithEmailAndPassword`.
+ * - Displays appropriate error messages for failed login attempts.
+ * - "Forgot Password" option for password recovery.
+ * - Navigation to the main application upon successful login.
+ * - Navigation to the registration screen for new users.
+ * - Styled UI with an Air Force-inspired theme (blue and gold).
+ * 
+ * Data Flow:
+ * - Uses `useState` to manage email, password, and loading state.
+ * - Calls `signInWithEmailAndPassword` for authentication.
+ * - On successful login, updates the user context (`setUserEmail`) and navigates to `MainTabs`.
+ * - Displays errors using `Alert.alert` based on Firebase authentication error codes.
+ * 
+ * Functions:
+ * - `signIn()`: Handles user login, manages authentication, and displays appropriate error messages.
+ * 
+ * UI Elements:
+ * - `TextInput`: For user email and password input.
+ * - `TouchableOpacity`: For login button, forgot password navigation, and registration link.
+ * - `KeyboardAvoidingView`: Ensures proper layout handling on different devices.
+ * - `SafeAreaView`: Provides consistent UI across various screen sizes.
+ * - `MaterialIcons`: Enhances input fields with icons.
+ * 
+ * Styling:
+ * - Uses a **blue (#2F4F6D) and gold (#FFD700) Air Force-inspired theme**.
+ * - Rounded input fields and buttons for a modern UI experience.
+ * - Ensures accessibility with proper text contrast and spacing.
+ */
+
 import React, { useState } from 'react';
 import { 
   KeyboardAvoidingView, SafeAreaView, StyleSheet, Text, 

@@ -1,3 +1,29 @@
+/**
+ * App Navigation and Authentication Management
+ * -------------------------------------------
+ * This file defines the main structure of the app, handling navigation, authentication state, 
+ * and the bottom tab bar with animations.
+ * 
+ * Features:
+ * - Implements a Bottom Tab Navigator with animated icons.
+ * - Manages authentication state using Firebase's `onAuthStateChanged`.
+ * - Provides a stack navigator for login, sign-up, and password reset screens.
+ * - Uses `UserProvider` to manage user-related data globally.
+ * - Supports smooth UI interactions with animations from `react-native-animatable`.
+ * - Adapts to different screen sizes with responsive design.
+ * 
+ * Components:
+ * - `HomeStack`: Stack navigator for quiz topics and questions.
+ * - `ProfileStack`: Stack navigator for profile and password reset.
+ * - `TabButton`: Custom animated button for tab navigation.
+ * - `AnimTab`: Animated bottom tab navigator.
+ * - `App`: Main component handling authentication and navigation.
+ * 
+ * Usage:
+ * - `onAuthStateChanged` listens for user authentication changes.
+ * - If a user is logged in, the app navigates to `MainTabs`; otherwise, it defaults to `Login`.
+ * - The `AnimTab` handles navigation between Home, Leaderboard, and Account screens.
+ */
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React, { useEffect, useRef, useState } from 'react';
 import { SafeAreaView, StyleSheet, TouchableOpacity, Dimensions, PixelRatio } from 'react-native';

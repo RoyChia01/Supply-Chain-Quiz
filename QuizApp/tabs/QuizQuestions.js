@@ -1,4 +1,33 @@
-import React, { useState, useEffect, useCallback,useMemo } from 'react';
+/**
+ * QuizQuestions.js
+ * 
+ * This React Native component handles the quiz functionality, including:
+ * - Fetching quiz questions from an API.
+ * - Displaying questions and answer options.
+ * - Managing user responses and tracking score.
+ * - Showing a progress bar with a plane animation.
+ * - Displaying the final score with a user rank image.
+ * - Submitting quiz results to a backend.
+ * 
+ * Key Functionalities:
+ * - useQuizQuestions (Custom Hook): Fetches and manages quiz questions.
+ * - QuizQuestions (Main Component): Controls the quiz flow and UI.
+ * - ProgressBar: Displays quiz progress with animated plane.
+ * - QuestionCard: Shows the current question and answer options.
+ * - OptionButton: Handles user answer selection and feedback.
+ * - Score: Displays user rank image, score, and submits results.
+ * 
+ * Dependencies:
+ * - React & React Native for UI and state management.
+ * - react-native-vector-icons for icons.
+ * - react-navigation for screen navigation.
+ * - External API calls for fetching questions & posting results.
+ * 
+ * Usage:
+ * This component is used in a navigation stack. It receives a `topicId`
+ * via `route.params` to fetch relevant quiz questions.
+ */
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image, Alert,Dimensions,ScrollView  } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
@@ -11,6 +40,7 @@ const getFontSize = (size) => {
   const baseScale = 375;  // base screen width
   return size * (width / baseScale);
 };
+const getscaleSize = (size) => size * (width / 375); // Base size scaling
 
 const images = {
   SCEngineer: require('../images/Engineer.jpg'),
@@ -300,7 +330,8 @@ const styles = StyleSheet.create({
     color: 'white', 
     fontWeight: 'bold', 
     fontFamily: 'Roboto', 
-    marginBottom: 100
+    marginBottom: getscaleSize(20),
+    marginTop: getscaleSize(40),
   },
   optionsContainer: { 
     marginVertical: 20, 
@@ -396,12 +427,12 @@ const styles = StyleSheet.create({
   },
   progressBarContainer: { 
     position: 'absolute', 
-    top: 30, 
+    top: getscaleSize(50),
     width: '90%', 
     height: getFontSize(60), 
     backgroundColor: '#071f35', 
     borderRadius: 10, 
-    overflow: 'hidden' 
+    overflow: 'hidden', 
   },
   progressBar: { 
     position: 'relative', 
@@ -422,7 +453,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     width: '100%',
-    maxHeight: '60%', // Adjust max height to fit screen
+    maxHeight: '70%', // Adjust max height to fit screen
   },
   optionsContainer: {
     alignItems: 'center',

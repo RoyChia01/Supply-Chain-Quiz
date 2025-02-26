@@ -1,6 +1,35 @@
+/**
+ * QuizTopics Component
+ * --------------------
+ * This component displays a list of quiz topics for users to select.
+ * It fetches user rank data and dynamically updates the display image
+ * based on the rank. Topics are fetched from an API and displayed
+ * as buttons for navigation.
+ * 
+ * Features:
+ * - Fetches and displays quiz topics from an API.
+ * - Retrieves the user's rank using their email and displays a corresponding image.
+ * - Implements a pull-to-refresh mechanism for reloading topics.
+ * - Shows a loading indicator while fetching data.
+ * - Handles API errors with a retry button.
+ * - Responsive layout that adapts to screen size.
+ * 
+ * Dependencies:
+ * - react-navigation for navigation.
+ * - react-native-safe-area-context for safe UI rendering.
+ * - react-native-size-matters for responsive styling.
+ * - API functions `fetchTopics` and `getUserTitle` for fetching data.
+ * - Custom `useUser` hook to retrieve user email.
+ * 
+ * Components:
+ * - `TopicButton`: Renders individual topic selection buttons.
+ * - `QuizTopics`: Main component that manages data fetching and UI rendering.
+ */
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator, RefreshControl, useWindowDimensions 
+  View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator,Dimensions, RefreshControl, useWindowDimensions 
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { fetchTopics, getUserTitle } from './apiHandler';
@@ -8,6 +37,9 @@ import PropTypes from 'prop-types';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScaledSheet } from 'react-native-size-matters';
 import { useUser } from './userInfo';  // Import the hook
+
+const { width, height } = Dimensions.get('window');
+const scaleSize = (size) => size * (width / 375); // Base size scaling
 
 // Local image import
 const images = {
@@ -136,6 +168,7 @@ const QuizTopics = () => {
       <ScrollView
         contentContainerStyle={styles.contentContainer}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#FFD700']} />}
+
       >
         <View style={[styles.windowRow, { width: width * 0.9 }]}>
           {topics.map((topic) => (
@@ -163,6 +196,7 @@ const styles = ScaledSheet.create({
     flex: 1,
     backgroundColor: '#2F4F6D',
     alignItems: 'center',
+    Top: '-10@ms',
   },
   imageContainer: {
     width: '50%', // Adjusted size to fit better
@@ -188,7 +222,7 @@ const styles = ScaledSheet.create({
   },
   contentContainer: {
     alignItems: 'center',
-    paddingBottom: '20@ms',
+    paddingBottom: scaleSize(50)
   },
   windowRow: {
     flexDirection: 'row',
