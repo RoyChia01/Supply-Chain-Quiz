@@ -108,21 +108,19 @@ const SignUpScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#2F4F6D',
     paddingHorizontal: 20,
   },
   logo: {
-    width: 250,
-    height: 250,
+    width: 350,
+    height: 350,
     resizeMode: 'contain',
-    marginBottom: 10,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFD700',
     marginBottom: 10,
   },
   errorText: {
