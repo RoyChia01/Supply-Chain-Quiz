@@ -33,7 +33,10 @@ import { fetchLeaderboard } from './apiHandler';
 
 const { width, height } = Dimensions.get('window');
 const scaleSize = (size) => size * (width / 375); // Base size scaling
-const scaleFont = (size) => size * PixelRatio.getFontScale(); // Font scaling
+const scaleFont = (size) => {
+  const baseScale = 375;  // base screen width
+  return size * (width / baseScale);
+};
 
 const images = {
 
@@ -120,7 +123,7 @@ const InitialiseLeaderboard = () => {
           [topThree[1], topThree[0], topThree[2]].map((player, index) => (
             <View key={player.position} style={[styles.section, index === 1 ? styles.mainSection : styles.sideSection]}>
              <Image source={images[player.rank] || images.default} style={styles.image} />
-              <Text style={[styles.title, { fontSize: scaleFont(18) }]}>{player.name}</Text>
+              <Text style={[styles.title, { fontSize: scaleFont(10) }]}>{player.name}</Text>
               <Text style={styles.subtitle}>{player.rank}</Text>
               <Text style={[styles.text, styles.number]}>
                 {index === 0 ? 2 : index === 1 ? 1 : 3}
@@ -196,6 +199,7 @@ const styles = StyleSheet.create({
     flex: 0.8,
     paddingTop: scaleSize(60),
     backgroundColor: '#2F4F6D',
+    marginBottom: scaleSize(20),
   },
   icon: { width: scaleSize(100), height: scaleSize(100) },
   bottomContainer: {
@@ -232,12 +236,12 @@ const styles = StyleSheet.create({
     borderColor: '#FFD700', 
     resizeMode: 'cover', 
   },
-  nameContainer: { flex: 1, paddingLeft: scaleSize(10) },
+  nameContainer: { flex: 1, paddingLeft: scaleSize(15) },
   name: { color: 'white', textAlign: 'left' },
   subtitle: { color: '#FFD700', fontSize: scaleFont(16), textAlign: 'left' },
-  score: { color: '#FFD700', fontSize: scaleFont(25), fontWeight: 'bold', textAlign: 'right' },
+  score: { color: '#FFD700', fontSize: scaleFont(20), fontWeight: 'bold', textAlign: 'right' },
   text: { color: 'white', fontSize: scaleFont(50), fontWeight: 'bold' },
-  number: { fontSize: scaleFont(50), color: '#FFD700' },
+  number: { fontSize: scaleFont(30), color: '#FFD700' },
   title: { color: 'white', fontWeight: 'normal' },
   suffix: { fontSize: scaleFont(20), color: '#FFD700' },
 });
