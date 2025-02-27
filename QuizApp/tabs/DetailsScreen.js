@@ -1,16 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Dimensions, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Dimensions, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { SharedElement } from 'react-navigation-shared-element'
 import Icon, { Icons } from '../components/Icons'
 import Colors from '../constants/Colors'
+import { color } from 'react-native-elements/dist/helpers'
 const { width, height } = Dimensions.get('window');
-
-const colors = [
-  Colors.red,
-  Colors.green,
-  Colors.yellow,
-  Colors.black,
-]
 
 const Quantity = () => {
   const [quantity, setQuantity] = useState(0);
@@ -48,24 +42,13 @@ const Quantity = () => {
 export default function DetailsScreen({ navigation, route }) {
   const { item } = route.params;
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      StatusBar.setBackgroundColor(item.bgColor);
-      StatusBar.setBarStyle('light-content')
-    })
-    return () => unsubscribe;
-  }, [navigation])
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('blur', () => {
-      StatusBar.setBackgroundColor(Colors.white);
-      StatusBar.setBarStyle('dark-content')
-    })
-    return () => unsubscribe;
-  }, [navigation])
   return (
     <>
       <SafeAreaView style={[styles.container, { backgroundColor: item.bgColor }]} >
         <View style={styles.container}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Icon type={Icons.Ionicons} name="arrow-back" size={32} color={Colors.gold} />
+          </TouchableOpacity>
           <View style={styles.topContainer}>
             <View>
               <Text style={styles.smallText}>{item.subtitle}</Text>
@@ -81,8 +64,8 @@ export default function DetailsScreen({ navigation, route }) {
           </SharedElement>
           <View style={styles.bottomContainer}>
             <View style={styles.descriptionContainer}>
-              <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>Description</Text>
-              <Text>{item.description}</Text>
+              <Text style={{ fontWeight: 'bold', marginBottom: 10,fontSize:32,color:Colors.gold }}>Description</Text>
+              <Text style={{fontWeight: 'bold',fontSize:20 }}>{item.description}</Text>
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <Quantity />
@@ -114,17 +97,24 @@ DetailsScreen.sharedElements = (route) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 35,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 5,
+    left: 5,
+    zIndex: 10,
+    padding: 10,
   },
   topContainer: {
     height: height / 3,
-    padding: 16,
+    paddingLeft: 20,
+    paddingBottom: 20,
+    paddingTop: 60,
     justifyContent: 'space-between',
   },
   bottomContainer: {
     padding: 16,
     flex: 1,
-    backgroundColor: Colors.white,
     borderTopRightRadius: 30,
     borderTopLeftRadius: 30,
     paddingTop: 80,
@@ -137,6 +127,7 @@ const styles = StyleSheet.create({
   },
   smallText: {
     color: Colors.white,
+    fontSize: 18,
   },
   image: {
     width: width / 1.5,
@@ -147,15 +138,6 @@ const styles = StyleSheet.create({
     zIndex: 999,
     top: 60,
     alignSelf: 'flex-end',
-  },
-  outerCircle: {
-    height: 24,
-    width: 24,
-    borderRadius: 6,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 5,
   },
   descriptionContainer: {
     marginVertical: 5,
@@ -191,4 +173,4 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.white,
   },
-})
+});

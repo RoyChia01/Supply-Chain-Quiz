@@ -9,12 +9,17 @@ import { FIREBASE_AUTH, FIRESTORE_DB } from '../tabs/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
 const { width } = Dimensions.get('window');
+const scaleSize = (size) => size * (width / 375); // Base size scaling
+const scaleFont = (size) => {
+  const baseScale = 375;  // base screen width
+  return size * (width / baseScale);
+};
 
 const ListItem = ({ item, navigation }) => {
   return (
     <View style={styles.item}>
       <TouchableOpacity
-        onPress={() => navigation.navigate('Details', { item })}
+        onPress={() => navigation.navigate('DetailsScreen', { item })}
         style={[styles.imageContainer, { backgroundColor: item.bgColor }]}>
         <SharedElement id={`item.${item.id}.image`}>
           <Image source={item.image} style={styles.image} />
@@ -52,79 +57,78 @@ export default function ProductsList({ navigation, route }) {
     setSearchQuery('');
   };
 
-  useEffect(() => {
-    const user = FIREBASE_AUTH.currentUser;
+  // useEffect(() => {
+  //   const user = FIREBASE_AUTH.currentUser;
 
-    if (user) {
-      const userDocRef = doc(FIRESTORE_DB, 'users', user.uid);
+  //   if (user) {
+  //     const userDocRef = doc(FIRESTORE_DB, 'users', user.uid);
 
-      getDoc(userDocRef).then((snapshot) => {
-        if (snapshot.exists()) {
-          setPointsBalance(snapshot.data().points);
-        } else {
-          console.log('User does not exist');
-        }
-      }).catch((error) => {
-        console.error('Error fetching user data: ', error);
-      });
-    }
-  }, []);
+  //     getDoc(userDocRef).then((snapshot) => {
+  //       if (snapshot.exists()) {
+  //         setPointsBalance(snapshot.data().points);
+  //       } else {
+  //         console.log('User does not exist');
+  //       }
+  //     }).catch((error) => {
+  //       console.error('Error fetching user data: ', error);
+  //     });
+  //   }
+  // }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+        <View style={styles.headerContainer}>
+          <View style={styles.searchAndPointsContainer}>
+            <View style={styles.searchBox}>
+              <Icon name="search" size={20} color="#888" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search for products"
+                value={searchQuery}
+                onChangeText={(text) => setSearchQuery(text)}
+              />
+            </View>
+
+            <Text style={styles.pointsBalance}>
+              {pointsBalance || '0'} points
+            </Text>
+          </View>
+
+          <ScrollView
+            horizontal
+            contentContainerStyle={styles.categoryContainer}
+            showsHorizontalScrollIndicator={false}
+          >
+            {categories.map(category => (
+              <TouchableOpacity
+                key={category}
+                onPress={() => handleCategorySelect(category)}
+                style={[
+                  styles.categoryButton,
+                  selectedCategory === category && styles.selectedCategoryButton
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.categoryText,
+                    selectedCategory === category && styles.selectedCategoryText
+                  ]}
+                >
+                  {category}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
       <FlatList
         data={filteredItems}
         numColumns={2}
-        style={{ paddingVertical: 5, marginTop: 40 }}
         keyExtractor={(item, index) => item.id + index.toString()}
         renderItem={({ item }) => <ListItem item={item} navigation={navigation} />}
-        ListHeaderComponent={
-          <View style={styles.headerContainer}>
-            <View style={styles.searchAndPointsContainer}>
-              <View style={styles.searchBox}>
-                <Icon name="search" size={20} color="#888" style={styles.searchIcon} />
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Search for products"
-                  value={searchQuery}
-                  onChangeText={(text) => setSearchQuery(text)}
-                />
-              </View>
-
-              <Text style={styles.pointsBalance}>
-                {pointsBalance || '0'} points
-              </Text>
-            </View>
-
-            <ScrollView
-              horizontal
-              contentContainerStyle={styles.categoryContainer}
-              showsHorizontalScrollIndicator={false}
-            >
-              {categories.map(category => (
-                <TouchableOpacity
-                  key={category}
-                  onPress={() => handleCategorySelect(category)}
-                  style={[
-                    styles.categoryButton,
-                    selectedCategory === category && styles.selectedCategoryButton
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.categoryText,
-                      selectedCategory === category && styles.selectedCategoryText
-                    ]}
-                  >
-                    {category}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        }
+        
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -142,6 +146,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingTop:scaleSize(25),
   },
   searchBox: {
     flexDirection: 'row',
@@ -176,48 +181,65 @@ const styles = StyleSheet.create({
   },
   categoryContainer: {
     flexDirection: 'row',
-    paddingVertical: 5,
-    marginTop: 5,
+    paddingVertical: 15,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: '#FFD700', // Subtle gold line at the bottom
+    paddingBottom: 20, // Add padding to the bottom to avoid blocking text
   },
+  
   categoryButton: {
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    marginRight: 10,
-    borderRadius: 8,
-    backgroundColor: Colors.white,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    marginRight: 20,
+    borderRadius: 30,
+    backgroundColor: '#1E3A5F', // Dark blue background for unselected
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4, // Shadow for depth
+    transition: 'background-color 0.3s ease', // Smooth transition for hover effect
   },
+  
   selectedCategoryButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: '#FFD700', // Gold background for the selected category
+    elevation: 6, // More pronounced shadow for selected
   },
+  
   categoryText: {
     fontSize: 16,
-    color: Colors.darkGray,
+    color: '#FFFFFF', // White text for unselected categories
+    fontWeight: '700',
+    textTransform: 'capitalize', // Capitalize the first letter
+    letterSpacing: 1, // Adds spacing between letters for better readability
   },
+  
   selectedCategoryText: {
-    color: Colors.white,
+    color: '#1E3A5F', // Dark blue text for selected category
+    fontWeight: 'bold', // Bolder font for emphasis
   },
   item: {
     width: width / 2 - 24,
     marginLeft: 16,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   imageContainer: {
-    height: 180,
-    justifyContent: 'center',
+
     alignItems: 'center',
     backgroundColor: Colors.gray,
     borderRadius: 14,
   },
   image: {
-    height: 140,
-    width: 140,
-    resizeMode: 'center',
+    height: 200,
+    width: 200,
+    resizeMode: 'contain',
   },
   textContainer: {
     marginVertical: 4,
   },
   text: {
     fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: 18,
   },
 });
+

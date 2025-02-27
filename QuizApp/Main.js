@@ -35,6 +35,7 @@ import QuizTopics from './tabs/QuizTopics';
 import QuizQuestions from './tabs/QuizQuestions'; 
 import InitialiseLeaderboard from './tabs/Leaderboard';
 import ProductsList from './tabs/ShopScreen'; 
+import DetailsScreen from './tabs/DetailsScreen';
 import BoardingPass from './tabs/Profile';
 import resetPassword from './tabs/resetPassword';
 import { StatusBar } from 'expo-status-bar';
@@ -66,6 +67,13 @@ const ProfileStack = () => (
   </Stack.Navigator>
 );
 
+const ShopStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled: false }}>
+    <Stack.Screen name="ProductsList" component={ProductsList} />
+    <Stack.Screen name="DetailsScreen" component={DetailsScreen} />
+  </Stack.Navigator>
+);
+
 const TabArr = [
   {
     route: 'Home',
@@ -89,7 +97,7 @@ const TabArr = [
     type: Icons.FontAwesome,
     activeIcon: 'shopping-cart',
     inActiveIcon: 'shopping-cart',
-    component: ProductsList,
+    component: ShopStack,
   },
   {
     route: 'Account',

@@ -1,7 +1,7 @@
 //This file handles all the request to the backend server and returns the response
 //The server is hosted on a local machine and the IP address is used to connect to the server
 
-const BASE_URL = 'http://10.132.0.50:8080';
+const BASE_URL = 'http://10.132.0.65:8080';
 
 // Fetch all the topics from the backend
 export const fetchTopics = async () => {
@@ -116,7 +116,7 @@ export const postUser = async (username,email) => {
 };
 
 // Post the quiz results to the backend
-export const postQuizResults = async (UserdocumentID, quizID, result) => {
+export const postQuizResults = async (UserdocumentID, quizID, result,gameScore) => {
   console.log("UserdocumentID:", UserdocumentID, "TopicID:", quizID, "Result:", result);
   try {
     const response = await fetch(`${BASE_URL}/user/${UserdocumentID}/quiz-result`, {
@@ -241,7 +241,7 @@ export const getUserPowerups = async (userDocumentID) => {
   }
 };
 
-export const purchasePowerup = async (userDocumentID, powerupType, targetID = null) => {
+export const purchasePowerup = async (userDocumentID, powerupType, targetID,pointBalance) => {
   console.log("Purchasing Power-Up:", powerupType, "For User:", userDocumentID, "Target:", targetID);
 
   try {
@@ -253,6 +253,8 @@ export const purchasePowerup = async (userDocumentID, powerupType, targetID = nu
       body: JSON.stringify({
         powerupType: powerupType, // "Shield", "Sabotage", or "Multiplier"
         targetID: targetID, // Only required for Sabotage, otherwise null
+        pointBalance: pointBalance,
+
       }),
     });
 

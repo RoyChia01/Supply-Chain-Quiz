@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   placeholderImage: {
-    borderRadius: 45,
+    borderRadius: 30,
     borderWidth: 2,
     borderColor: 'gray',
   },
@@ -501,8 +501,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   logoImage: {
-    height: 70,
-    width: 70,
+    height: 100,
+    width: 200,
   },
 });
 
