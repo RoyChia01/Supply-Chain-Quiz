@@ -201,13 +201,11 @@ const styles = ScaledSheet.create({
   imageContainer: {
     width: '50%', // Adjusted size to fit better
     aspectRatio: 1, // Maintains square aspect ratio for the image
-    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: '20@ms',
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: '80%',
+    height: '80%',
     resizeMode: 'cover', // Makes sure the image fills the space while maintaining its aspect ratio
     borderRadius: '15@ms',
     borderWidth: '4@ms',
@@ -217,12 +215,11 @@ const styles = ScaledSheet.create({
     fontSize: '24@ms',
     fontWeight: 'bold',
     color: '#FFD700',
-    marginBottom: '20@ms',
     fontFamily: 'Arial',
   },
   contentContainer: {
     alignItems: 'center',
-    paddingBottom: scaleSize(50)
+    paddingBottom: scaleSize(50),
   },
   windowRow: {
     flexDirection: 'row',

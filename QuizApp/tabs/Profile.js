@@ -40,6 +40,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 // Get device width and height
 const { width, height } = Dimensions.get('window');
+const getscaleSize = (size) => size * (width / 375); // Base size scaling
 
 const images = {
   SCEngineer: require('../images/AvatarProgression/Engineer.jpg'),
@@ -339,7 +340,7 @@ const FourthRow = ({ email, pointsBalance, navigation, fontSizeFactor }) => (
         <TouchableOpacity 
           onPress={() => navigation.navigate('resetPassword')} 
           style={styles.iconButton}>
-          <Text style={{ fontSize: 20 * fontSizeFactor, fontWeight: 'bold', color: '#FFD700' }}>
+          <Text style={{ fontSize: 20 * fontSizeFactor, fontWeight: 'bold', color: '#FFD700',marginTop: getscaleSize(10) }}>
             Reset Password Here
           </Text>
         </TouchableOpacity>
@@ -434,6 +435,7 @@ const styles = StyleSheet.create({
   },
   boldText: {
     fontWeight: 'bold',
+    alignSelf: 'center',
   },
   topicNameText: {
     color: '#333',
@@ -453,9 +455,12 @@ const styles = StyleSheet.create({
   },
   leftSide: {
     flex: 0.6,
+    paddingBottom: getscaleSize(20),
   },
   rightSide: {
     flex: 0.4,
+    alignItems: 'center',
+    paddingBottom: getscaleSize(60),
   },
   confirmationMessageContainer: {
     marginTop: 10,
