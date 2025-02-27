@@ -17,6 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import { FIREBASE_AUTH, FIRESTORE_DB } from '../tabs/firebase';
 import { postUser } from './apiHandler';
 import { LogBox } from 'react-native';
+import Colors from '../constants/Colors';
 
 LogBox.ignoreAllLogs(); // Ignore all log notifications
 
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#2F4F6D',
+    backgroundColor: Colors.mainBackgroundColor,
     paddingHorizontal: 20,
   },
   logo: {
@@ -123,7 +124,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#FFD700',
+    color: Colors.gold,
     marginBottom: 10,
   },
   errorText: {
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
     height: 40,
   },
   button: {
-    backgroundColor: '#FFD700',
+    backgroundColor: Colors.gold,
     width: '100%',
     padding: 15,
     borderRadius: 10,
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
   loginLink: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFD700',
+    color: Colors.gold,
   },
 });
 

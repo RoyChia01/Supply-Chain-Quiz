@@ -136,12 +136,12 @@ export default function ProductsList({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2F4F6D',
+    backgroundColor: Colors.mainBackgroundColor,
   },
   headerContainer: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: '#2F4F6D',
+    backgroundColor: Colors.mainBackgroundColor,
   },
   searchAndPointsContainer: {
     flexDirection: 'row', 
@@ -171,14 +171,14 @@ const styles = StyleSheet.create({
   pointsBalance: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#FFD700',
+    color: Colors.gold,
     marginLeft: 10,
     paddingVertical: 6,
     paddingHorizontal: 15,
     borderWidth: 3, 
     borderColor: Colors.white,
     borderRadius: 12,
-    backgroundColor: '#2F4F6D', 
+    backgroundColor: Colors.mainBackgroundColor, 
   },
   categoryContainer: {
     flexDirection: 'row',
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     borderBottomWidth: 2,
-    borderBottomColor: '#FFD700', // Subtle gold line at the bottom
+    borderBottomColor: Colors.gold, // Subtle gold line at the bottom
     paddingBottom: 20, // Add padding to the bottom to avoid blocking text
   },
   
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   },
   
   selectedCategoryButton: {
-    backgroundColor: '#FFD700', // Gold background for the selected category
+    backgroundColor: Colors.gold, // Gold background for the selected category
     elevation: 6, // More pronounced shadow for selected
   },
   

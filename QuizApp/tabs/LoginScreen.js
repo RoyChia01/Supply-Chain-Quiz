@@ -46,6 +46,7 @@ import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useUser } from './userInfo';
 import { LogBox } from 'react-native';
+import Colors from '../constants/Colors';
 
 LogBox.ignoreAllLogs(); // Ignore all log notifications
 
@@ -149,12 +150,12 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#2F4F6D',
+    backgroundColor: Colors.mainBackgroundColor,
   },
   container: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#2F4F6D',
+    backgroundColor: Colors.mainBackgroundColor,
   },
   logo: {
     width: 350,
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#FFD700',
+    color:Colors.gold,
     marginBottom: 10,
   },
   inputContainer: {
@@ -191,14 +192,14 @@ const styles = StyleSheet.create({
   forgotPasswordText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFD700',
+    color: Colors.gold,
   },
   buttonContainer: {
     width: '70%',
     marginTop: 20,
   },
   button: {
-    backgroundColor: '#FFD700',
+    backgroundColor: Colors.gold,
     paddingVertical: 15,
     borderRadius: 10,
   },
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
   registerLink: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFD700',
+    color: Colors.gold,
   },
 });
 

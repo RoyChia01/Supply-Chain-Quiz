@@ -41,6 +41,7 @@ import { FIREBASE_AUTH } from '../tabs/firebase';
 import Fonts from '../common/fonts';
 import SvgIcon from '../common/SvgIcon';
 import { LogBox } from 'react-native';
+import Colors from '../constants/Colors';
 
 LogBox.ignoreAllLogs(); // Ignore all log notifications
 
@@ -131,11 +132,11 @@ export default ResetPasswordScreen;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#2F4F6D', // Ensure consistent background
+    backgroundColor: Colors.mainBackgroundColor, // Ensure consistent background
   },
   container: {
     flex: 1,
-    backgroundColor: '#2F4F6D',
+    backgroundColor: Colors.mainBackgroundColor,
   },
   innerContainer: {
     flex: 1,
@@ -153,7 +154,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: {
-    color: '#FFD700',
+    color: Colors.gold,
     fontSize: 40,
     fontFamily: Fonts.type.NotoSansExtraBold,
     textAlign: 'center',
@@ -170,13 +171,13 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: '#FFD700',
+    color: Colors.gold,
     fontSize: 18,
     fontFamily: Fonts.type.NotoSansMedium,
     paddingLeft: 10,
   },
   button: {
-    backgroundColor: '#FFD700',
+    backgroundColor: Colors.gold,
     borderRadius: 20,
     paddingVertical: 12,
     paddingHorizontal: 50,

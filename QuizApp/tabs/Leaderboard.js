@@ -31,6 +31,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, FlatList, ActivityIndicator, Dimensions, PixelRatio, SafeAreaView } from 'react-native';
 import { fetchLeaderboard } from './apiHandler';
 import { LogBox } from 'react-native';
+import Colors from '../constants/Colors';
 
 LogBox.ignoreAllLogs(); // Ignore all log notifications
 
@@ -166,14 +167,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#2F4F6D',
+    backgroundColor: Colors.mainBackgroundColor,
   },
   loadingText: { color: 'white', fontSize: scaleFont(20), marginTop: 10 },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#2F4F6D',
+    backgroundColor: Colors.mainBackgroundColor,
   },
   errorMessage: {
     color: 'white',
@@ -195,19 +196,19 @@ const styles = StyleSheet.create({
     paddingTop: scaleSize(10),
     height: '100%',
     borderBottomWidth: scaleSize(4),
-    borderColor: '#FFD700',
+    borderColor: Colors.gold,
   },
   mainSection: { backgroundColor: '#5B7F94' },
   sideSection: {
     flex: 0.8,
     paddingTop: scaleSize(60),
-    backgroundColor: '#2F4F6D',
+    backgroundColor: Colors.mainBackgroundColor,
     marginBottom: scaleSize(20),
   },
   icon: { width: scaleSize(100), height: scaleSize(100) },
   bottomContainer: {
     flex: 6,
-    backgroundColor: '#2F4F6D',
+    backgroundColor: Colors.mainBackgroundColor,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: scaleSize(20),
@@ -224,7 +225,7 @@ const styles = StyleSheet.create({
     borderRadius: scaleSize(10),
   },
   rank: {
-    color: '#FFD700',
+    color: Colors.gold,
     fontSize: scaleFont(25),
     fontWeight: 'bold',
     width: scaleSize(40),
@@ -236,17 +237,17 @@ const styles = StyleSheet.create({
     borderRadius: scaleSize(50), 
     marginBottom: scaleSize(10), 
     borderWidth: scaleSize(2), 
-    borderColor: '#FFD700', 
+    borderColor: Colors.gold, 
     resizeMode: 'cover', 
   },
   nameContainer: { flex: 1, paddingLeft: scaleSize(15) },
   name: { color: 'white', textAlign: 'left' },
-  subtitle: { color: '#FFD700', fontSize: scaleFont(16), textAlign: 'left' },
-  score: { color: '#FFD700', fontSize: scaleFont(20), fontWeight: 'bold', textAlign: 'right' },
+  subtitle: { color: Colors.gold, fontSize: scaleFont(16), textAlign: 'left' },
+  score: { color: Colors.gold, fontSize: scaleFont(20), fontWeight: 'bold', textAlign: 'right' },
   text: { color: 'white', fontSize: scaleFont(50), fontWeight: 'bold' },
-  number: { fontSize: scaleFont(30), color: '#FFD700' },
+  number: { fontSize: scaleFont(30), color: Colors.gold },
   title: { color: 'white', fontWeight: 'normal' },
-  suffix: { fontSize: scaleFont(20), color: '#FFD700' },
+  suffix: { fontSize: scaleFont(20), color: Colors.gold },
 });
 
 export default InitialiseLeaderboard;

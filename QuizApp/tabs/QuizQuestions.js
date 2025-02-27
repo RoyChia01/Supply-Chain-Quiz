@@ -34,6 +34,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { fetchQuestions, getUserInfo, postQuizResults } from './apiHandler';
 import { useUser } from './userInfo';  // Import the hook
 import { LogBox } from 'react-native';
+import Colors from '../constants/Colors';
 
 LogBox.ignoreAllLogs(); // Ignore all log notifications
 
@@ -321,7 +322,7 @@ const Score = ({ score, totalQuestions, onRestart, topicId }) => {
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    backgroundColor: '#2F4F6D', 
+    backgroundColor: Colors.mainBackgroundColor, 
     alignItems: 'center', 
     justifyContent: 'center', 
     paddingTop: height * 0.1, // 10% of screen height
@@ -403,7 +404,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold' 
   },
   scoreContainer: { 
-    backgroundColor: '#2F4F6D', 
+    backgroundColor: Colors.mainBackgroundColor, 
     padding: 30, 
     borderRadius: 20, 
     alignItems: 'center', 
@@ -452,7 +453,7 @@ const styles = StyleSheet.create({
   planeIcon: { 
     position: 'absolute', 
     zIndex: 1 , 
-    color: '#FFD700' 
+    color: Colors.gold 
   },
   scrollView: {
     width: '100%',

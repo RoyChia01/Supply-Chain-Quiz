@@ -38,6 +38,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScaledSheet } from 'react-native-size-matters';
 import { useUser } from './userInfo';  // Import the hook
 import { LogBox } from 'react-native';
+import Colors from '../constants/Colors';
 
 LogBox.ignoreAllLogs(); // Ignore all log notifications
 
@@ -140,7 +141,7 @@ const QuizTopics = () => {
   // If loading data, show a loading spinner
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#FFD700" />
       </View>
     );
@@ -197,7 +198,7 @@ const QuizTopics = () => {
 const styles = ScaledSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2F4F6D',
+    backgroundColor: Colors.mainBackgroundColor,
     alignItems: 'center',
     Top: '-10@ms',
   },
@@ -212,12 +213,12 @@ const styles = ScaledSheet.create({
     resizeMode: 'cover', // Makes sure the image fills the space while maintaining its aspect ratio
     borderRadius: '15@ms',
     borderWidth: '4@ms',
-    borderColor: '#FFD700',
+    borderColor: Colors.gold,
   },
   title: {
     fontSize: '24@ms',
     fontWeight: 'bold',
-    color: '#FFD700',
+    color: Colors.gold,
     fontFamily: 'Arial',
   },
   contentContainer: {
@@ -238,7 +239,7 @@ const styles = ScaledSheet.create({
     alignItems: 'center',
     margin: '10@ms',
     borderWidth: '2@ms',
-    borderColor: '#FFD700',
+    borderColor: Colors.gold,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.3,
@@ -247,7 +248,7 @@ const styles = ScaledSheet.create({
   windowNumber: {
     fontSize: '28@ms',
     fontWeight: 'bold',
-    color: '#FFD700',
+    color: Colors.gold,
   },
   windowText: {
     fontSize: '14@ms',
@@ -265,7 +266,7 @@ const styles = ScaledSheet.create({
   },
   retryButton: {
     marginTop: '20@ms',
-    backgroundColor: '#FFD700',
+    backgroundColor: Colors.gold,
     padding: '10@ms',
     borderRadius: '5@ms',
   },
@@ -274,6 +275,12 @@ const styles = ScaledSheet.create({
     fontWeight: 'bold',
     color: '#000',
   },
+  loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',  // Centers vertically
+      alignItems: 'center',      // Centers horizontally
+      backgroundColor: Colors.mainBackgroundColor,
+    },
 });
 
 export default QuizTopics;
