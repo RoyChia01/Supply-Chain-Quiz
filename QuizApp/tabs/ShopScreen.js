@@ -57,7 +57,7 @@ export default function ProductsList({ navigation, route }) {
     setSelectedCategory(category);
     setSearchQuery('');
   };
-
+  //This portion is to fetch the user's points balance 
   // useEffect(() => {
   //   const user = FIREBASE_AUTH.currentUser;
 

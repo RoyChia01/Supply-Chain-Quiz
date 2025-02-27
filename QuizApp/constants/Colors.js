@@ -39,6 +39,7 @@ export default {
     light: '#fcfcfc',
     backgroundColor: '#446d92',
     gold: '#FFD700',
+    mainBackgroundColor: '#2F4F6D',
 
     darkOverlayColor: 'rgba(0, 0, 0, 0.4)',
     darkOverlayColor2: 'rgba(0, 0, 0, 0.8)',
