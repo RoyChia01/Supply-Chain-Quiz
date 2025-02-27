@@ -20,8 +20,6 @@ LogBox.ignoreAllLogs(); // Ignore all log notifications
 const { width, height } = Dimensions.get('window');
 const scaleSize = (size) => size * (width / 375); // Base size scaling
 
-const rowHeight = 50; // Set the row height to a fixed value (adjust based on your needs)
-
 export default function DetailsScreen({ navigation, route }) {
   const { item } = route.params;
   const [modalVisible, setModalVisible] = useState(false);
@@ -193,7 +191,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 5,
+    top: scaleSize(15),
     left: 5,
     zIndex: 10,
     padding: 10,

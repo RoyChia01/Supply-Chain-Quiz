@@ -37,6 +37,7 @@ import { useUser } from './userInfo';  // Import the hook
 import { signOut } from 'firebase/auth';
 import { FIREBASE_AUTH } from './firebase';  // Assuming you have the firebase configuration
 import Icon from 'react-native-vector-icons/FontAwesome';
+import Colors from '../constants/Colors';  // Import your color palette
 import { LogBox } from 'react-native';
 
 LogBox.ignoreAllLogs(); // Ignore all log notifications
@@ -494,7 +495,7 @@ const styles = StyleSheet.create({
   },
   modalCloseButton: {
     marginTop: 20,
-    backgroundColor: '#FFD700',
+    backgroundColor: Colors.backgroundColor,
     padding: 10,
     borderRadius: 5,
   },
