@@ -5,8 +5,9 @@ import Colors from '../constants/Colors';
 import { itemsList } from '../constants/itemlist';
 import debounce from 'lodash/debounce';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { FIREBASE_AUTH, FIRESTORE_DB } from '../tabs/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs(); // Ignore all log notifications
 
 const { width } = Dimensions.get('window');
 const scaleSize = (size) => size * (width / 375); // Base size scaling

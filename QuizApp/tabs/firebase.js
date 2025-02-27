@@ -6,18 +6,20 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import {getFirestore} from 'firebase/firestore';
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getFirestore } from 'firebase/firestore';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs(); // Ignore all log notifications
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBcCBiJO8ThI5n2Vefuf5C2fA0iO3x7-AI",
-  authDomain: "rsaf-72426.firebaseapp.com",
-  projectId: "rsaf-72426",
-  storageBucket: "rsaf-72426.firebasestorage.app",
-  messagingSenderId: "99224025673",
-  appId: "1:99224025673:web:23f2b887c24e91f663dd98"
+  apiKey: "AIzaSyDmqBKUv3cHYeoTVrqqjEvwqCYrCwQie6s",
+  authDomain: "supply-chain-school.firebaseapp.com",
+  projectId: "supply-chain-school",
+  storageBucket: "supply-chain-school.firebasestorage.app",
+  messagingSenderId: "654475678346",
+  appId: "1:654475678346:web:7d477d28dca63117ea1373",
+  measurementId: "G-ZLLNR7PW6M"
 };
 
 // Initialize Firebase

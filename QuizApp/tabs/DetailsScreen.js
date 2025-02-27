@@ -3,7 +3,9 @@ import { Dimensions, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, Vi
 import { SharedElement } from 'react-navigation-shared-element'
 import Icon, { Icons } from '../components/Icons'
 import Colors from '../constants/Colors'
-import { color } from 'react-native-elements/dist/helpers'
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs(); // Ignore all log notifications
 const { width, height } = Dimensions.get('window');
 
 const Quantity = () => {

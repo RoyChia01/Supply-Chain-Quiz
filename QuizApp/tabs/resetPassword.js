@@ -40,6 +40,9 @@ import { sendPasswordResetEmail } from 'firebase/auth';
 import { FIREBASE_AUTH } from '../tabs/firebase';
 import Fonts from '../common/fonts';
 import SvgIcon from '../common/SvgIcon';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs(); // Ignore all log notifications
 
 const ResetPasswordScreen = () => {
   const navigation = useNavigation();

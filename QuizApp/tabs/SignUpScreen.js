@@ -16,6 +16,9 @@ import { doc, setDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import { FIREBASE_AUTH, FIRESTORE_DB } from '../tabs/firebase';
 import { postUser } from './apiHandler';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs(); // Ignore all log notifications
 
 const SignUpScreen = () => {
   // State variables for form data and loading/error management
@@ -63,7 +66,7 @@ const SignUpScreen = () => {
       navigation.goBack();
     } catch (error) {
       // Handle and display any errors that occur during registration
-      setError(error.message);
+      //setError(error.message);
     } finally {
       setLoading(false);  // Stop loading state
     }

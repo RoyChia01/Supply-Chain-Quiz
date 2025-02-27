@@ -37,6 +37,9 @@ import PropTypes from 'prop-types';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScaledSheet } from 'react-native-size-matters';
 import { useUser } from './userInfo';  // Import the hook
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs(); // Ignore all log notifications
 
 const { width, height } = Dimensions.get('window');
 const scaleSize = (size) => size * (width / 375); // Base size scaling

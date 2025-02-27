@@ -37,6 +37,9 @@ import { useUser } from './userInfo';  // Import the hook
 import { signOut } from 'firebase/auth';
 import { FIREBASE_AUTH } from './firebase';  // Assuming you have the firebase configuration
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs(); // Ignore all log notifications
 
 // Get device width and height
 const { width, height } = Dimensions.get('window');

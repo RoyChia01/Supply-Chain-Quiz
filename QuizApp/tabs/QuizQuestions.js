@@ -33,6 +33,9 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
 import { fetchQuestions, getUserInfo, postQuizResults } from './apiHandler';
 import { useUser } from './userInfo';  // Import the hook
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs(); // Ignore all log notifications
 
 // Get the device screen width and height
 const { width, height } = Dimensions.get('window');

@@ -30,6 +30,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, FlatList, ActivityIndicator, Dimensions, PixelRatio, SafeAreaView } from 'react-native';
 import { fetchLeaderboard } from './apiHandler';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs(); // Ignore all log notifications
 
 const { width, height } = Dimensions.get('window');
 const scaleSize = (size) => size * (width / 375); // Base size scaling
