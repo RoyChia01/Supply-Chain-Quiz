@@ -1,32 +1,3 @@
-/**
- * Leaderboard Component
- * 
- * This component fetches and displays the leaderboard rankings from the API.
- * 
- * Features:
- * - Displays the **top 3 users** in a horizontal row, with the highest-ranked user centered.
- * - Shows the **remaining users** in a vertical list with rank, name, and total score.
- * - Assigns proper rank suffixes ("st", "nd", "rd", "th") based on position.
- * - Displays user profile images, with a default image if unavailable.
- * - Supports **pull-to-refresh** to update the leaderboard data.
- * - Handles **loading states and errors** while fetching data.
- * - Ensures proper layout using `SafeAreaView` for compatibility across devices.
- * 
- * Data Flow:
- * - Uses `fetchLeaderboard` from `apiHandler.js` to get data.
- * - Stores leaderboard data in state (`leaderboardData`).
- * - Sets `loading` while fetching, and updates `refreshing` on pull-to-refresh.
- * 
- * Functions:
- * - `getLeaderboardData()`: Fetches and updates leaderboard data on mount.
- * - `handleRefresh()`: Refreshes data when the user pulls down.
- * - `getRankSuffix(rank)`: Returns the appropriate rank suffix for display.
- * 
- * UI:
- * - Uses `FlatList` to display leaderboard entries.
- * - Shows user image, rank, name, and total score.
- */
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, FlatList, ActivityIndicator, Dimensions, PixelRatio, SafeAreaView } from 'react-native';
 import { fetchLeaderboard } from './apiHandler';
@@ -43,7 +14,6 @@ const scaleFont = (size) => {
 };
 
 const images = {
-
   SCEngineer: require('../images/AvatarProgression/Engineer.jpg'),
   TeamIC: require('../images/AvatarProgression/TeamIC.jpg'),
   FlightLead: require('../images/AvatarProgression/FlightLead.jpg'),
@@ -58,7 +28,7 @@ const InitialiseLeaderboard = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
-
+  const [retryCount, setRetryCount] = useState(0); // Track number of retries
 
   const getLeaderboardData = async () => {
     try {
@@ -69,14 +39,24 @@ const InitialiseLeaderboard = () => {
         id: user?.name || positionIndex.toString(),
         name: user?.name || "Unknown",
         rank: user?.rank?.selectedTitle || "N/A",
-        totalScore: user?.pointBalance || 0,
+        totalScore: user?.totalScore || 0,
         position: positionIndex,
       }));
 
       setLeaderboardData(sortedData);
+      setError(null); // Reset error state on successful fetch
+      setRetryCount(0); // Reset retry count after success
     } catch (error) {
       console.error('Failed to load leaderboard:', error);
-      setError('Failed to load leaderboard data. Please try again later.');
+      setError('Failed to load leaderboard data. Retrying...');
+      
+      // Retry mechanism if loading fails
+      if (retryCount < 3) {
+        setRetryCount(retryCount + 1);
+        setTimeout(() => getLeaderboardData(), 2000); // Retry after 2 seconds
+      } else {
+        setError('Failed to load leaderboard data after multiple attempts.');
+      }
     } finally {
       setLoading(false);
     }
@@ -84,7 +64,7 @@ const InitialiseLeaderboard = () => {
 
   useEffect(() => {
     getLeaderboardData();
-  }, []);
+  }, []); // Initial fetch on mount
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -126,7 +106,7 @@ const InitialiseLeaderboard = () => {
         {topThree.length === 3 &&
           [topThree[1], topThree[0], topThree[2]].map((player, index) => (
             <View key={player.position} style={[styles.section, index === 1 ? styles.mainSection : styles.sideSection]}>
-             <Image source={images[player.rank] || images.default} style={styles.image} />
+              <Image source={images[player.rank] || images.default} style={styles.image} />
               <Text style={[styles.title, { fontSize: scaleFont(10) }]}>{player.name}</Text>
               <Text style={styles.subtitle}>{player.rank}</Text>
               <Text style={[styles.text, styles.number]}>
@@ -139,23 +119,23 @@ const InitialiseLeaderboard = () => {
       </View>
 
       <View style={styles.bottomContainer}>
-      <FlatList
-        data={remainingLeaderboard}
-        keyExtractor={(item) => item.position.toString()}
-        renderItem={({ item, index }) => (
-          <View style={styles.row}>
-            <Text style={styles.rank}>{index + 4}</Text>
-            <View style={styles.nameContainer}>
-              <Text style={[styles.name, { fontSize: scaleFont(18) }]}>{item.name}</Text>
-              <Text style={styles.subtitle}>{item.rank}</Text>
+        <FlatList
+          data={remainingLeaderboard}
+          keyExtractor={(item) => item.position.toString()}
+          renderItem={({ item, index }) => (
+            <View style={styles.row}>
+              <Text style={styles.rank}>{index + 4}</Text>
+              <View style={styles.nameContainer}>
+                <Text style={[styles.name, { fontSize: scaleFont(18) }]}>{item.name}</Text>
+                <Text style={styles.subtitle}>{item.rank}</Text>
+              </View>
+              <Text style={styles.score}>{item.totalScore}</Text>
             </View>
-            <Text style={styles.score}>{item.totalScore}</Text>
-          </View>
-        )}
-        refreshing={refreshing}
-        onRefresh={handleRefresh}
-        contentContainerStyle={{ paddingBottom: scaleSize(50) }} // Adds bottom padding
-      />
+          )}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          contentContainerStyle={{ paddingBottom: scaleSize(50) }} // Adds bottom padding
+        />
       </View>
     </SafeAreaView>
   );

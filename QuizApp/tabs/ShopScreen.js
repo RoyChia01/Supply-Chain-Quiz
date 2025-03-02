@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Dimensions, FlatList, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
+import { Dimensions, FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
 import { SharedElement } from 'react-navigation-shared-element';
 import Colors from '../constants/Colors';
 import { itemsList } from '../constants/itemlist';
 import debounce from 'lodash/debounce';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { LogBox } from 'react-native';
+
 
 LogBox.ignoreAllLogs(); // Ignore all log notifications
 

@@ -1,7 +1,7 @@
 //This file handles all the request to the backend server and returns the response
 //The server is hosted on a local machine and the IP address is used to connect to the server
 
-const BASE_URL = 'http://10.132.0.65:8080';
+const BASE_URL = 'http://10.132.0.78:8080';
 
 // Fetch all the topics from the backend
 export const fetchTopics = async () => {
@@ -245,7 +245,7 @@ export const purchasePowerup = async (userDocumentID, powerupType, targetID,poin
   console.log("Purchasing Power-Up:", powerupType, "For User:", userDocumentID, "Target:", targetID);
 
   try {
-    const response = await fetch(`${BASE_URL}/powerupPurchased/${userDocumentID}`, {
+    const response = await fetch(`${BASE_URL}/user/${userDocumentID}/powerup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
