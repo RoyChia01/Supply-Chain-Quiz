@@ -104,7 +104,7 @@ const BoardingPass = ({ navigation }) => {
           { title: "Rank", subText: data.rank?.selectedTitle || "Unranked" },
           { title: "", subText: getCurrentDate() }
         ]);
-        setImageUrl(images[data.rank] || images.Trainee);
+        setImageUrl(images[data.rank.selectedTitle] || images.Trainee);
 
       } catch (error) {
         console.error("❌ Error loading user data:", error);

@@ -85,52 +85,66 @@ const QuizTopics = () => {
   const { userEmail } = useUser(); // Get user email from context
 
   // Load topics function
-  const loadTopics = useCallback(async () => {
-    setLoading(true);
+const loadTopics = useCallback(async () => {
+  setLoading(true);
+  try {
+    // Step 1: Check if we have a user email
+    if (!userEmail) {
+      setError('User email is missing. Please log in again.');
+      return;
+    }
+
+    // Step 2: Get user rank
+    let userRankData;
     try {
-      const topicsData = await fetchTopics(); 
+      userRankData = await getUserTitle(userEmail);
+      console.log("User Rank:", userRankData);
+      if (userRankData) {
+        setUserRank(userRankData);
+        // Dynamically set the image based on rank
+        setImageSource(images[userRankData] || images.Trainee);
+      } else {
+        console.warn("No user rank returned");
+        // Set default rank if needed
+        setUserRank('Trainee');
+        setImageSource(images.Trainee);
+      }
+    } catch (rankError) {
+      console.error("Error fetching user rank:", rankError);
+      // Continue with default values instead of stopping entirely
+      setUserRank('Trainee');
+      setImageSource(images.Trainee);
+    }
+
+    // Step 3: Get topics data
+    try {
+      const topicsData = await fetchTopics();
       const extractedTopics = topicsData.map(item => ({
         id: item.id,
         topicList: item.topicList,
       }));
 
-      setTopics(extractedTopics);  
-      setError(null);
-    } catch (err) {
-      console.error(err);
+      setTopics(extractedTopics);
+    } catch (topicsError) {
+      console.error("Error fetching topics:", topicsError);
       setError('Failed to load topics. Please try again later.');
-    } finally {
-      setLoading(false);
+      // We still set the error but don't return early
     }
-  }, []);
 
-  // Fetch user data and rank
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!userEmail) return;
+    // Clear any previous errors if everything succeeded
+    setError(null);
+  } catch (err) {
+    console.error("Unexpected error in loadAllData:", err);
+    setError('Something went wrong. Please try again later.');
+  } finally {
+    setLoading(false);
+  }
+}, [userEmail, images]); // Only depend on userEmail and images
 
-      try {
-        const rank = await getUserTitle(userEmail); // Get user rank from API
-        console.log("User Rank:", rank);
-        if (rank) {
-          setUserRank(rank);
-          // Dynamically set the image based on rank
-          setImageSource(images[rank] || images.Trainee); 
-        }
-      } catch (err) {
-        console.error("Error fetching user rank:", err);
-      }
-    };
-
-    fetchUserData();
-  }, [userEmail]);
-
-  // Fetch topics data once the user rank is set
-  useEffect(() => {
-    if (userRank) {
-      loadTopics();
-    }
-  }, [userRank, loadTopics]);
+// Single useEffect to trigger the data loading
+useEffect(() => {
+  loadTopics();
+}, [loadTopics]);
 
   const onRefresh = async () => {
     setRefreshing(true);
