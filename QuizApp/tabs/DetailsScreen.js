@@ -8,7 +8,8 @@ import {
   Text, 
   TouchableOpacity, 
   View, 
-  FlatList 
+  FlatList,
+  Alert 
 } from 'react-native';
 import { SharedElement } from 'react-navigation-shared-element';
 import Icon, { Icons } from '../components/Icons';
@@ -81,20 +82,21 @@ export default function DetailsScreen({ navigation, route }) {
     
     if (purchaseType === "View Users") {
       await fetchSabotageData();
-    } else {
+    }
+    else {
       console.log("Purchase successful!");
       console.log("Item:", item);
       console.log("Selected User:", selectedUser);
   
       // Lock the button once purchased
       setIsPurchased(true);
-  
       // Store purchase state in AsyncStorage
       try {
         await AsyncStorage.setItem(`purchased_${item.id}`, 'true');
       } catch (error) {
         console.error("Error saving purchase status:", error);
       }
+      setModalVisible(false);
     }
   };
   
@@ -102,7 +104,10 @@ export default function DetailsScreen({ navigation, route }) {
   const fetchSabotageData = async () => {
     try {
       const responseData = await fetchLeaderboard(); // Ensure fetchLeaderboard is an async function
-      setSabotageData(responseData); // Update sabotageData with fetched response
+      const sortedData = responseData
+                          .filter(item => item.user.canBeTargeted === true) // Filter out the current user
+                          .sort((a, b) => a.positionIndex - b.positionIndex); 
+      setSabotageData(sortedData); // Update sabotageData with fetched response
       setModalVisible(true);
     } catch (error) {
       console.error("Error fetching leaderboard data:", error);
@@ -122,9 +127,20 @@ export default function DetailsScreen({ navigation, route }) {
         <Text style={styles.listLabel}>{item.user.name}</Text>
         <Text style={styles.listSubLabel}>{item.user.rank.selectedTitle}</Text>
       </View>
-      <Text style={styles.listValue}>{item.user.pointBalance}</Text>
+      <Text style={styles.listValue}>{item.user.totalScore}</Text>
     </TouchableOpacity>
   );
+
+  const doubleCheckTarget = async (purchaseType, item, selectedUser) => {
+    console.log("selectedUser:", selectedUser);
+    const target = await getUserInfo(selectedUser.user.email);
+    if (target.canBeTargeted) {
+      console.log("Target is available. Proceed with purchase.");
+      handleBuyPress(purchaseType, item, selectedUser);
+    } else {
+      Alert.alert('Error', 'Target is unavailable. Please select another target.');
+    }
+  }
 
   return (
     <>
@@ -206,12 +222,12 @@ export default function DetailsScreen({ navigation, route }) {
             <View style={styles.selectedUserContainer}>
             <Text style={styles.selectedUserName}>Selected Target:</Text>
             <Text style={styles.selectedUserName}>{selectedUser.user.name}</Text>
-            <Text style={styles.selectedUserPoints}>Points: {selectedUser.user.pointBalance}</Text>
+            <Text style={styles.selectedUserPoints}>Points: {selectedUser.user.totalScore}</Text>
             <Text style={styles.selectedUserRank}>Rank: {selectedUser.user.rank.selectedTitle}</Text>
         
             <TouchableOpacity
                 style={[styles.btnTarget, { backgroundColor: isPurchased ? 'gray' : item.bgColor }]}
-                onPress={() => handleBuyPress("Confirmed", item, selectedUser.user.id)}
+                  onPress={() => doubleCheckTarget("Confirmed", item, selectedUser)}
                 disabled={isPurchased} // Disable button once purchased
               >
                 <Text style={styles.btnTextTarget}>{isPurchased ? "Purchased" : "Buy Now"}</Text>
