@@ -1,7 +1,6 @@
 //This file handles all the request to the backend server and returns the response
 //The server is hosted on a local machine and the IP address is used to connect to the server
-
-const BASE_URL = 'http://192.168.50.26:8080';
+const BASE_URL = `http://${global.deviceIPAddress}:8080`; // Replace with your server IP address
 
 // Fetch all the topics from the backend
 export const fetchTopics = async () => {
@@ -85,6 +84,7 @@ export const getUserInfo = async (userEmail) => {
         }
       },
       canBeTargeted: data.canBeTargeted,
+      scoreMultiplier: data.scoreMultiplier,
     };
 
   } catch (error) {
@@ -221,7 +221,7 @@ export const getUserPowerups = async (userDocumentID) => {
   console.log("Fetching Power-Ups for User:", userDocumentID);
 
   try {
-    const response = await fetch(`${BASE_URL}/powerupUsed/${userDocumentID}`, {
+    const response = await fetch(`${BASE_URL}/user${userDocumentID}/powerUp`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

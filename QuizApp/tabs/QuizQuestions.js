@@ -8,6 +8,7 @@
  * - Showing a progress bar with a plane animation.
  * - Displaying the final score with a user rank image.
  * - Submitting quiz results to a backend.
+ * - Showing score multiplier popup at quiz start.
  * 
  * Key Functionalities:
  * - useQuizQuestions (Custom Hook): Fetches and manages quiz questions.
@@ -16,6 +17,7 @@
  * - QuestionCard: Shows the current question and answer options.
  * - OptionButton: Handles user answer selection and feedback.
  * - Score: Displays user rank image, score, and submits results.
+ * - MultiplierPopup: Displays score multiplier information at quiz start.
  * 
  * Dependencies:
  * - React & React Native for UI and state management.
@@ -28,7 +30,7 @@
  * via `route.params` to fetch relevant quiz questions.
  */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Image, Alert,Dimensions,ScrollView  } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image, Alert, Dimensions, ScrollView, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
 import { fetchQuestions, getUserInfo, postQuizResults } from './apiHandler';
@@ -87,18 +89,96 @@ const useQuizQuestions = (topicId) => {
   return { questions, loading, error };
 };
 
+// Score Multiplier Popup Component
+const MultiplierPopup = ({ visible, onClose, scoreMultiplier }) => {
+  // Determine message based on multiplier value
+  const getMessage = () => {
+    if (scoreMultiplier === 1) {
+      return "Your score will be calculated normally.";
+    } else if (scoreMultiplier > 1) {
+      return `Power up active! Your score will be multiplied by ${scoreMultiplier}x`;
+    } else {
+      return `Power down active! Your score will be reduced to ${scoreMultiplier * 100}% of normal.`;
+    }
+  };
+
+  // Determine background color based on multiplier
+  const getBackgroundColor = () => {
+    if (scoreMultiplier === 1) return '#4682B4'; // Normal - blue
+    if (scoreMultiplier > 1) return '#4CAF50';   // Boost - green
+    return '#FF6347';                           // Reduction - red
+  };
+
+  return (
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={[styles.modalContent, { backgroundColor: getBackgroundColor() }]}>
+          <Icon 
+            name={scoreMultiplier >= 1 ? "rocket" : "arrow-down"} 
+            size={50} 
+            color="white" 
+            style={styles.modalIcon} 
+          />
+          
+          <Text style={styles.modalTitle}>
+            {scoreMultiplier === 1 ? "Ready for Takeoff" : 
+             scoreMultiplier > 1 ? "Score Boost Active!" : 
+             "Score Reduction Active!"}
+          </Text>
+          
+          <Text style={styles.modalMessage}>{getMessage()}</Text>
+          
+          <TouchableOpacity style={styles.modalButton} onPress={onClose}>
+            <Text style={styles.modalButtonText}>Let's Go!</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 // Main Component for Quiz Questions
 const QuizQuestions = ({ navigation, route }) => {
   const { id } = route.params; // Destructure 'id' from route.params
   console.log("Received ID:", id); // Log to check if it comes through correctly
   const { questions, loading, error } = useQuizQuestions(id);
+  const { userEmail } = useUser();
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [answerLocked, setAnswerLocked] = useState(false);
+  
+  // New state for score multiplier and popup
+  const [scoreMultiplier, setScoreMultiplier] = useState(1);
+  const [showMultiplierPopup, setShowMultiplierPopup] = useState(false);
+  const [userDocumentID, setUserDocumentID] = useState(null);
+
+  // Fetch user info and score multiplier
+  useEffect(() => {
+    const fetchUserMultiplier = async () => {
+      try {
+        const userInfo = await getUserInfo(userEmail);
+        if (userInfo) {
+          setUserDocumentID(userInfo.id);
+          const multiplier = userInfo.scoreMultiplier || 1; // Default to 1 if not present
+          setScoreMultiplier(multiplier);
+          setShowMultiplierPopup(true); // Show popup after getting multiplier
+        }
+      } catch (error) {
+        console.error("Error fetching user multiplier:", error);
+        Alert.alert('Error', 'Unable to fetch your power-up status. Playing with standard scoring.');
+      }
+    };
+
+    fetchUserMultiplier();
+  }, [userEmail]);
 
   // Handle TabBar Visibility
   useFocusEffect(
@@ -108,9 +188,12 @@ const QuizQuestions = ({ navigation, route }) => {
     }, [navigation])
   );
 
-  // Handle Answer Selection
+  // Handle Answer Selection with multiplier
   const handleAnswer = (answer) => {
-    if (answer === questions[currentQuestion]?.answer) setScore(prev => prev + 1);
+    if (answer === questions[currentQuestion]?.answer) {
+      // Apply score multiplier to correct answers
+      setScore(prev => prev + 1 * scoreMultiplier);
+    }
     setSelectedAnswer(answer);
     setAnswerLocked(true);
   };
@@ -150,10 +233,24 @@ const QuizQuestions = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
+      {/* Score Multiplier Popup */}
+      <MultiplierPopup 
+        visible={showMultiplierPopup} 
+        onClose={() => setShowMultiplierPopup(false)} 
+        scoreMultiplier={scoreMultiplier} 
+      />
+
       {!showScore && <ProgressBar currentQuestion={currentQuestion} totalQuestions={questions.length} />}
 
       {showScore ? (
-        <Score score={score} totalQuestions={questions.length} onRestart={handleRestart} topicId={id} />
+        <Score 
+          score={score} 
+          totalQuestions={questions.length} 
+          onRestart={handleRestart} 
+          topicId={id}
+          userDocumentID={userDocumentID} 
+          scoreMultiplier={scoreMultiplier}
+        />
       ) : (
         <QuestionCard
           question={questions[currentQuestion]}
@@ -262,19 +359,22 @@ const OptionButton = ({ option, selectedAnswer, isCorrect, onAnswer, answerLocke
 );
 
 // Score Component with Ranking and Restart Option
-const Score = ({ score, totalQuestions, onRestart, topicId }) => {
+const Score = ({ score, totalQuestions, onRestart, topicId, userDocumentID, scoreMultiplier }) => {
   const { userEmail } = useUser();
-  const [userDocumentID, setUserDocumentID] = useState(null);
   const [imageSource, setImageSource] = useState(require('../images/AvatarProgression/Trainee.jpg')); // Default image
+  const finalScore = Math.round(score); // Ensure score is rounded to nearest integer
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const userInfo = await getUserInfo(userEmail);
-        console.log('User Info:', userInfo.id);
-        console.log('User Info:', userInfo.rank.selectedTitle);
-        if (userInfo) {
-          setUserDocumentID(userInfo.id);
+        if (!userDocumentID) {
+          const userInfo = await getUserInfo(userEmail);
+          if (userInfo) {
+            setUserDocumentID(userInfo.id);
+            setImageSource(images[userInfo.rank.selectedTitle] || images.Trainee);
+          }
+        } else {
+          const userInfo = await getUserInfo(userEmail);
           setImageSource(images[userInfo.rank.selectedTitle] || images.Trainee);
         }
       } catch (error) {
@@ -283,30 +383,47 @@ const Score = ({ score, totalQuestions, onRestart, topicId }) => {
     };
 
     fetchUserInfo();
-  }, [userEmail]);
+  }, [userEmail, userDocumentID]);
 
   useEffect(() => {
-    if (userDocumentID && topicId !== undefined && score !== undefined) {
+    if (userDocumentID && topicId !== undefined && finalScore !== undefined) {
       try {
-        console.log('Submitting quiz results...', userDocumentID, topicId, score);
-        postQuizResults(userDocumentID, topicId, score);
+        console.log('Submitting quiz results...', userDocumentID, topicId, finalScore);
+        postQuizResults(userDocumentID, topicId, finalScore);
       } catch (error) {
         Alert.alert('Error', 'Unable to submit your results. Please try again later.');
       }
     }
-  }, [userDocumentID, topicId, score]); // Dependency array ensures postQuizResults is called only when userDocumentID is set
+  }, [userDocumentID, topicId, finalScore]); // Dependency array ensures postQuizResults is called only when userDocumentID is set
 
   if (!userDocumentID) return <Text style={styles.loadingText}>Loading user info...</Text>;
 
   return (
     <View style={styles.scoreContainer}>
       <Image source={imageSource} style={styles.avatar} />
-      <Text style={styles.scoreText}>Score: {score} / {totalQuestions}</Text>
+      <Text style={styles.scoreText}>Score: {finalScore} / {totalQuestions}</Text>
+      
+      {scoreMultiplier !== 1 && (
+        <View style={styles.multiplierInfo}>
+          <Icon 
+            name={scoreMultiplier > 1 ? "rocket" : "arrow-down"} 
+            size={20} 
+            color={scoreMultiplier > 1 ? "#4CAF50" : "#FF6347"} 
+            style={{marginRight: 10}} 
+          />
+          <Text style={styles.multiplierText}>
+            {scoreMultiplier > 1 
+              ? `Score boosted by ${scoreMultiplier}x!` 
+              : `Score reduced to ${scoreMultiplier * 100}%`}
+          </Text>
+        </View>
+      )}
+      
       <TouchableOpacity
         style={styles.resetButton}
         onPress={() => {
           try {
-            onRestart(score);
+            onRestart(finalScore);
           } catch (error) {
             Alert.alert('Error', 'Unable to restart. Please try again later.');
           }
@@ -468,6 +585,59 @@ const styles = StyleSheet.create({
     color: '#aaa',
     textAlign: 'center',
     marginBottom: 5,
+  },
+  // New styles for multiplier popup
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '80%',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    elevation: 5,
+  },
+  modalIcon: {
+    marginBottom: 15,
+  },
+  modalTitle: {
+    fontSize: getFontSize(24),
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: getFontSize(18),
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: 'white',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  modalButtonText: {
+    fontSize: getFontSize(18),
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  multiplierInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  multiplierText: {
+    color: 'white',
+    fontSize: getFontSize(16),
   },
 });
 
