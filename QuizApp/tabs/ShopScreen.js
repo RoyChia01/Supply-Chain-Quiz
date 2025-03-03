@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Dimensions, FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Dimensions, FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView, RefreshControl, Alert } from 'react-native';
 import { SharedElement } from 'react-navigation-shared-element';
+import { useFocusEffect } from '@react-navigation/native';
 import Colors from '../constants/Colors';
 import { itemsList } from '../constants/itemlist';
 import debounce from 'lodash/debounce';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { LogBox } from 'react-native';
+import { getUserInfo } from './apiHandler';
+import { useUser } from './userInfo';
 
 
 LogBox.ignoreAllLogs(); // Ignore all log notifications
@@ -17,30 +20,123 @@ const scaleFont = (size) => {
   return size * (width / baseScale);
 };
 
-const ListItem = ({ item, navigation }) => {
-  return (
-    <View style={styles.item}>
-      <TouchableOpacity
-        onPress={() => navigation.navigate('DetailsScreen', { item })}
-        style={[styles.imageContainer, { backgroundColor: item.bgColor }]}>
-        <SharedElement id={`item.${item.id}.image`}>
-          <Image source={item.image} style={styles.image} />
-        </SharedElement>
-      </TouchableOpacity>
-      <View style={styles.textContainer}>
-        <Text style={[styles.text, { color: '#FFD700' }]}>{item.title}</Text>
-        <Text style={[styles.text, { color: '#FFD700' }]}>{item.price} points</Text>
-      </View>
-    </View>
-  );
-};
-
 export default function ProductsList({ navigation, route }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredItems, setFilteredItems] = useState(itemsList);
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [pointsBalance, setPointsBalance] = useState('');
+  const [pointsBalance, setPointsBalance] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
   const categories = ['All', 'Offence', 'Defence', 'Wildcard'];
+  const { userEmail } = useUser(); // Get user email from context
+
+  // Calculate the cheapest item price
+  const cheapestItemPrice = useMemo(() => {
+    return Math.min(...itemsList.map(item => parseInt(item.price)));
+  }, []);
+
+  // Check if user can afford any items
+  const canBuyItems = useMemo(() => {
+    return pointsBalance >= cheapestItemPrice;
+  }, [pointsBalance, cheapestItemPrice]);
+
+  // ListItem component with affordability check
+  const ListItem = useCallback(({ item }) => {
+    const handleItemPress = () => {
+      if (!canBuyItems) {
+        Alert.alert(
+          "Insufficient Points",
+          `You need at least ${cheapestItemPrice} points to purchase items. Your current balance is ${pointsBalance} points.`,
+          [{ text: "OK", style: "default" }]
+        );
+        return;
+      }
+      
+      navigation.navigate('DetailsScreen', { item });
+    };
+
+    return (
+      <View style={styles.item}>
+        <TouchableOpacity
+          onPress={handleItemPress}
+          style={[
+            styles.imageContainer, 
+            { backgroundColor: item.bgColor },
+            !canBuyItems && styles.disabledItem
+          ]}
+        >
+          <SharedElement id={`item.${item.id}.image`}>
+            <Image 
+              source={item.image} 
+              style={[
+                styles.image,
+                !canBuyItems && styles.disabledImage
+              ]} 
+            />
+          </SharedElement>
+          {!canBuyItems && (
+            <View style={styles.lockOverlay}>
+              <Icon name="lock" size={24} color="#FFD700" />
+            </View>
+          )}
+        </TouchableOpacity>
+        <View style={styles.textContainer}>
+          <Text style={[styles.text, { color: '#FFD700' }]}>{item.title}</Text>
+          <Text 
+            style={[
+              styles.text, 
+              { color: '#FFD700' },
+              !canBuyItems && pointsBalance < item.price && styles.unaffordablePrice
+            ]}
+          >
+            {item.price} points
+          </Text>
+        </View>
+      </View>
+    );
+  }, [canBuyItems, pointsBalance, cheapestItemPrice, navigation]);
+
+  const fetchUserData = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      const userInfo = await getUserInfo(userEmail);
+      console.log("Fetched user info:", userInfo);
+      setPointsBalance(userInfo.pointBalance ? parseInt(userInfo.pointBalance) : 0);
+      
+      // Refresh the items list
+      const filtered = itemsList.filter(item =>
+        (selectedCategory === 'All' || item.subtitle === selectedCategory) &&
+        (searchQuery === '' || item.title.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+      setFilteredItems(filtered);
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [userEmail, selectedCategory, searchQuery]);
+
+  // Initial data load on component mount
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  // Refresh data when the screen comes into focus (including after goBack)
+  useFocusEffect(
+    useCallback(() => {
+      console.log("Screen focused - refreshing data");
+      fetchUserData();
+      
+      // Optional: Return a cleanup function
+      return () => {
+        console.log("Screen blurred");
+      };
+    }, [fetchUserData])
+  );
+
+  // Handle pull-to-refresh
+  const onRefresh = useCallback(() => {
+    fetchUserData();
+  }, [fetchUserData]);
 
   const handleSearch = debounce((query) => {
     const filtered = itemsList.filter(item =>
@@ -58,24 +154,6 @@ export default function ProductsList({ navigation, route }) {
     setSelectedCategory(category);
     setSearchQuery('');
   };
-  //This portion is to fetch the user's points balance 
-  // useEffect(() => {
-  //   const user = FIREBASE_AUTH.currentUser;
-
-  //   if (user) {
-  //     const userDocRef = doc(FIRESTORE_DB, 'users', user.uid);
-
-  //     getDoc(userDocRef).then((snapshot) => {
-  //       if (snapshot.exists()) {
-  //         setPointsBalance(snapshot.data().points);
-  //       } else {
-  //         console.log('User does not exist');
-  //       }
-  //     }).catch((error) => {
-  //       console.error('Error fetching user data: ', error);
-  //     });
-  //   }
-  // }, []);
 
   return (
     <View style={styles.container}>
@@ -91,10 +169,22 @@ export default function ProductsList({ navigation, route }) {
               />
             </View>
 
-            <Text style={styles.pointsBalance}>
+            <Text style={[
+              styles.pointsBalance,
+              !canBuyItems && styles.insufficientBalance
+            ]}>
               {pointsBalance || '0'} points
             </Text>
           </View>
+
+          {!canBuyItems && (
+            <View style={styles.warningBanner}>
+              <Icon name="exclamation-triangle" size={16} color="#FFD700" />
+              <Text style={styles.warningText}>
+                You need at least {cheapestItemPrice} points to purchase items
+              </Text>
+            </View>
+          )}
 
           <ScrollView
             horizontal
@@ -127,8 +217,15 @@ export default function ProductsList({ navigation, route }) {
         data={filteredItems}
         numColumns={2}
         keyExtractor={(item, index) => item.id + index.toString()}
-        renderItem={({ item }) => <ListItem item={item} navigation={navigation} />}
-        
+        renderItem={({ item }) => <ListItem item={item} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[Colors.gold]}
+            tintColor={Colors.gold}
+          />
+        }
       />
     </View>
   );
@@ -148,7 +245,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop:scaleSize(25),
+    paddingTop: scaleSize(25),
   },
   searchBox: {
     flexDirection: 'row',
@@ -181,44 +278,60 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: Colors.mainBackgroundColor, 
   },
+  insufficientBalance: {
+    borderColor: '#FF6B6B',
+    color: '#FF6B6B',
+  },
+  warningBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+    borderRadius: 8,
+    marginTop: 8,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.3)',
+  },
+  warningText: {
+    color: '#FFD700',
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '500',
+  },
   categoryContainer: {
     flexDirection: 'row',
     paddingVertical: 15,
     justifyContent: 'flex-start',
     alignItems: 'center',
     borderBottomWidth: 2,
-    borderBottomColor: Colors.gold, // Subtle gold line at the bottom
-    paddingBottom: 20, // Add padding to the bottom to avoid blocking text
+    borderBottomColor: Colors.gold,
+    paddingBottom: 20,
   },
-  
   categoryButton: {
     paddingHorizontal: 20,
     paddingVertical: 12,
     marginRight: 20,
     borderRadius: 30,
-    backgroundColor: '#1E3A5F', // Dark blue background for unselected
+    backgroundColor: '#1E3A5F',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 4, // Shadow for depth
-    transition: 'background-color 0.3s ease', // Smooth transition for hover effect
+    elevation: 4,
+    transition: 'background-color 0.3s ease',
   },
-  
   selectedCategoryButton: {
-    backgroundColor: Colors.gold, // Gold background for the selected category
-    elevation: 6, // More pronounced shadow for selected
+    backgroundColor: Colors.gold,
+    elevation: 6,
   },
-  
   categoryText: {
     fontSize: 16,
-    color: '#FFFFFF', // White text for unselected categories
+    color: '#FFFFFF',
     fontWeight: '700',
-    textTransform: 'capitalize', // Capitalize the first letter
-    letterSpacing: 1, // Adds spacing between letters for better readability
+    textTransform: 'capitalize',
+    letterSpacing: 1,
   },
-  
   selectedCategoryText: {
-    color: '#1E3A5F', // Dark blue text for selected category
-    fontWeight: 'bold', // Bolder font for emphasis
+    color: '#1E3A5F',
+    fontWeight: 'bold',
   },
   item: {
     width: width / 2 - 24,
@@ -226,15 +339,32 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   imageContainer: {
-
     alignItems: 'center',
     backgroundColor: Colors.gray,
     borderRadius: 14,
+    position: 'relative',
+  },
+  disabledItem: {
+    opacity: 0.7,
   },
   image: {
     height: 200,
     width: 200,
     resizeMode: 'contain',
+  },
+  disabledImage: {
+    opacity: 0.6,
+  },
+  lockOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 14,
   },
   textContainer: {
     marginVertical: 4,
@@ -243,5 +373,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
   },
+  unaffordablePrice: {
+    color: '#FF6B6B',
+    textDecorationLine: 'line-through',
+  },
 });
-
