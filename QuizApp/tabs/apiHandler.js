@@ -242,18 +242,17 @@ export const getUserPowerups = async (userDocumentID) => {
   }
 };
 
-export const purchasePowerup = async (userDocumentID, powerupType, targetID,pointBalance) => {
-  console.log("Purchasing Power-Up:", powerupType, "For User:", userDocumentID, "Target:", targetID);
-
+export const purchasePowerup = async (PurchasedUserInfo,targetUserId, powerUp,pointBalance) => {
+  console.log("Purchasing Power-Up:", powerUp, "For User:", targetUserId);
   try {
-    const response = await fetch(`${BASE_URL}/user/${userDocumentID}/powerup`, {
+    const response = await fetch(`${BASE_URL}/user/${PurchasedUserInfo}/powerUp`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        powerupType: powerupType, // "Shield", "Sabotage", or "Multiplier"
-        targetID: targetID, // Only required for Sabotage, otherwise null
+        powerUp: powerUp, // "Shield", "Sabotage", or "Multiplier"
+        targetUserId: targetUserId, // Only required for Sabotage, otherwise null
         pointBalance: pointBalance,
 
       }),
