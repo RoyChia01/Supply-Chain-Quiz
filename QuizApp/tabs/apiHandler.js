@@ -1,7 +1,7 @@
 //This file handles all the request to the backend server and returns the response
 //The server is hosted on a local machine and the IP address is used to connect to the server
 
-const BASE_URL = 'http://10.132.0.78:8080';
+const BASE_URL = 'http://192.168.50.26:8080';
 
 // Fetch all the topics from the backend
 export const fetchTopics = async () => {
@@ -83,7 +83,8 @@ export const getUserInfo = async (userEmail) => {
           index: data.progress?.latestTopic?.index || 0,
           name: data.progress?.latestTopic?.name || "Unknown"
         }
-      }
+      },
+      canBeTargeted: data.canBeTargeted,
     };
 
   } catch (error) {
