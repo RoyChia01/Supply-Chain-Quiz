@@ -33,7 +33,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image, Alert, Dimensions, ScrollView, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
-import { fetchQuestions, getUserInfo, postQuizResults } from './apiHandler';
+import { fetchQuestions, getUserInfo, postQuizResults,resetScoreMultiplier } from './apiHandler';
 import { useUser } from './userInfo';  // Import the hook
 import { LogBox } from 'react-native';
 import Colors from '../constants/Colors';
@@ -390,6 +390,7 @@ const Score = ({ score, totalQuestions, onRestart, topicId, userDocumentID, scor
       try {
         console.log('Submitting quiz results...', userDocumentID, topicId, finalScore);
         postQuizResults(userDocumentID, topicId, finalScore);
+        resetScoreMultiplier(userDocumentID);
       } catch (error) {
         Alert.alert('Error', 'Unable to submit your results. Please try again later.');
       }

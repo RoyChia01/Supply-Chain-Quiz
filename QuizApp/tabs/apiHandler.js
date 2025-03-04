@@ -270,3 +270,27 @@ export const purchasePowerup = async (PurchasedUserInfo,targetUserId, powerUp,po
     return { success: false, error: error.message };
   }
 };
+
+export const resetScoreMultiplier = async (userDocumentID) => {
+  console.log("Resetting scoreMultiplier for User:", userDocumentID);
+
+  try {
+    const response = await fetch(`${BASE_URL}/user/${userDocumentID}/score-multiplier/reset`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    return { success: true, data };
+
+  } catch (error) {
+    console.error('Error resetting:', error.message);
+    return { success: false, error: error.message };
+  }
+};
