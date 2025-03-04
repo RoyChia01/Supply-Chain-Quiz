@@ -143,6 +143,7 @@ const MultiplierPopup = ({ visible, onClose, scoreMultiplier }) => {
 };
 
 // Main Component for Quiz Questions
+// Main Component for Quiz Questions
 const QuizQuestions = ({ navigation, route }) => {
   const { id } = route.params; // Destructure 'id' from route.params
   console.log("Received ID:", id); // Log to check if it comes through correctly
@@ -159,6 +160,8 @@ const QuizQuestions = ({ navigation, route }) => {
   const [scoreMultiplier, setScoreMultiplier] = useState(1);
   const [showMultiplierPopup, setShowMultiplierPopup] = useState(false);
   const [userDocumentID, setUserDocumentID] = useState(null);
+  // New state to track if the quiz content should be shown
+  const [showQuizContent, setShowQuizContent] = useState(false);
 
   // Fetch user info and score multiplier
   useEffect(() => {
@@ -174,6 +177,8 @@ const QuizQuestions = ({ navigation, route }) => {
       } catch (error) {
         console.error("Error fetching user multiplier:", error);
         Alert.alert('Error', 'Unable to fetch your power-up status. Playing with standard scoring.');
+        // If there's an error, allow quiz to start anyway
+        setShowQuizContent(true);
       }
     };
 
@@ -227,6 +232,13 @@ const QuizQuestions = ({ navigation, route }) => {
     }
   }, [answerLocked, currentQuestion]);
 
+  // Handler for closing the multiplier popup
+  const handleCloseMultiplierPopup = () => {
+    setShowMultiplierPopup(false);
+    // Only show quiz content after popup is closed
+    setShowQuizContent(true);
+  };
+
   // Loading, Error Handling, and displaying messages
   if (loading) return <Text style={styles.loadingText}>Loading...</Text>;
   if (error) return <Text style={styles.errorText}>Error: {error}</Text>;
@@ -236,28 +248,38 @@ const QuizQuestions = ({ navigation, route }) => {
       {/* Score Multiplier Popup */}
       <MultiplierPopup 
         visible={showMultiplierPopup} 
-        onClose={() => setShowMultiplierPopup(false)} 
+        onClose={handleCloseMultiplierPopup} 
         scoreMultiplier={scoreMultiplier} 
       />
 
-      {!showScore && <ProgressBar currentQuestion={currentQuestion} totalQuestions={questions.length} />}
+      {/* Only show quiz content when showQuizContent is true */}
+      {showQuizContent && (
+        <>
+          {!showScore && <ProgressBar currentQuestion={currentQuestion} totalQuestions={questions.length} />}
 
-      {showScore ? (
-        <Score 
-          score={score} 
-          totalQuestions={questions.length} 
-          onRestart={handleRestart} 
-          topicId={id}
-          userDocumentID={userDocumentID} 
-          scoreMultiplier={scoreMultiplier}
-        />
-      ) : (
-        <QuestionCard
-          question={questions[currentQuestion]}
-          selectedAnswer={selectedAnswer}
-          answerLocked={answerLocked}
-          onAnswer={handleAnswer}
-        />
+          {showScore ? (
+            <Score 
+              score={score} 
+              totalQuestions={questions.length} 
+              onRestart={handleRestart} 
+              topicId={id}
+              userDocumentID={userDocumentID} 
+              scoreMultiplier={scoreMultiplier}
+            />
+          ) : (
+            <QuestionCard
+              question={questions[currentQuestion]}
+              selectedAnswer={selectedAnswer}
+              answerLocked={answerLocked}
+              onAnswer={handleAnswer}
+            />
+          )}
+        </>
+      )}
+      
+      {/* Show a waiting message when popup is visible and quiz hasn't started */}
+      {!showQuizContent && showMultiplierPopup && (
+        <Text style={styles.waitingText}>Get ready for the quiz!</Text>
       )}
     </View>
   );
