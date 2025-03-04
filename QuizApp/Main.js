@@ -21,7 +21,7 @@ import { FIREBASE_AUTH } from './tabs/firebase';
 import { UserProvider } from './tabs/userInfo';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
-import NetInfo from '@react-native-community/netinfo';
+import { NetworkInfo } from "react-native-network-info";
 
 const { width, height } = Dimensions.get('window');
 const scaleFont = (size) => size * PixelRatio.getFontScale();
@@ -141,66 +141,17 @@ export default function App() {
     } catch (error) {
       console.error('Error clearing AsyncStorage:', error);
     }
-  };
-   // Function to get device IP address
-   const getDeviceIPv4Address = async () => {
-    try {
-      const networkState = await NetInfo.fetch();
-      
-      if (networkState.isConnected) {
-        // For WiFi connections - extract IPv4 specifically
-        if (networkState.type === 'wifi' && networkState.details && networkState.details.ipAddress) {
-          // The ipAddress property typically returns IPv4 address
-          global.deviceIPAddress = networkState.details.ipAddress;
-          console.log('Device IPv4 Address (WiFi):', networkState.details.ipAddress);
-        } else {
-          // Fallback to API method for other connection types
-          fetchIPv4FromAPI();
-        }
-      } else {
-        console.log('Device is offline');
-        global.deviceIPAddress = 'offline';
-      }
-      
-      setIpAddressLoaded(true);
-    } catch (error) {
-      console.error('Error getting IP address:', error);
-      fetchIPv4FromAPI();
-    }
-  };
-  
-  // Fallback method using external API to get IP
-  const fetchIPv4FromAPI = async () => {
-    try {
-      const response = await fetch('https://api.ipify.org?format=json');
-      const data = await response.json();
-      global.deviceIPAddress = data.ip;
-      console.log('IP Address from API:', data.ip);
-      setIpAddressLoaded(true);
-    } catch (error) {
-      console.error('Error fetching IP from API:', error);
-      global.deviceIPAddress = 'unknown';
-      setIpAddressLoaded(true);
-    }
-  };
+  }
   
   useEffect(() => {
     // Ensure AsyncStorage is cleared at the start
     clearAsyncStorage();
-    
-    // Get device IP address
-    getDeviceIPv4Address();
   
     // Handle auth state changes
     const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, setUser);
     return unsubscribe;
   }, []);
 
-  // Wait until IP address is loaded before rendering the app
-  if (!ipAddressLoaded) {
-    // You could return a loading screen here if needed
-    return null;
-  }
   return (
     <UserProvider>
       <NavigationContainer>
