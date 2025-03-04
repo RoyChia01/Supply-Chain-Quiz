@@ -150,7 +150,7 @@ export default function DetailsScreen({ navigation, route }) {
           : "\n\nYou have used all your gamble tries.";
             
         Alert.alert('Gamble Result', 
-          `You spent ${item.price} points to gamble.\n${resultMessage}\nNew balance: ${newPointBalance} points${triesMessage}`
+          `You spent ${item.price} token to gamble.\n${resultMessage}\nNew balance: ${newPointBalance} token${triesMessage}`
         );
         
         // Save gamble count to AsyncStorage
@@ -305,7 +305,7 @@ export default function DetailsScreen({ navigation, route }) {
             </View>
             <View>
               <Text style={styles.smallText}>Price</Text>
-              <Text style={styles.bigText}>{item.price} points</Text>
+              <Text style={styles.bigText}>{item.price} Token</Text>
             </View>
           </View>
           <SharedElement id={`item.${item.id}.image`} style={styles.imageContainer}>

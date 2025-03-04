@@ -44,8 +44,8 @@ export default function ProductsList({ navigation, route }) {
     const handleItemPress = () => {
       if (!canBuyItems) {
         Alert.alert(
-          "Insufficient Points",
-          `You need at least ${cheapestItemPrice} points to purchase items. Your current balance is ${pointsBalance} points.`,
+          "Insufficient Tokens",
+          `You need at least ${cheapestItemPrice} Tokens to purchase items. Your current balance is ${pointsBalance} Tokens.`,
           [{ text: "OK", style: "default" }]
         );
         return;
@@ -88,7 +88,7 @@ export default function ProductsList({ navigation, route }) {
               !canBuyItems && pointsBalance < item.price && styles.unaffordablePrice
             ]}
           >
-            {item.price} points
+            {item.price} Tokens
           </Text>
         </View>
       </View>
@@ -173,7 +173,7 @@ export default function ProductsList({ navigation, route }) {
               styles.pointsBalance,
               !canBuyItems && styles.insufficientBalance
             ]}>
-              {pointsBalance || '0'} points
+              {pointsBalance || '0'} Tokens
             </Text>
           </View>
 
@@ -181,7 +181,7 @@ export default function ProductsList({ navigation, route }) {
             <View style={styles.warningBanner}>
               <Icon name="exclamation-triangle" size={16} color="#FFD700" />
               <Text style={styles.warningText}>
-                You need at least {cheapestItemPrice} points to purchase items
+                You need at least {cheapestItemPrice} Tokens to purchase items
               </Text>
             </View>
           )}

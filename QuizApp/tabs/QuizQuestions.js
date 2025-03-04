@@ -370,7 +370,7 @@ const Score = ({ score, totalQuestions, onRestart, topicId, userDocumentID, scor
         if (!userDocumentID) {
           const userInfo = await getUserInfo(userEmail);
           if (userInfo) {
-            setUserDocumentID(userInfo.id);
+            userDocumentID(userInfo.id);
             setImageSource(images[userInfo.rank.selectedTitle] || images.Trainee);
           }
         } else {

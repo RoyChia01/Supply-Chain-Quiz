@@ -1,7 +1,6 @@
 //This file handles all the request to the backend server and returns the response
 //The server is hosted on a local machine and the IP address is used to connect to the server
-const BASE_URL = `http://${global.deviceIPAddress}:8080`; // Replace with your server IP address
-
+const BASE_URL = `http://10.132.0.73:8080`; // Replace with your server IP address
 // Fetch all the topics from the backend
 export const fetchTopics = async () => {
   try {
