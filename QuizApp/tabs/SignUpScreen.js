@@ -8,7 +8,8 @@ import {
   View,
   Image,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  Dimensions
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
@@ -17,9 +18,12 @@ import { useNavigation } from '@react-navigation/native';
 import { FIREBASE_AUTH, FIRESTORE_DB } from '../tabs/firebase';
 import { postUser } from './apiHandler';
 import { LogBox } from 'react-native';
+import Icon, { Icons } from '../components/Icons';
 import Colors from '../constants/Colors';
 
 LogBox.ignoreAllLogs(); // Ignore all log notifications
+const { width, height } = Dimensions.get('window');
+const scaleSize = (size) => size * (width / 375); // Base size scaling
 
 const SignUpScreen = () => {
   // State variables for form data and loading/error management
@@ -75,6 +79,9 @@ const SignUpScreen = () => {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior='padding'>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Icon type={Icons.Ionicons} name="arrow-back" size={32} color={Colors.gold} />
+          </TouchableOpacity>
       <Image source={require('../images/IconSC.png')} style={styles.logo} />
       <Text style={styles.title}>Register</Text>
       {error ? <Text style={styles.errorText}>{error}</Text> : null} 
@@ -177,6 +184,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: Colors.gold,
+  },
+  backButton: {
+    position: 'absolute',
+    top: scaleSize(25),
+    left: 5,
+    zIndex: 10,
+    padding: 10,
   },
 });
 

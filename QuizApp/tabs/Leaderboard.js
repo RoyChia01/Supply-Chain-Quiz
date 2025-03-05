@@ -142,7 +142,9 @@ const InitialiseLeaderboard = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {
+    flex: 1, 
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -178,17 +180,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: scaleSize(4),
     borderColor: Colors.gold,
   },
-  mainSection: { backgroundColor: '#5B7F94' },
+  mainSection: {backgroundColor:Colors.backgroundColor, },
   sideSection: {
     flex: 0.8,
     paddingTop: scaleSize(60),
-    backgroundColor: Colors.mainBackgroundColor,
+    backgroundColor:Colors.mainBackgroundColor,
     marginBottom: scaleSize(20),
   },
   icon: { width: scaleSize(100), height: scaleSize(100) },
   bottomContainer: {
     flex: 6,
-    backgroundColor: Colors.mainBackgroundColor,
+    backgroundColor: "#0A1F33",
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: scaleSize(20),
@@ -200,7 +202,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: scaleSize(15),
-    backgroundColor: '#3A5F77',
+    backgroundColor:Colors.mainBackgroundColor,
     marginBottom: scaleSize(10),
     borderRadius: scaleSize(10),
   },
