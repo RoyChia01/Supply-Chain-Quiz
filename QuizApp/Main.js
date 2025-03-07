@@ -132,7 +132,6 @@ const AnimTab = () => (
 
 export default function App() {
   const [user, setUser] = useState(null);
-  const [ipAddressLoaded, setIpAddressLoaded] = useState(false);
 
   const clearAsyncStorage = async () => {
     try {

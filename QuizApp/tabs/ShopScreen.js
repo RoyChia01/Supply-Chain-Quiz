@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Dimensions, FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView, RefreshControl, Alert } from 'react-native';
+import { Dimensions, FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView,Platform, RefreshControl, Alert } from 'react-native';
 import { SharedElement } from 'react-navigation-shared-element';
 import { useFocusEffect } from '@react-navigation/native';
 import Colors from '../constants/Colors';
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: scaleSize(25),
+    paddingTop: Platform.OS === 'ios' ? scaleSize(-10) : scaleSize(40), // Slightly taller on Android
   },
   searchBox: {
     flexDirection: 'row',

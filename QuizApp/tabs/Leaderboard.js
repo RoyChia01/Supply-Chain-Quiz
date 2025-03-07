@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, FlatList, ActivityIndicator, Dimensions, PixelRatio, SafeAreaView } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, Image, FlatList, ActivityIndicator, Dimensions, TouchableOpacity, SafeAreaView,Platform } from 'react-native';
 import { fetchLeaderboard } from './apiHandler';
 import { LogBox } from 'react-native';
 import Colors from '../constants/Colors';
+import { useFocusEffect } from '@react-navigation/native';
 
 LogBox.ignoreAllLogs(); // Ignore all log notifications
 
@@ -23,6 +24,31 @@ const images = {
   default: require('../images/AvatarProgression/Trainee.jpg'), // Default image in case no rank matches
 };
 
+// Placeholder component for empty podium positions
+const EmptyPodiumPosition = ({ position }) => (
+  <View style={[
+    styles.section, 
+    position === 1 ? styles.mainSection : styles.sideSection,
+    styles.emptySection
+  ]}>
+    <View style={styles.emptyImageContainer}>
+      <Text style={styles.emptyImageText}>?</Text>
+    </View>
+    <Text style={[styles.title, { fontSize: scaleFont(10) }]}>Not Yet Claimed</Text>
+    <Text style={styles.emptySubtitle}>Compete to claim this spot!</Text>
+    <Text style={[styles.text, styles.number]}>
+      {position}<Text style={styles.suffix}>{getRankSuffix(position)}</Text>
+    </Text>
+  </View>
+);
+
+const getRankSuffix = (rank) => {
+  if (rank === 1) return 'st';
+  if (rank === 2) return 'nd';
+  if (rank === 3) return 'rd';
+  return 'th';
+};
+
 const InitialiseLeaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,6 +58,7 @@ const InitialiseLeaderboard = () => {
 
   const getLeaderboardData = async () => {
     try {
+      setLoading(true);
       const leaderboard = await fetchLeaderboard();
       if (!Array.isArray(leaderboard)) throw new Error('Invalid leaderboard format');
 
@@ -59,28 +86,30 @@ const InitialiseLeaderboard = () => {
       }
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
+  // Initial fetch on mount
   useEffect(() => {
     getLeaderboardData();
-  }, []); // Initial fetch on mount
+  }, []);
+
+  // Refresh when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      getLeaderboardData();
+      return () => {}; // cleanup function
+    }, [])
+  );
 
   const handleRefresh = async () => {
     setRefreshing(true);
     setError(null);
     await getLeaderboardData();
-    setRefreshing(false);
   };
 
-  const getRankSuffix = (rank) => {
-    if (rank === 1) return 'st';
-    if (rank === 2) return 'nd';
-    if (rank === 3) return 'rd';
-    return 'th';
-  };
-
-  if (loading) {
+  if (loading && !refreshing) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#FFD700" />
@@ -93,49 +122,99 @@ const InitialiseLeaderboard = () => {
     return (
       <SafeAreaView style={styles.errorContainer}>
         <Text style={styles.errorMessage}>{error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={getLeaderboardData}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
-  const topThree = leaderboardData.slice(0, 3);
-  const remainingLeaderboard = leaderboardData.slice(3);
+  // Generate top 3 array with real or placeholder podium positions
+  const generateTopThree = () => {
+    // Create an array with 3 positions
+    const topThree = [
+      { position: 2, placeholder: true }, // 2nd place (left)
+      { position: 1, placeholder: true }, // 1st place (center)
+      { position: 3, placeholder: true }  // 3rd place (right)
+    ];
+    
+    // Fill in positions with real data when available
+    for (let i = 0; i < Math.min(leaderboardData.length, 3); i++) {
+      const realPosition = i + 1;
+      const displayIndex = realPosition === 1 ? 1 : realPosition === 2 ? 0 : 2;
+      topThree[displayIndex] = { ...leaderboardData[i], position: realPosition, placeholder: false };
+    }
+    
+    return topThree;
+  };
+
+  const topThree = generateTopThree();
+  const remainingLeaderboard = leaderboardData.length <= 3 ? [] : leaderboardData.slice(3);
+
+  // Render podium position (either real player or placeholder)
+  const renderPodiumPosition = (item, index) => {
+    if (item.placeholder) {
+      return <EmptyPodiumPosition position={item.position} key={`placeholder-${item.position}`} />;
+    }
+    
+    return (
+      <View key={item.position} style={[
+        styles.section, 
+        index === 1 ? styles.mainSection : styles.sideSection
+      ]}>
+        <Image source={images[item.rank] || images.default} style={styles.image} />
+        <Text style={[styles.title, { fontSize: scaleFont(10) }]}>{item.name}</Text>
+        <Text style={styles.subtitle}>{item.rank}</Text>
+        <Text style={[styles.text, styles.number]}>
+          {item.position}<Text style={styles.suffix}>{getRankSuffix(item.position)}</Text>
+        </Text>
+        <Text style={styles.score}>Score: {item.totalScore}</Text>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.topContainer}>
-        {topThree.length === 3 &&
-          [topThree[1], topThree[0], topThree[2]].map((player, index) => (
-            <View key={player.position} style={[styles.section, index === 1 ? styles.mainSection : styles.sideSection]}>
-              <Image source={images[player.rank] || images.default} style={styles.image} />
-              <Text style={[styles.title, { fontSize: scaleFont(10) }]}>{player.name}</Text>
-              <Text style={styles.subtitle}>{player.rank}</Text>
-              <Text style={[styles.text, styles.number]}>
-                {index === 0 ? 2 : index === 1 ? 1 : 3}
-                <Text style={styles.suffix}>{getRankSuffix(index === 0 ? 2 : index === 1 ? 1 : 3)}</Text>
-              </Text>
-              <Text style={styles.score}>Score: {player.totalScore}</Text>
-            </View>
-          ))}
+        {topThree.map(renderPodiumPosition)}
       </View>
 
       <View style={styles.bottomContainer}>
-        <FlatList
-          data={remainingLeaderboard}
-          keyExtractor={(item) => item.position.toString()}
-          renderItem={({ item, index }) => (
-            <View style={styles.row}>
-              <Text style={styles.rank}>{index + 4}</Text>
-              <View style={styles.nameContainer}>
-                <Text style={[styles.name, { fontSize: scaleFont(18) }]}>{item.name}</Text>
-                <Text style={styles.subtitle}>{item.rank}</Text>
+        {remainingLeaderboard.length > 0 ? (
+          <FlatList
+            data={remainingLeaderboard}
+            keyExtractor={(item) => item.position.toString()}
+            renderItem={({ item, index }) => (
+              <View style={styles.row}>
+                <Text style={styles.rank}>{index + 4}</Text>
+                <View style={styles.nameContainer}>
+                  <Text style={[styles.name, { fontSize: scaleFont(18) }]}>{item.name}</Text>
+                  <Text style={styles.subtitle}>{item.rank}</Text>
+                </View>
+                <Text style={styles.score}>{item.totalScore}</Text>
               </View>
-              <Text style={styles.score}>{item.totalScore}</Text>
-            </View>
-          )}
-          refreshing={refreshing}
-          onRefresh={handleRefresh}
-          contentContainerStyle={{ paddingBottom: scaleSize(50) }} // Adds bottom padding
-        />
+            )}
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            contentContainerStyle={{ paddingBottom: scaleSize(50) }} // Adds bottom padding
+            ListEmptyComponent={
+              <View style={styles.emptyListContainer}>
+                <Text style={styles.emptyText}>No additional competitors yet</Text>
+              </View>
+            }
+          />
+        ) : (
+          <View style={styles.emptyListContainer}>
+            <Text style={styles.emptyText}>
+              {leaderboardData.length === 0 
+                ? "No competitors yet. Be the first to join!" 
+                : "No additional competitors beyond the podium."}
+            </Text>
+            <TouchableOpacity style={styles.refreshButton} onPress={handleRefresh}>
+              <Text style={styles.refreshButtonText}>Refresh</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -165,6 +244,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: scaleSize(20),
   },
+  emptyListContainer: {
+    padding: scaleSize(20),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: 'white',
+    fontSize: scaleFont(16),
+    textAlign: 'center',
+    marginBottom: scaleSize(15),
+  },
   topContainer: {
     flex: 4,
     flexDirection: 'row',
@@ -175,17 +265,42 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingTop: scaleSize(10),
+    paddingTop:  Platform.OS === 'ios' ? scaleSize(10) : scaleSize(40), // Slightly taller on Android
     height: '100%',
     borderBottomWidth: scaleSize(4),
     borderColor: Colors.gold,
   },
-  mainSection: {backgroundColor:Colors.backgroundColor, },
+  mainSection: {backgroundColor: Colors.backgroundColor},
   sideSection: {
     flex: 0.8,
-    paddingTop: scaleSize(60),
-    backgroundColor:Colors.mainBackgroundColor,
-    marginBottom: scaleSize(20),
+    paddingTop: Platform.OS === 'ios' ? scaleSize(60) : scaleSize(75), // Slightly taller on Android
+    backgroundColor: Colors.mainBackgroundColor,
+  },
+  emptySection: {
+    opacity: 0.6,
+  },
+  emptyImageContainer: {
+    width: scaleSize(90),
+    height: scaleSize(90),
+    borderRadius: scaleSize(50),
+    borderWidth: scaleSize(2),
+    borderColor: Colors.gold,
+    borderStyle: 'dashed',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: scaleSize(10),
+  },
+  emptyImageText: {
+    fontSize: scaleFont(40),
+    color: Colors.gold,
+    fontWeight: 'bold',
+  },
+  emptySubtitle: {
+    color: '#AAA',
+    fontSize: scaleFont(12),
+    textAlign: 'center',
+    marginTop: scaleSize(5),
   },
   icon: { width: scaleSize(100), height: scaleSize(100) },
   bottomContainer: {
@@ -202,7 +317,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: scaleSize(15),
-    backgroundColor:Colors.mainBackgroundColor,
+    backgroundColor: Colors.mainBackgroundColor,
     marginBottom: scaleSize(10),
     borderRadius: scaleSize(10),
   },
@@ -230,6 +345,31 @@ const styles = StyleSheet.create({
   number: { fontSize: scaleFont(30), color: Colors.gold },
   title: { color: 'white', fontWeight: 'normal' },
   suffix: { fontSize: scaleFont(20), color: Colors.gold },
+  retryButton: {
+    marginTop: scaleSize(15),
+    paddingVertical: scaleSize(10),
+    paddingHorizontal: scaleSize(20),
+    backgroundColor: Colors.gold,
+    borderRadius: scaleSize(5),
+  },
+  retryButtonText: {
+    color: Colors.mainBackgroundColor,
+    fontSize: scaleFont(16),
+    fontWeight: 'bold',
+  },
+  refreshButton: {
+    paddingVertical: scaleSize(8),
+    paddingHorizontal: scaleSize(20),
+    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+    borderWidth: 1,
+    borderColor: Colors.gold,
+    borderRadius: scaleSize(20),
+    marginTop: scaleSize(10),
+  },
+  refreshButtonText: {
+    color: Colors.gold,
+    fontSize: scaleFont(14),
+  },
 });
 
 export default InitialiseLeaderboard;

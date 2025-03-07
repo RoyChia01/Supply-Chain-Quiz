@@ -9,7 +9,8 @@ import {
   TouchableOpacity, 
   View, 
   FlatList,
-  Alert 
+  Alert,
+  Platform
 } from 'react-native';
 import { SharedElement } from 'react-navigation-shared-element';
 import Icon, { Icons } from '../components/Icons';
@@ -424,10 +425,11 @@ DetailsScreen.sharedElements = (route) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: Platform.OS === 'ios' ? 0 : 10, // Slightly taller on Android
   },
   backButton: {
     position: 'absolute',
-    top: scaleSize(15),
+    top: Platform.OS === 'ios' ? scaleSize(5) : scaleSize(25), // Slightly taller on Android
     left: 5,
     zIndex: 10,
     padding: 10,

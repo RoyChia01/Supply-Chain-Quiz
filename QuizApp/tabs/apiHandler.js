@@ -1,6 +1,6 @@
 //This file handles all the request to the backend server and returns the response
 //The server is hosted on a local machine and the IP address is used to connect to the server
-const BASE_URL = `http://10.132.0.73:8080`; // Replace with your server IP address
+const BASE_URL = `http://10.132.0.57:8080`; // Replace with your server IP address
 // Fetch all the topics from the backend
 export const fetchTopics = async () => {
   try {
@@ -21,11 +21,18 @@ export const fetchQuestions = async (topicUID) => {
     const data = await response.json();
 
     // Map the response data to match the required structure
-    const questionsData = data.qnaList.map(({ question, optionList, answer }) => ({
-      question,
-      options: optionList,
-      answer,
-    }));
+    const questionsData = data.qnaList.map(({ question, optionList, answer }) => {
+      // Create a new options array that includes the answer if it's not already in the list
+      const options = optionList.includes(answer) 
+        ? optionList 
+        : [...optionList, answer];
+        
+      return {
+        question,
+        options,
+        answer,
+      };
+    });
 
     return { questionsData, loading: false };
   } catch (error) {
