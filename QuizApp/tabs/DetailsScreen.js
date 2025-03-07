@@ -126,7 +126,7 @@ export default function DetailsScreen({ navigation, route }) {
       let newPointBalance;
       
       if (item.title === 'Gamble') {
-        const possibleOutcomes = [15, 5, 0, -5, -10];
+        const possibleOutcomes = [15, 6, -6, -10];
         const randomIndex = Math.floor(Math.random() * possibleOutcomes.length);
         const pointsChange = possibleOutcomes[randomIndex];
         

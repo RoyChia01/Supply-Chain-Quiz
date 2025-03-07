@@ -29,7 +29,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator,Dimensions, RefreshControl, useWindowDimensions 
+  View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator,Dimensions, RefreshControl, useWindowDimensions,Platform 
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { fetchTopics, getUserTitle } from './apiHandler';
@@ -196,7 +196,7 @@ useEffect(() => {
                 topic={{
                   id: item.id, 
                   name: item.name,
-                  index: item.index,
+                  index: item.index+1,
                 }}
                 onPress={() => navigation.navigate('QuizQuestions', { id: topic.id })}
               />
@@ -214,7 +214,7 @@ const styles = ScaledSheet.create({
     flex: 1,
     backgroundColor: Colors.mainBackgroundColor,
     alignItems: 'center',
-    Top: '-10@ms',
+    paddingTop: Platform.OS === 'ios' ? scaleSize(-40) : scaleSize(20), // Slightly taller on Android
   },
   imageContainer: {
     width: '50%', // Adjusted size to fit better

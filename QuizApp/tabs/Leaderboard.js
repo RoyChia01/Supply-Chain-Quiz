@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
   },
   icon: { width: scaleSize(100), height: scaleSize(100) },
   bottomContainer: {
-    flex: 6,
+    flex: 5,
     backgroundColor: "#0A1F33",
     justifyContent: 'center',
     alignItems: 'center',

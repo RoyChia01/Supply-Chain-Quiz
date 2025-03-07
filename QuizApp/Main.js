@@ -21,7 +21,6 @@ import { FIREBASE_AUTH } from './tabs/firebase';
 import { UserProvider } from './tabs/userInfo';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
-import { NetworkInfo } from "react-native-network-info";
 
 const { width, height } = Dimensions.get('window');
 const scaleFont = (size) => size * PixelRatio.getFontScale();
@@ -94,7 +93,7 @@ const TabButton = ({ item, onPress, accessibilityState }) => {
 
   useEffect(() => {
     viewRef.current?.animate({
-      0: { scale: focused ? 0.5 : 1.2, rotate: '0deg' },
+      0: { scale: focused ? 0.5 : 1.5, rotate: '0deg' },
       1: { scale: focused ? 1.2 : 1, rotate: '360deg' },
     });
   }, [focused]);
@@ -107,7 +106,7 @@ const TabButton = ({ item, onPress, accessibilityState }) => {
         <Icon 
           type={item.type} 
           name={iconName} 
-          color={focused ? Colors.primary : Colors.primaryLite} 
+          color={focused ? Colors.gold : Colors.gold} 
           size={width * 0.07} // Responsive icon size
         />
       </Animatable.View>
@@ -172,13 +171,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#2F4F6D',
   },
   tabBar: {
-    position: 'absolute',
-    bottom: 0,
-    height: Platform.OS === 'ios' ? height * 0.09 : height * 0.08,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: Platform.OS === 'ios' ? 20 : 0, // Adjusts for iOS safe area
+    backgroundColor: '#446d92',
+    height: 70,
+    borderRadius: 60,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 5,
+    paddingBottom: 10,
   },
   tabButton: {
     flex: 1,

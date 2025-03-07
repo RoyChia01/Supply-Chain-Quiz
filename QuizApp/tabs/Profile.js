@@ -503,6 +503,7 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: Colors.mainBackgroundColor,
     minHeight: height - (isIOS ? 120 : 80),
+    top: isIOS ? 0 : 40,
   },
   loadingContainer: {
     flex: 1,
