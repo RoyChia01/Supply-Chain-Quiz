@@ -1,0 +1,107 @@
+# Supply-Chain-Quiz
+
+## 📌 Project Description
+Supply-Chain-Quiz is a mobile application built using React Native (Expo) that includes a **QuizApp** module. It provides an interactive quiz experience with various features like color themes, icons, and different quiz screens.
+
+## 🚀 Features
+- Interactive quiz system
+- Custom UI components
+- Organized project structure with reusable components
+- Expo-based mobile development
+
+## 🛠 Installation
+To set up and run the project locally, follow these steps:
+
+1. Clone the frontend repository:
+   ```sh
+   git clone https://github.com/RoyChia01/Supply-Chain-Quiz.git
+   cd Supply-Chain-Quiz/QuizApp
+   ```
+2. Clone the backend service (required for full functionality):
+   ```sh
+   git clone https://github.com/CossetCosmi/RSAF-SC-MDEC-QUIZ-V3.git
+   ```
+3. Install dependencies for both frontend and backend:
+   ```sh
+   # Frontend
+   cd ../Supply-Chain-Quiz/QuizApp
+   npm install
+   
+   # Backend
+   cd ../Supply-Chain-Quiz-Backend
+   npm install
+   ```
+4. Start the backend service:
+   ```sh
+   npm start
+   ```
+5. Run the frontend using Expo:
+   ```sh
+   cd ../Supply-Chain-Quiz/QuizApp
+   npx expo start
+   ```
+To set up and run the project locally, follow these steps:
+
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/RoyChia01/Supply-Chain-Quiz.git
+   cd Supply-Chain-Quiz/QuizApp
+   ```
+2. Install dependencies:
+   ```sh
+   npm install
+   ```
+3. Run the project using Expo:
+   ```sh
+   npx expo start
+   ```
+
+## 📂 Project Structure
+```
+RSAF/
+  ├── QuizApp/
+  │   ├── App.js                    # Main entry point of the application
+  │   ├── Main.js                   # Handles the primary logic of the app
+  │   ├── index.js                  # Initializes the application
+  │   ├── images/                   # Contains images and icons
+  │   ├── common/                   # Shared styles and utilities
+  │   ├── components/               # Reusable UI components
+  │   │   ├── Icons.tsx             # Handles custom icons
+  │   │   ├── MyHeader.js           # Custom header component
+  │   ├── constants/                # Configuration constants
+  │   │   ├── Colors.js             # Defines color themes
+  │   ├── screens/                  # App screens
+  │   │   ├── ColorScreen.js        # Displays quiz options with colors
+  │   │   ├── Home.js               # Home screen of the app
+  │   ├── tabs/                     # Contains quiz-related tab components
+  │   │   ├── apiHandler.js         # Handles all API request
+  │   │   ├── DetailsScreen.js      # Handles the logic for the power up and ui of details screen
+  │   │   ├── firebase.js           # Handles the connection to firebase
+  │   │   ├── Leaderboard.js        # Handles leaderboard logic and the UI screen
+  │   │   ├── LoginScreen.js        # Handles login logic and the UI screen
+  │   │   ├── Profile.js            # Handles profile logic and the UI screen
+  │   │   ├── QuizTuestion.js       # Handles the logic and UI of the Quiz portion
+  │   │   ├── QuizTopics.js         # Handles the logic to display the topics
+  │   │   ├── resetPassword.js      # Handles logic to reset password
+  │   │   ├── ShopScreen.js         # Handles the UI and logic of the shop
+  │   │   ├── SignUpScreen.js       # Handles sign up screen
+  │   │   ├── userinfo.js           # stores the user email for easy access
+  │   ├── testing/                  # Testing-related scripts
+  │   │   ├── quiztesting.js        # Test cases for the quiz functionality
+  │   ├── package.json              # Project dependencies
+  │   ├── tsconfig.json             # TypeScript configuration
+```
+
+## 🖥 Usage
+1. Start the project as described in the installation steps.
+2. Open it on an emulator or a physical device using the Expo Go app.
+
+## 📜 License
+This project is licensed under the MIT License.
+
+## 🤝 Contributing
+Feel free to fork the repository and submit pull requests. For major changes, please open an issue first to discuss the changes.
+
+## 📩 Contact
+For any questions or support, reach out at [your-email@example.com].
+
