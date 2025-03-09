@@ -129,8 +129,13 @@ const BoardingPass = ({ navigation }) => {
       setEmail(data.email || "No email provided");
       setPointsBalance(data.pointBalance ?? 0);
       setRowData([
-        data.progress?.currentTopic || { index: 0, name: "Unknown" },
-        data.progress?.latestTopic || { index: 0, name: "Unknown" }
+        data.progress?.currentTopic 
+          ? { ...data.progress.currentTopic, index: data.progress.currentTopic.index + 1 }
+          : { index: 0, name: "Unknown" }, // Default case
+        
+        data.progress?.latestTopic
+          ? { ...data.progress.latestTopic, index: data.progress.latestTopic.index + 1 }
+          : { index: 0, name: "Unknown" }, // Default case
       ]);
       setTopRowData([
         { title: "School", subText: data.school || "N/A" },
@@ -567,8 +572,8 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
   },
   logoImage: {
-    height: getScaleSize(50),
-    width: getScaleSize(100),
+    height: getScaleSize(95),
+    width: getScaleSize(70),
   },
   exitIconContainer: {
     flexDirection: 'row',

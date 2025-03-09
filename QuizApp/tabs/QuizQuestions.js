@@ -94,7 +94,7 @@ const MultiplierPopup = ({ visible, onClose, scoreMultiplier }) => {
   // Determine message based on multiplier value
   const getMessage = () => {
     if (scoreMultiplier === 1) {
-      return "Your score will be calculated normally.";
+      return;
     } else if (scoreMultiplier > 1) {
       return `Power up active! Your score will be multiplied by ${scoreMultiplier}x`;
     } else {

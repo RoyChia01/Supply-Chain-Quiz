@@ -122,10 +122,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.mainBackgroundColor,
     paddingHorizontal: 20,
+    paddingTop: 70,
   },
   logo: {
-    width: 350,
-    height: 300,
+    width: 180,
+    height: 250,
     resizeMode: 'cover',
   },
   title: {

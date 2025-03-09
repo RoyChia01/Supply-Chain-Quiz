@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.mainBackgroundColor,
   },
   logo: {
-    width: 350,
+    width: 180,
     height: 250,
     resizeMode:'cover',
   },

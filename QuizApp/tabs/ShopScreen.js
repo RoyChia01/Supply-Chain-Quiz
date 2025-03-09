@@ -26,7 +26,7 @@ export default function ProductsList({ navigation, route }) {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [pointsBalance, setPointsBalance] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-  const categories = ['All', 'Offence', 'Defence', 'Wildcard'];
+  const categories = ['All', 'Attack', 'Defend', 'Wildcard'];
   const { userEmail } = useUser(); // Get user email from context
 
   // Calculate the cheapest item price

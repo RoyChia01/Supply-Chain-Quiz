@@ -42,7 +42,7 @@ export default function DetailsScreen({ navigation, route }) {
     const checkPurchaseStatus = async () => {
       try {
         // For regular power-ups
-        if (item.title !== 'Gamble') {
+        if (item.title !== 'Roll the dice') {
           const purchased = await AsyncStorage.getItem(`purchased_${item.id}`);
           if (purchased === 'true') {
             setIsPurchased(true);
@@ -125,7 +125,7 @@ export default function DetailsScreen({ navigation, route }) {
       
       let newPointBalance;
       
-      if (item.title === 'Gamble') {
+      if (item.title === 'Roll the dice') {
         const possibleOutcomes = [15, 6, -6, -10];
         const randomIndex = Math.floor(Math.random() * possibleOutcomes.length);
         const pointsChange = possibleOutcomes[randomIndex];
@@ -147,11 +147,11 @@ export default function DetailsScreen({ navigation, route }) {
         // Display remaining tries
         const remainingTries = MAX_GAMBLE_TRIES - newGambleCount;
         const triesMessage = remainingTries > 0
-          ? `\n\nYou have ${remainingTries} gamble ${remainingTries === 1 ? 'try' : 'tries'} remaining.`
-          : "\n\nYou have used all your gamble tries.";
+          ? `\n\nYou have ${remainingTries} Roll the dice ${remainingTries === 1 ? 'try' : 'tries'} remaining.`
+          : "\n\nYou have used all your Roll the dice tries.";
             
-        Alert.alert('Gamble Result', 
-          `You spent ${item.price} token to gamble.\n${resultMessage}\nNew balance: ${newPointBalance} token${triesMessage}`
+        Alert.alert('Roll the dice Result', 
+          `You spent ${item.price} token to Roll the dice.\n${resultMessage}\nNew balance: ${newPointBalance} token${triesMessage}`
         );
         
         // Save gamble count to AsyncStorage
@@ -281,11 +281,11 @@ export default function DetailsScreen({ navigation, route }) {
 
   // Get button text based on power-up type
   const getButtonText = () => {
-    if (item.title === 'Gamble') {
+    if (item.title === 'Roll the dice') {
       if (isPurchased) {
         return "No Tries Left";
       } else {
-        return `Gamble (${MAX_GAMBLE_TRIES - gambleCount} left)`;
+        return `Roll the dice (${MAX_GAMBLE_TRIES - gambleCount} left)`;
       }
     } else {
       return isPurchased ? "Purchased" : "Buy Now";
@@ -322,7 +322,7 @@ export default function DetailsScreen({ navigation, route }) {
               </Text>
               
               {/* Display gamble count for Gamble power-up */}
-              {item.title === 'Gamble' && (
+              {item.title === 'Roll the dice' && (
                 <Text style={{ fontSize: 16, color: Colors.gold, marginBottom: 15 }}>
                   You have used {gambleCount} out of {MAX_GAMBLE_TRIES} tries
                 </Text>
