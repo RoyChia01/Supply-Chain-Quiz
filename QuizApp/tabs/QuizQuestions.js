@@ -1,40 +1,9 @@
-/**
- * QuizQuestions.js
- * 
- * This React Native component handles the quiz functionality, including:
- * - Fetching quiz questions from an API.
- * - Displaying questions and answer options.
- * - Managing user responses and tracking score.
- * - Showing a progress bar with a plane animation.
- * - Displaying the final score with a user rank image.
- * - Submitting quiz results to a backend.
- * - Showing score multiplier popup at quiz start.
- * 
- * Key Functionalities:
- * - useQuizQuestions (Custom Hook): Fetches and manages quiz questions.
- * - QuizQuestions (Main Component): Controls the quiz flow and UI.
- * - ProgressBar: Displays quiz progress with animated plane.
- * - QuestionCard: Shows the current question and answer options.
- * - OptionButton: Handles user answer selection and feedback.
- * - Score: Displays user rank image, score, and submits results.
- * - MultiplierPopup: Displays score multiplier information at quiz start.
- * 
- * Dependencies:
- * - React & React Native for UI and state management.
- * - react-native-vector-icons for icons.
- * - react-navigation for screen navigation.
- * - External API calls for fetching questions & posting results.
- * 
- * Usage:
- * This component is used in a navigation stack. It receives a `topicId`
- * via `route.params` to fetch relevant quiz questions.
- */
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Image, Alert, Dimensions, ScrollView, Modal } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image, Alert, Dimensions, ScrollView, Modal, SafeAreaView, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
-import { fetchQuestions, getUserInfo, postQuizResults,resetScoreMultiplier } from './apiHandler';
-import { useUser } from './userInfo';  // Import the hook
+import { fetchQuestions, getUserInfo, postQuizResults, resetScoreMultiplier } from './apiHandler';
+import { useUser } from './userInfo';
 import { LogBox } from 'react-native';
 import Colors from '../constants/Colors';
 
@@ -42,11 +11,12 @@ LogBox.ignoreAllLogs(); // Ignore all log notifications
 
 // Get the device screen width and height
 const { width, height } = Dimensions.get('window');
-const getFontSize = (size) => {
-  const baseScale = 375;  // base screen width
-  return size * (width / baseScale);
-};
-const getscaleSize = (size) => size * (width / 375); // Base size scaling
+
+// Responsive scaling helpers
+const getFontSize = (size) => size * (width / 375);
+const getScaleSize = (size) => size * (width / 375);
+const isSmallDevice = width < 375;
+const isLargeDevice = width >= 768;
 
 const images = {
   SCEngineer: require('../images/AvatarProgression/Engineer.jpg'),
@@ -58,8 +28,6 @@ const images = {
   Trainee: require('../images/AvatarProgression/Trainee.jpg'), // Added fallback image
 };
 
-// Adjust font sizes and layout based on screen size
-const scale = width / 375; // 375 is the base width for standard screen size (like iPhone 6)
 // Custom Hook for Fetching Quiz Questions with Error Handling
 const useQuizQuestions = (topicId) => {
   const [questions, setQuestions] = useState([]);
@@ -75,7 +43,7 @@ const useQuizQuestions = (topicId) => {
         if (!response || !response.questionsData || response.questionsData.length === 0) {
           throw new Error('No questions found.');
         }
-        setQuestions(response.questionsData);  // Set the correct questionsData
+        setQuestions(response.questionsData);
       } catch (err) {
         setError(err.message || 'An error occurred while fetching questions.');
       } finally {
@@ -120,7 +88,7 @@ const MultiplierPopup = ({ visible, onClose, scoreMultiplier }) => {
         <View style={[styles.modalContent, { backgroundColor: getBackgroundColor() }]}>
           <Icon 
             name={scoreMultiplier >= 1 ? "rocket" : "arrow-down"} 
-            size={50} 
+            size={getFontSize(50)} 
             color="white" 
             style={styles.modalIcon} 
           />
@@ -143,10 +111,9 @@ const MultiplierPopup = ({ visible, onClose, scoreMultiplier }) => {
 };
 
 // Main Component for Quiz Questions
-// Main Component for Quiz Questions
 const QuizQuestions = ({ navigation, route }) => {
-  const { id } = route.params; // Destructure 'id' from route.params
-  console.log("Received ID:", id); // Log to check if it comes through correctly
+  const { id } = route.params;
+  console.log("Received ID:", id);
   const { questions, loading, error } = useQuizQuestions(id);
   const { userEmail } = useUser();
 
@@ -155,6 +122,7 @@ const QuizQuestions = ({ navigation, route }) => {
   const [showScore, setShowScore] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [answerLocked, setAnswerLocked] = useState(false);
+  const [isAnswerCorrect, setIsAnswerCorrect] = useState(null);
   
   // New state for score multiplier and popup
   const [scoreMultiplier, setScoreMultiplier] = useState(1);
@@ -188,17 +156,29 @@ const QuizQuestions = ({ navigation, route }) => {
   // Handle TabBar Visibility
   useFocusEffect(
     useCallback(() => {
-      navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
-      return () => navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex' } });
+      if (navigation.getParent()) {
+        navigation.getParent().setOptions({ tabBarVisible: false });
+      }
+      return () => {
+        if (navigation.getParent()) {
+          navigation.getParent().setOptions({ tabBarVisible: true });
+        }
+      };
     }, [navigation])
   );
 
   // Handle Answer Selection with multiplier
   const handleAnswer = (answer) => {
-    if (answer === questions[currentQuestion]?.answer) {
+    const isCorrect = answer === questions[currentQuestion]?.answer;
+    
+    if (isCorrect) {
       // Apply score multiplier to correct answers
       setScore(prev => prev + 1 * scoreMultiplier);
+      setIsAnswerCorrect(true);
+    } else {
+      setIsAnswerCorrect(false);
     }
+    
     setSelectedAnswer(answer);
     setAnswerLocked(true);
   };
@@ -209,6 +189,7 @@ const QuizQuestions = ({ navigation, route }) => {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
       setAnswerLocked(false);
+      setIsAnswerCorrect(null);
     } else {
       setShowScore(true);
     }
@@ -221,13 +202,14 @@ const QuizQuestions = ({ navigation, route }) => {
     setShowScore(false);
     setAnswerLocked(false);
     setSelectedAnswer(null);
+    setIsAnswerCorrect(null);
     navigation.goBack();
   };
 
   // Auto-advance after Answer Selection
   useEffect(() => {
     if (answerLocked) {
-      const timeout = setTimeout(moveNextQuestion, 1000);
+      const timeout = setTimeout(moveNextQuestion, 2500);
       return () => clearTimeout(timeout);
     }
   }, [answerLocked, currentQuestion]);
@@ -240,11 +222,20 @@ const QuizQuestions = ({ navigation, route }) => {
   };
 
   // Loading, Error Handling, and displaying messages
-  if (loading) return <Text style={styles.loadingText}>Loading...</Text>;
-  if (error) return <Text style={styles.errorText}>Error: {error}</Text>;
+  if (loading) return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.loadingText}>Loading...</Text>
+    </SafeAreaView>
+  );
+  
+  if (error) return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.errorText}>Error: {error}</Text>
+    </SafeAreaView>
+  );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Score Multiplier Popup */}
       <MultiplierPopup 
         visible={showMultiplierPopup} 
@@ -272,6 +263,7 @@ const QuizQuestions = ({ navigation, route }) => {
               selectedAnswer={selectedAnswer}
               answerLocked={answerLocked}
               onAnswer={handleAnswer}
+              isAnswerCorrect={isAnswerCorrect}
             />
           )}
         </>
@@ -281,7 +273,7 @@ const QuizQuestions = ({ navigation, route }) => {
       {!showQuizContent && showMultiplierPopup && (
         <Text style={styles.waitingText}>Get ready for the quiz!</Text>
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -298,14 +290,14 @@ const ProgressBar = ({ currentQuestion, totalQuestions }) => {
     <View style={styles.progressBarContainer}>
       <View style={styles.progressBar}>
         {dashes}
-        <Icon name="plane" size={60} style={[styles.planeIcon, { left: `${progress}%` }]} />
+        <Icon name="plane" size={getFontSize(50)} style={[styles.planeIcon, { left: `${progress}%` }]} />
       </View>
     </View>
   );
 };
 
 // Display Question Card with Options
-const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer }) => {
+const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer, isAnswerCorrect }) => {
   const [shuffledOptions, setShuffledOptions] = useState([]);
 
   const shuffleArray = (array) => {
@@ -327,11 +319,17 @@ const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer }) => {
 
   return (
     <>
-      <Text style={[styles.questionText, { fontSize: 24 }]}>{question?.question || 'Loading question...'}</Text>
+      <Text style={styles.questionText}>{question?.question || 'Loading question...'}</Text>
       
-      <Text style={styles.scrollHint}>Scroll to see more options ↓</Text>
+      {shuffledOptions.length > 4 && (
+        <Text style={styles.scrollHint}>Scroll to see more options ↓</Text>
+      )}
       
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.optionsContainer}>
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={styles.optionsContainer}
+        showsVerticalScrollIndicator={true}
+      >
         {shuffledOptions.length > 0 ? (
           shuffledOptions.map((option, index) => (
             <OptionButton
@@ -341,6 +339,7 @@ const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer }) => {
               isCorrect={option === question.answer}
               onAnswer={onAnswer}
               answerLocked={answerLocked}
+              highlightCorrect={!isAnswerCorrect && answerLocked}
             />
           ))
         ) : (
@@ -352,39 +351,70 @@ const QuestionCard = ({ question, selectedAnswer, answerLocked, onAnswer }) => {
 };
 
 // Option Button Component with Answer Feedback
-const OptionButton = ({ option, selectedAnswer, isCorrect, onAnswer, answerLocked }) => (
-  <TouchableOpacity
-    onPress={() => onAnswer(option)}
-    style={[
-      styles.optionButton,
-      selectedAnswer === option && (isCorrect ? styles.correctOption : styles.incorrectOption)
-    ]}
-    disabled={answerLocked}
-  >
-    <Text
+const OptionButton = ({ option, selectedAnswer, isCorrect, onAnswer, answerLocked, highlightCorrect }) => {
+  // Determine button style based on selection and correctness
+  const getButtonStyle = () => {
+    // If this is the selected answer
+    if (selectedAnswer === option) {
+      return isCorrect ? styles.correctOption : styles.incorrectOption;
+    }
+    // If we should highlight the correct answer when user got it wrong
+    else if (highlightCorrect && isCorrect) {
+      return styles.correctAnswerHighlight;
+    }
+    return {};
+  };
+
+  return (
+    <TouchableOpacity
+      onPress={() => onAnswer(option)}
       style={[
-        styles.optionsBox,
-        selectedAnswer === option && { marginRight: 35, fontSize: 14 }
+        styles.optionButton,
+        getButtonStyle()
       ]}
+      disabled={answerLocked}
+      activeOpacity={0.7}
     >
-      {option}
-    </Text>
-    {selectedAnswer === option && (
-      <Icon
-        name={isCorrect ? 'check-circle' : 'times-circle'}
-        size={30}
-        color={isCorrect ? '#90EE90' : '#FF6F6F'}
-        style={styles.icon}
-      />
-    )}
-  </TouchableOpacity>
-);
+      <Text
+        style={[
+          styles.optionsBox,
+          selectedAnswer === option && { marginRight: 35 }
+        ]}
+        numberOfLines={3}
+        ellipsizeMode="tail"
+      >
+        {option}
+      </Text>
+      
+      {/* Show feedback icon for selected answer */}
+      {selectedAnswer === option && (
+        <Icon
+          name={isCorrect ? 'check-circle' : 'times-circle'}
+          size={getFontSize(20)}
+          color={isCorrect ? '#90EE90' : '#FF6F6F'}
+          style={styles.icon}
+        />
+      )}
+      
+      {/* Show correct answer icon when user selected wrong answer */}
+      {highlightCorrect && isCorrect && (
+        <Icon
+          name="check-circle"
+          size={getFontSize(20)}
+          color="#90EE90"
+          style={styles.icon}
+        />
+      )}
+    </TouchableOpacity>
+  );
+};
 
 // Score Component with Ranking and Restart Option
 const Score = ({ score, totalQuestions, onRestart, topicId, userDocumentID, scoreMultiplier }) => {
   const { userEmail } = useUser();
   const [imageSource, setImageSource] = useState(require('../images/AvatarProgression/Trainee.jpg')); // Default image
   const finalScore = Math.round(score); // Ensure score is rounded to nearest integer
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -408,29 +438,45 @@ const Score = ({ score, totalQuestions, onRestart, topicId, userDocumentID, scor
   }, [userEmail, userDocumentID]);
 
   useEffect(() => {
-    if (userDocumentID && topicId !== undefined && finalScore !== undefined) {
-      try {
-        console.log('Submitting quiz results...', userDocumentID, topicId, finalScore);
-        postQuizResults(userDocumentID, topicId, finalScore);
-        resetScoreMultiplier(userDocumentID);
-      } catch (error) {
-        Alert.alert('Error', 'Unable to submit your results. Please try again later.');
+    const submitResults = async () => {
+      if (userDocumentID && topicId !== undefined && finalScore !== undefined && !isSubmitting) {
+        setIsSubmitting(true);
+        try {
+          console.log('Submitting quiz results...', userDocumentID, topicId, finalScore);
+          await postQuizResults(userDocumentID, topicId, finalScore);
+          await resetScoreMultiplier(userDocumentID);
+        } catch (error) {
+          Alert.alert('Error', 'Unable to submit your results. Please try again later.');
+        } finally {
+          setIsSubmitting(false);
+        }
       }
-    }
-  }, [userDocumentID, topicId, finalScore]); // Dependency array ensures postQuizResults is called only when userDocumentID is set
+    };
+
+    submitResults();
+  }, [userDocumentID, topicId, finalScore]);
 
   if (!userDocumentID) return <Text style={styles.loadingText}>Loading user info...</Text>;
+
+  const scorePercentage = (finalScore / totalQuestions) * 100;
+  const scoreColor = 
+    scorePercentage >= 80 ? '#4CAF50' : 
+    scorePercentage >= 60 ? '#FFC107' : 
+    '#FF5252';
 
   return (
     <View style={styles.scoreContainer}>
       <Image source={imageSource} style={styles.avatar} />
-      <Text style={styles.scoreText}>Score: {finalScore} / {totalQuestions}</Text>
+      
+      <Text style={[styles.scoreText, { color: scoreColor }]}>
+        Score: {finalScore} / {totalQuestions}
+      </Text>
       
       {scoreMultiplier !== 1 && (
         <View style={styles.multiplierInfo}>
           <Icon 
             name={scoreMultiplier > 1 ? "rocket" : "arrow-down"} 
-            size={20} 
+            size={getFontSize(20)} 
             color={scoreMultiplier > 1 ? "#4CAF50" : "#FF6347"} 
             style={{marginRight: 10}} 
           />
@@ -451,165 +497,181 @@ const Score = ({ score, totalQuestions, onRestart, topicId, userDocumentID, scor
             Alert.alert('Error', 'Unable to restart. Please try again later.');
           }
         }}
+        disabled={isSubmitting}
       >
-        <Text style={styles.resetButtonText}>Home</Text>
+        <Text style={styles.resetButtonText}>
+          {isSubmitting ? 'Submitting...' : 'Home'}
+        </Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-// Styles for the Components
+// Enhanced styles for better responsiveness
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
     backgroundColor: Colors.mainBackgroundColor, 
     alignItems: 'center', 
     justifyContent: 'center', 
-    paddingTop: height * 0.1, // 10% of screen height
+    paddingTop: Platform.OS === 'ios' ? getScaleSize(20) : getScaleSize(40), 
+    paddingHorizontal: getScaleSize(10),
     width: '100%' 
   },
   questionText: { 
-    fontSize: getFontSize(36), // Scale font size dynamically
+    fontSize: isSmallDevice ? getFontSize(20) : isLargeDevice ? getFontSize(32) : getFontSize(24),
     textAlign: 'center', 
     color: 'white', 
     fontWeight: 'bold', 
     fontFamily: 'Roboto', 
-    marginBottom: getscaleSize(20),
-    marginTop: getscaleSize(40),
+    marginBottom: getScaleSize(20),
+    marginTop: getScaleSize(75),
+    paddingHorizontal: getScaleSize(15),
   },
   optionsContainer: { 
-    marginVertical: 20, 
+    marginVertical: getScaleSize(15), 
     width: '100%', 
-    alignItems: 'center' 
+    alignItems: 'center',
+    paddingHorizontal: getScaleSize(10),
   },
   optionButton: { 
     backgroundColor: '#5b7c99', 
-    borderRadius: 20, 
-    padding: 10, 
-    marginVertical: 10, 
-    width: '80%',  // Adjust width relative to screen size
-    maxWidth: 300, 
+    borderRadius: getScaleSize(20), 
+    padding: getScaleSize(10), 
+    marginVertical: getScaleSize(8), 
+    width: isLargeDevice ? '70%' : '90%',
+    maxWidth: 400, 
     alignItems: 'center', 
-    position: 'relative' 
+    position: 'relative',
+    minHeight: getScaleSize(60),
+    justifyContent: 'center',
   },
   optionsBox: { 
     color: 'white', 
-    padding: 5, 
-    marginVertical: 10, 
+    padding: getScaleSize(5), 
     textAlign: 'center', 
-    fontSize: getFontSize(18),  // Scale the font size dynamically
-    borderRadius: 20, 
+    fontSize: isSmallDevice ? getFontSize(14) : getFontSize(16),
     width: '100%' 
   },
   correctOption: { 
     borderWidth: 3, 
     borderColor: '#90EE90', 
-    backgroundColor: '#5b7c99', 
-    borderRadius: 20, 
-    padding: 5 
+    backgroundColor: 'rgba(144, 238, 144, 0.2)',
   },
   incorrectOption: { 
     borderWidth: 3, 
     borderColor: '#FF6F6F', 
-    backgroundColor: '#5b7c99', 
-    borderRadius: 20, 
-    padding: 5 
+    backgroundColor: 'rgba(255, 111, 111, 0.2)',
+  },
+  // New style for highlighting the correct answer when user got it wrong
+  correctAnswerHighlight: {
+    borderWidth: 3,
+    borderColor: '#90EE90',
+    borderStyle: 'dashed',
+    backgroundColor: 'rgba(144, 238, 144, 0.1)',
   },
   icon: { 
     position: 'absolute', 
-    bottom: 10, 
-    right: 10 
+    right: getScaleSize(10),
   },
   loadingText: { 
     color: 'white', 
-    fontSize: getFontSize(20), // Scale font size dynamically
-    fontWeight: 'bold' 
+    fontSize: getFontSize(20),
+    fontWeight: 'bold',
+    textAlign: 'center', 
+  },
+  waitingText: {
+    color: 'white',
+    fontSize: getFontSize(20),
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   errorText: { 
     color: 'red', 
     fontSize: getFontSize(20), 
-    fontWeight: 'bold' 
+    fontWeight: 'bold',
+    textAlign: 'center',
+    padding: getScaleSize(20),
   },
   resetButton: { 
     backgroundColor: '#e0a100', 
-    padding: 15, 
-    borderRadius: 10, 
-    width: '90%',  // Make button width relative
+    padding: getScaleSize(15), 
+    borderRadius: getScaleSize(10), 
+    width: isLargeDevice ? '60%' : '90%',
+    maxWidth: 300,
     alignItems: 'center', 
-    marginVertical: '5%' 
+    marginVertical: getScaleSize(20),
   },
   resetButtonText: { 
     color: '#fff', 
-    fontSize: getFontSize(20),  // Scale button text dynamically
+    fontSize: getFontSize(20),
     fontWeight: 'bold' 
   },
   scoreContainer: { 
     backgroundColor: Colors.mainBackgroundColor, 
-    padding: 30, 
-    borderRadius: 20, 
+    padding: getScaleSize(20), 
+    borderRadius: getScaleSize(20), 
     alignItems: 'center', 
-    width: '90%' 
+    width: '100%',
+    maxWidth: 500,
   },
   rankText: { 
     color: '#FFD700', 
-    fontSize: getFontSize(24),  // Scale rank text dynamically
+    fontSize: getFontSize(24),
     fontWeight: 'bold', 
-    marginBottom: 10 
+    marginBottom: getScaleSize(10),
   },
   avatar: { 
-    width: getFontSize(150), 
-    height: getFontSize(150), 
-    borderRadius: getFontSize(60), 
+    width: isSmallDevice ? getFontSize(120) : getFontSize(150), 
+    height: isSmallDevice ? getFontSize(120) : getFontSize(150), 
+    borderRadius: getFontSize(75), 
     backgroundColor: '#ccc', 
-    marginBottom: 20 
+    marginBottom: getScaleSize(20),
   },
   scoreText: { 
     fontSize: getFontSize(28), 
-    color: 'white', 
     fontWeight: 'bold', 
-    marginBottom: 20 
+    marginBottom: getScaleSize(20),
   },
   progressBarContainer: { 
     position: 'absolute', 
-    top: getscaleSize(50),
+    top: Platform.OS === 'ios' ? getScaleSize(50) : getScaleSize(30),
     width: '90%', 
     height: getFontSize(60), 
     backgroundColor: '#071f35', 
-    borderRadius: 10, 
-    overflow: 'hidden', 
+    borderRadius: getScaleSize(10), 
+    overflow: 'hidden',
+    maxWidth: 500,
   },
   progressBar: { 
     position: 'relative', 
     width: '100%', 
-    height: '100%' 
+    height: '100%',
   },
   dash: { 
     position: 'absolute', 
     top: getFontSize(28), 
-    width: 10, 
-    height: 2, 
+    width: getScaleSize(10), 
+    height: getScaleSize(2), 
     backgroundColor: '#ffffff' 
   },
   planeIcon: { 
     position: 'absolute', 
-    zIndex: 1 , 
+    top: getScaleSize(5),
+    zIndex: 1, 
     color: Colors.gold 
   },
   scrollView: {
     width: '100%',
-    maxHeight: '70%', // Adjust max height to fit screen
-  },
-  optionsContainer: {
-    alignItems: 'center',
-    paddingBottom: 20, // Ensure some space at bottom for scrolling
+    maxHeight: isLargeDevice ? '65%' : '60%',
   },
   scrollHint: {
-    fontSize: 16,
+    fontSize: isSmallDevice ? getFontSize(12) : getFontSize(14),
     color: '#aaa',
     textAlign: 'center',
-    marginBottom: 5,
+    marginBottom: getScaleSize(5),
   },
-  // New styles for multiplier popup
+  // Styles for multiplier popup
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
@@ -617,33 +679,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    width: '80%',
-    borderRadius: 20,
-    padding: 20,
+    width: isLargeDevice ? '60%' : '80%',
+    maxWidth: 400,
+    borderRadius: getScaleSize(20),
+    padding: getScaleSize(20),
     alignItems: 'center',
     elevation: 5,
   },
   modalIcon: {
-    marginBottom: 15,
+    marginBottom: getScaleSize(15),
   },
   modalTitle: {
     fontSize: getFontSize(24),
     fontWeight: 'bold',
     color: 'white',
-    marginBottom: 10,
+    marginBottom: getScaleSize(10),
     textAlign: 'center',
   },
   modalMessage: {
     fontSize: getFontSize(18),
     color: 'white',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: getScaleSize(20),
   },
   modalButton: {
     backgroundColor: 'white',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
+    paddingVertical: getScaleSize(10),
+    paddingHorizontal: getScaleSize(20),
+    borderRadius: getScaleSize(10),
   },
   modalButtonText: {
     fontSize: getFontSize(18),
@@ -654,13 +717,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 15,
+    padding: getScaleSize(10),
+    borderRadius: getScaleSize(10),
+    marginBottom: getScaleSize(15),
+    flexWrap: 'wrap',
+    justifyContent: 'center',
   },
   multiplierText: {
     color: 'white',
     fontSize: getFontSize(16),
+    textAlign: 'center',
   },
 });
 
