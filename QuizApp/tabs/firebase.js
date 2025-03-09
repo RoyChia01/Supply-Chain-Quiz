@@ -13,7 +13,13 @@ LogBox.ignoreAllLogs(); // Ignore all log notifications
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-#
+  apiKey: "AIzaSyDmqBKUv3cHYeoTVrqqjEvwqCYrCwQie6s",
+  authDomain: "supply-chain-school.firebaseapp.com",
+  projectId: "supply-chain-school",
+  storageBucket: "supply-chain-school.firebasestorage.app",
+  messagingSenderId: "654475678346",
+  appId: "1:654475678346:web:7d477d28dca63117ea1373",
+  measurementId: "G-ZLLNR7PW6M"
 };
 
 // Initialize Firebase
