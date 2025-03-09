@@ -77,6 +77,7 @@ RSAF/
   │   │   ├── apiHandler.js         # Handles all API request
   │   │   ├── DetailsScreen.js      # Handles the logic for the power up and ui of details screen
   │   │   ├── firebase.js           # Handles the connection to firebase
+  │   │   ├── gameRulePage.js       # Handles game rule screen
   │   │   ├── Leaderboard.js        # Handles leaderboard logic and the UI screen
   │   │   ├── LoginScreen.js        # Handles login logic and the UI screen
   │   │   ├── Profile.js            # Handles profile logic and the UI screen
