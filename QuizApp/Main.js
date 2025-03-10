@@ -16,7 +16,7 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import LoginScreen from './tabs/LoginScreen';
 import SignUpScreen from './tabs/SignUpScreen';
-import gameRulePage from './tabs/gameRulePage';
+import GameRulebook from './tabs/gameRulePage';
 import { onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from './tabs/firebase';
 import { UserProvider } from './tabs/userInfo';
@@ -90,9 +90,9 @@ const TabArr = [
     route: 'GameRule',
     label: 'GameRule',
     type: Icons.FontAwesome,
-    activeIcon: 'question-circle',
-    inActiveIcon: 'question',
-    component: ProfileStack,
+    activeIcon: 'book',
+    inActiveIcon: 'book',
+    component: GameRulebook,
   },
 ];
 
