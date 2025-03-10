@@ -332,7 +332,7 @@ const BoardingPass = ({ navigation }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Your Title</Text>
+              <Text style={styles.modalTitle}>Select Your Avatar</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Icon name="times" size={24} color="#333" />
               </TouchableOpacity>
