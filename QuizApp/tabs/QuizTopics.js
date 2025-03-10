@@ -47,7 +47,7 @@ const TopicButton = ({ topic, onPress, completed = false }) => (
     {completed && (
       <View style={styles.completionBadgeContainer}>
         <View style={styles.completionBadge}>
-          <Icon name="check" size={16} color="white" />
+          <Icon name="star" size={25} color="gold" />
         </View>
         <Text style={styles.completionText}>Completed</Text>
       </View>
@@ -327,13 +327,12 @@ const styles = ScaledSheet.create({
     width: '22@ms',
     height: '22@ms',
     borderRadius: '11@ms',
-    backgroundColor: '#4CAF50',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: '5@ms',
   },
   completionText: {
-    fontSize: '12@ms',
+    fontSize: '16@ms',
     color: '#4CAF50',
     fontWeight: 'bold',
   },
