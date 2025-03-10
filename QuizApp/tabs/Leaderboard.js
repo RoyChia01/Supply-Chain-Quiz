@@ -27,8 +27,8 @@ const images = {
   CO2: require('../images/AvatarProgression/CO2.jpg'),
   Commander1: require('../images/AvatarProgression/Commander1.jpg'),
   Commander2: require('../images/AvatarProgression/Commander2.jpg'),
-  Trainee1: require('../images/AvatarProgression/Trainee1.jpg'),
-  Trainee2: require('../images/AvatarProgression/Trainee2.jpg'), 
+  Apprentice1: require('../images/AvatarProgression/Trainee1.jpg'),
+  Apprentice2: require('../images/AvatarProgression/Trainee2.jpg'), 
 };
 
 // Placeholder component for empty podium positions
@@ -167,8 +167,11 @@ const InitialiseLeaderboard = () => {
     // Get the appropriate image based on rank
     let imageKey = item.rank;
     
-    // Default to the "1" suffix version for Commander, Trainee, OC, and CO
-    if (['Commander', 'Trainee', 'OC', 'CO','FlightLead','TeamIC','SCEngineer'].includes(item.rank)) {
+    // Check if rank is in the valid list and does not have a number suffix
+    const validRanks = ['Commander', 'Trainee', 'OC', 'CO', 'FlightLead', 'TeamIC', 'SCEngineer'];
+    const hasNumberSuffix = /\d$/.test(item.rank);
+
+    if (validRanks.includes(item.rank) && !hasNumberSuffix) {
       imageKey = `${item.rank}1`;
     }
     

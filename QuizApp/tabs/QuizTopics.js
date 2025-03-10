@@ -33,8 +33,8 @@ const images = {
   CO2: require('../images/AvatarProgression/CO2.jpg'),
   Commander1: require('../images/AvatarProgression/Commander1.jpg'),
   Commander2: require('../images/AvatarProgression/Commander2.jpg'),
-  Trainee1: require('../images/AvatarProgression/Trainee1.jpg'),
-  Trainee2: require('../images/AvatarProgression/Trainee2.jpg'), 
+  Apprentice1: require('../images/AvatarProgression/Trainee1.jpg'),
+  Apprentice2: require('../images/AvatarProgression/Trainee2.jpg'), 
 };
 
 // TopicButton with interior completion badge
@@ -108,14 +108,20 @@ const QuizTopics = () => {
 
       // Process user rank and set avatar image
       if (userRankData) {
+        console.log(userRankData)
         setUserRank(userRankData);
-        const validRanks = ['Commander', 'Trainee', 'OC', 'CO', 'FlightLead', 'TeamIC', 'SCEngineer'];
-        const imageKey = validRanks.includes(userRankData) ? `${userRankData}1` : 'Trainee1';
-        setImageSource(images[imageKey] || images.Trainee1);
+        const validRanks = ['Commander', 'Apprentice', 'OC', 'CO', 'FlightLead', 'TeamIC', 'SCEngineer'];
+      
+        // Check if rank is valid and does not already have a numeric suffix
+        const hasNumberSuffix = /\d$/.test(userRankData);
+        const imageKey = validRanks.includes(userRankData) && !hasNumberSuffix ? `${userRankData}1` : userRankData;
+      
+        setImageSource(images[imageKey] || images[userRankData]);
       } else {
         setUserRank('Trainee');
         setImageSource(images.Trainee1);
       }
+      
 
       // Process completed quizzes
       const validQuizStatus = Array.isArray(quizStatusData) ? quizStatusData : [];

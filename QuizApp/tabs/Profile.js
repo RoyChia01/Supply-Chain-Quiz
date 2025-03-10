@@ -78,8 +78,8 @@ const images = {
   CO2: require('../images/AvatarProgression/CO2.jpg'),
   Commander1: require('../images/AvatarProgression/Commander1.jpg'),
   Commander2: require('../images/AvatarProgression/Commander2.jpg'),
-  Trainee1: require('../images/AvatarProgression/Trainee1.jpg'),
-  Trainee2: require('../images/AvatarProgression/Trainee2.jpg'), 
+  Apprentice1: require('../images/AvatarProgression/Trainee1.jpg'),
+  Apprentice2: require('../images/AvatarProgression/Trainee2.jpg'), 
 };
 // Function to get formatted date
 const getCurrentDate = () => {
@@ -148,12 +148,18 @@ const BoardingPass = ({ navigation }) => {
         { title: "Rank", subText: data.rank?.selectedTitle || "Unranked" },
         { title: "Date", subText: getCurrentDate() }
       ]);
-      let imageKey = 'Trainee1'; // Default image key
-        if (['Commander', 'Trainee', 'OC', 'CO', 'FlightLead', 'TeamIC', 'SCEngineer'].includes(data.rank.selectedTitle)) {
-          imageKey = `${data.rank.selectedTitle}1`;
-        }
-        // Set image source using the determined key
-        setImageUrl(images[imageKey] || images.Trainee1);
+      if (data.rank.selectedTitle) {
+        console.log(data.rank.selectedTitle)
+        const validRanks = ['Commander', 'Apprentice', 'OC', 'CO', 'FlightLead', 'TeamIC', 'SCEngineer'];
+      
+        // Check if rank is valid and does not already have a numeric suffix
+        const hasNumberSuffix = /\d$/.test(data.rank.selectedTitle);
+        const imageKey = validRanks.includes(data.rank.selectedTitle) && !hasNumberSuffix ? `${data.rank.selectedTitle}1` : data.rank.selectedTitle;
+      
+        setImageUrl(images[imageKey] || images[data.rank.selectedTitle]);
+      } else {
+        setImageUrl(images.Apprentice1);
+      }
     } catch (error) {
       console.error("❌ Error loading user data:", error);
       setError("Failed to load profile data. Please check your connection.");

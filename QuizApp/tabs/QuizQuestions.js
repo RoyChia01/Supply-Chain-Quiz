@@ -31,8 +31,8 @@ const images = {
   CO2: require('../images/AvatarProgression/CO2.jpg'),
   Commander1: require('../images/AvatarProgression/Commander1.jpg'),
   Commander2: require('../images/AvatarProgression/Commander2.jpg'),
-  Trainee1: require('../images/AvatarProgression/Trainee1.jpg'),
-  Trainee2: require('../images/AvatarProgression/Trainee2.jpg'), 
+  Apprentice1: require('../images/AvatarProgression/Trainee1.jpg'),
+  Apprentice2: require('../images/AvatarProgression/Trainee2.jpg'), 
 };
 
 // Custom Hook for Fetching Quiz Questions with Error Handling
@@ -433,15 +433,21 @@ const Score = ({ score, totalQuestions, onRestart, topicId, userDocumentID, scor
           userDocumentID(userInfo.id);
         }
         
-        // Set avatar image based on user rank
         if (userInfo && userInfo.rank && userInfo.rank.selectedTitle) {
           const validRanks = ['Commander', 'Trainee', 'OC', 'CO', 'FlightLead', 'TeamIC', 'SCEngineer'];
-          const imageKey = validRanks.includes(userInfo.rank.selectedTitle) 
-            ? `${userInfo.rank.selectedTitle}1` 
-            : 'Trainee1';
+          const { selectedTitle } = userInfo.rank;
+        
+          // Check if selectedTitle has a numeric suffix
+          const hasNumberSuffix = /\d$/.test(selectedTitle);
           
-          setImageSource(images[imageKey] || images.Trainee1);
+          // Append "1" only if it's in the validRanks and doesn't already have a number
+          const imageKey = validRanks.includes(selectedTitle) && !hasNumberSuffix 
+            ? `${selectedTitle}1` 
+            : selectedTitle;
+        
+          setImageSource(images[imageKey] || images[selectedTitle] || images.Apprentice1);
         }
+        
       } catch (error) {
         Alert.alert('Error', 'Unable to fetch user info. Please try again later.');
       }
