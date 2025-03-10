@@ -289,11 +289,11 @@ const styles = ScaledSheet.create({
   windowRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
   },
   windowButton: {
     backgroundColor: '#3A5F77',
-    width: '140@ms',
+    width: '120@ms',
     height: '160@ms',
     borderRadius: '15@ms',
     justifyContent: 'center',
