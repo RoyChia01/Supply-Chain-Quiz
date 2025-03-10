@@ -15,13 +15,20 @@ const scaleFont = (size) => {
 };
 
 const images = {
-  SCEngineer: require('../images/AvatarProgression/Engineer.jpg'),
-  TeamIC: require('../images/AvatarProgression/TeamIC.jpg'),
-  FlightLead: require('../images/AvatarProgression/FlightLead.jpg'),
-  OC: require('../images/AvatarProgression/OC.jpg'),
-  CO: require('../images/AvatarProgression/CO.jpg'),
-  Commander: require('../images/AvatarProgression/Commander.jpg'),
-  default: require('../images/AvatarProgression/Trainee.jpg'), // Default image in case no rank matches
+  SCEngineer1: require('../images/AvatarProgression/SCEngineer1.jpg'),
+  SCEngineer2: require('../images/AvatarProgression/SCEngineer2.jpg'),
+  TeamIC1: require('../images/AvatarProgression/TeamIC1.jpg'),
+  TeamIC2: require('../images/AvatarProgression/TeamIC2.jpg'),
+  FlightLead1: require('../images/AvatarProgression/FlightLead1.jpg'),
+  FlightLead2: require('../images/AvatarProgression/FlightLead2.jpg'),
+  OC1: require('../images/AvatarProgression/OC1.jpg'),
+  OC2: require('../images/AvatarProgression/OC2.jpg'),
+  CO1: require('../images/AvatarProgression/CO1.jpg'),
+  CO2: require('../images/AvatarProgression/CO2.jpg'),
+  Commander1: require('../images/AvatarProgression/Commander1.jpg'),
+  Commander2: require('../images/AvatarProgression/Commander2.jpg'),
+  Trainee1: require('../images/AvatarProgression/Trainee1.jpg'),
+  Trainee2: require('../images/AvatarProgression/Trainee2.jpg'), 
 };
 
 // Placeholder component for empty podium positions
@@ -157,14 +164,25 @@ const InitialiseLeaderboard = () => {
       return <EmptyPodiumPosition position={item.position} key={`placeholder-${item.position}`} />;
     }
     
+    // Get the appropriate image based on rank
+    let imageKey = item.rank;
+    
+    // Default to the "1" suffix version for Commander, Trainee, OC, and CO
+    if (['Commander', 'Trainee', 'OC', 'CO','FlightLead','TeamIC','SCEngineer'].includes(item.rank)) {
+      imageKey = `${item.rank}1`;
+    }
+    
+    // Remove number suffix for display (e.g., "Commander1" -> "Commander")
+    const displayRank = item.rank.replace(/[0-9]+$/, '');
+    
     return (
       <View key={item.position} style={[
         styles.section, 
         index === 1 ? styles.mainSection : styles.sideSection
       ]}>
-        <Image source={images[item.rank] || images.default} style={styles.image} />
+        <Image source={images[imageKey] || images.Trainee1} style={styles.image} />
         <Text style={[styles.title, { fontSize: scaleFont(10) }]}>{item.name}</Text>
-        <Text style={styles.subtitle}>{item.rank}</Text>
+        <Text style={styles.subtitle}>{displayRank}</Text>
         <Text style={[styles.text, styles.number]}>
           {item.position}<Text style={styles.suffix}>{getRankSuffix(item.position)}</Text>
         </Text>
@@ -182,27 +200,40 @@ const InitialiseLeaderboard = () => {
       <View style={styles.bottomContainer}>
         {remainingLeaderboard.length > 0 ? (
           <FlatList
-            data={remainingLeaderboard}
-            keyExtractor={(item) => item.position.toString()}
-            renderItem={({ item, index }) => (
+          data={remainingLeaderboard}
+          keyExtractor={(item) => item.position.toString()}
+          renderItem={({ item, index }) => {
+            // Get the appropriate image based on rank
+            let imageKey = item.rank;
+            
+            // Default to the "1" suffix version for Commander, Trainee, OC, and CO
+            if (['Commander', 'Trainee', 'OC', 'CO','FlightLead','TeamIC','SCEngineer'].includes(item.rank)) {
+              imageKey = `${item.rank}1`;
+            }
+            
+            // Remove number suffix for display (e.g., "Commander1" -> "Commander")
+            const displayRank = item.rank.replace(/[0-9]+$/, '');
+            
+            return (
               <View style={styles.row}>
                 <Text style={styles.rank}>{index + 4}</Text>
                 <View style={styles.nameContainer}>
                   <Text style={[styles.name, { fontSize: scaleFont(18) }]}>{item.name}</Text>
-                  <Text style={styles.subtitle}>{item.rank}</Text>
+                  <Text style={styles.subtitle}>{displayRank}</Text>
                 </View>
                 <Text style={styles.score}>{item.totalScore}</Text>
               </View>
-            )}
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            contentContainerStyle={{ paddingBottom: scaleSize(50) }} // Adds bottom padding
-            ListEmptyComponent={
-              <View style={styles.emptyListContainer}>
-                <Text style={styles.emptyText}>No additional competitors yet</Text>
-              </View>
-            }
-          />
+            );
+          }}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          contentContainerStyle={{ paddingBottom: scaleSize(50) }}
+          ListEmptyComponent={
+            <View style={styles.emptyListContainer}>
+              <Text style={styles.emptyText}>No additional competitors yet</Text>
+            </View>
+          }
+        />
         ) : (
           <View style={styles.emptyListContainer}>
             <Text style={styles.emptyText}>

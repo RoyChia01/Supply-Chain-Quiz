@@ -66,15 +66,21 @@ const isIOS = Platform.OS === 'ios';
 
 // Rank images
 const images = {
-  SCEngineer: require('../images/AvatarProgression/Engineer.jpg'),
-  TeamIC: require('../images/AvatarProgression/TeamIC.jpg'),
-  FlightLead: require('../images/AvatarProgression/FlightLead.jpg'),
-  OC: require('../images/AvatarProgression/OC.jpg'),
-  CO: require('../images/AvatarProgression/CO.jpg'),
-  Commander: require('../images/AvatarProgression/Commander.jpg'),
-  Trainee: require('../images/AvatarProgression/Trainee.jpg'),
+  SCEngineer1: require('../images/AvatarProgression/SCEngineer1.jpg'),
+  SCEngineer2: require('../images/AvatarProgression/SCEngineer2.jpg'),
+  TeamIC1: require('../images/AvatarProgression/TeamIC1.jpg'),
+  TeamIC2: require('../images/AvatarProgression/TeamIC2.jpg'),
+  FlightLead1: require('../images/AvatarProgression/FlightLead1.jpg'),
+  FlightLead2: require('../images/AvatarProgression/FlightLead2.jpg'),
+  OC1: require('../images/AvatarProgression/OC1.jpg'),
+  OC2: require('../images/AvatarProgression/OC2.jpg'),
+  CO1: require('../images/AvatarProgression/CO1.jpg'),
+  CO2: require('../images/AvatarProgression/CO2.jpg'),
+  Commander1: require('../images/AvatarProgression/Commander1.jpg'),
+  Commander2: require('../images/AvatarProgression/Commander2.jpg'),
+  Trainee1: require('../images/AvatarProgression/Trainee1.jpg'),
+  Trainee2: require('../images/AvatarProgression/Trainee2.jpg'), 
 };
-
 // Function to get formatted date
 const getCurrentDate = () => {
   const today = new Date();
@@ -140,9 +146,14 @@ const BoardingPass = ({ navigation }) => {
       setTopRowData([
         { title: "School", subText: data.school || "N/A" },
         { title: "Rank", subText: data.rank?.selectedTitle || "Unranked" },
-        { title: "", subText: getCurrentDate() }
+        { title: "Date", subText: getCurrentDate() }
       ]);
-      setImageUrl(images[data.rank.selectedTitle] || images.Trainee);
+      let imageKey = 'Trainee1'; // Default image key
+        if (['Commander', 'Trainee', 'OC', 'CO', 'FlightLead', 'TeamIC', 'SCEngineer'].includes(data.rank.selectedTitle)) {
+          imageKey = `${data.rank.selectedTitle}1`;
+        }
+        // Set image source using the determined key
+        setImageUrl(images[imageKey] || images.Trainee1);
     } catch (error) {
       console.error("❌ Error loading user data:", error);
       setError("Failed to load profile data. Please check your connection.");
@@ -327,7 +338,7 @@ const BoardingPass = ({ navigation }) => {
               <ActivityIndicator size="small" color={Colors.backgroundColor} style={styles.modalLoading} />
             ) : userInfo && userInfo.rank ? (
             <FlatList
-              data={[...new Set([userInfo.rank.title, ...userInfo.rank.specialTitle])]} // Removes duplicates
+              data={[...new Set(userInfo.rank.specialTitle)]} // Only using specialTitle
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item }) => (
                 <TouchableOpacity 
@@ -397,10 +408,10 @@ const FirstRow = ({ topRowData, setModalVisible, fontSizeFactor }) => (
             >
               <Text style={[
                 styles.subText, 
-                { fontSize: 12 * fontSizeFactor }, // Apply fontSizeFactor
+                { fontSize: 12 * fontSizeFactor}, // Apply fontSizeFactor
                 index === 1 && styles.rankText
               ]}>
-                {item.subText}
+                {item.title === 'Rank' ? item.subText.replace(/[0-9]+$/, '') : item.subText}
               </Text>
               {index === 1 && (
                 <Icon name="chevron-down" size={12 * fontSizeFactor} color={Colors.backgroundColor} style={styles.rankIcon} />
@@ -654,11 +665,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rowItem: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   rankCenter: {
     alignItems: 'center',
+  },
+  rankCenterContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1, // This helps ensure equal spacing
   },
   leftSection: {
     flex: 1,
@@ -755,10 +772,12 @@ const styles = StyleSheet.create({
   rankButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center', // Center the contents of the rank button
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 15,
+    alignSelf: 'center', // Helps with centering
   },
   rankText: {
     color: Colors.backgroundColor,

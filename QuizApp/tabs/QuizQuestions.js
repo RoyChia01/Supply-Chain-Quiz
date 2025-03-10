@@ -19,13 +19,20 @@ const isSmallDevice = width < 375;
 const isLargeDevice = width >= 768;
 
 const images = {
-  SCEngineer: require('../images/AvatarProgression/Engineer.jpg'),
-  TeamIC: require('../images/AvatarProgression/TeamIC.jpg'),
-  FlightLead: require('../images/AvatarProgression/FlightLead.jpg'),
-  OC: require('../images/AvatarProgression/OC.jpg'),
-  CO: require('../images/AvatarProgression/CO.jpg'),
-  Commander: require('../images/AvatarProgression/Commander.jpg'),
-  Trainee: require('../images/AvatarProgression/Trainee.jpg'), // Added fallback image
+  SCEngineer1: require('../images/AvatarProgression/SCEngineer1.jpg'),
+  SCEngineer2: require('../images/AvatarProgression/SCEngineer2.jpg'),
+  TeamIC1: require('../images/AvatarProgression/TeamIC1.jpg'),
+  TeamIC2: require('../images/AvatarProgression/TeamIC2.jpg'),
+  FlightLead1: require('../images/AvatarProgression/FlightLead1.jpg'),
+  FlightLead2: require('../images/AvatarProgression/FlightLead2.jpg'),
+  OC1: require('../images/AvatarProgression/OC1.jpg'),
+  OC2: require('../images/AvatarProgression/OC2.jpg'),
+  CO1: require('../images/AvatarProgression/CO1.jpg'),
+  CO2: require('../images/AvatarProgression/CO2.jpg'),
+  Commander1: require('../images/AvatarProgression/Commander1.jpg'),
+  Commander2: require('../images/AvatarProgression/Commander2.jpg'),
+  Trainee1: require('../images/AvatarProgression/Trainee1.jpg'),
+  Trainee2: require('../images/AvatarProgression/Trainee2.jpg'), 
 };
 
 // Custom Hook for Fetching Quiz Questions with Error Handling
@@ -412,22 +419,28 @@ const OptionButton = ({ option, selectedAnswer, isCorrect, onAnswer, answerLocke
 // Score Component with Ranking and Restart Option
 const Score = ({ score, totalQuestions, onRestart, topicId, userDocumentID, scoreMultiplier }) => {
   const { userEmail } = useUser();
-  const [imageSource, setImageSource] = useState(require('../images/AvatarProgression/Trainee.jpg')); // Default image
+  const [imageSource, setImageSource] = useState(require('../images/AvatarProgression/Trainee1.jpg')); // Default image
   const finalScore = Math.round(score); // Ensure score is rounded to nearest integer
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        if (!userDocumentID) {
-          const userInfo = await getUserInfo(userEmail);
-          if (userInfo) {
-            userDocumentID(userInfo.id);
-            setImageSource(images[userInfo.rank.selectedTitle] || images.Trainee);
-          }
-        } else {
-          const userInfo = await getUserInfo(userEmail);
-          setImageSource(images[userInfo.rank.selectedTitle] || images.Trainee);
+        const userInfo = await getUserInfo(userEmail);
+        
+        // If userDocumentID is a function, call it with the user ID
+        if (userInfo && typeof userDocumentID === 'function') {
+          userDocumentID(userInfo.id);
+        }
+        
+        // Set avatar image based on user rank
+        if (userInfo && userInfo.rank && userInfo.rank.selectedTitle) {
+          const validRanks = ['Commander', 'Trainee', 'OC', 'CO', 'FlightLead', 'TeamIC', 'SCEngineer'];
+          const imageKey = validRanks.includes(userInfo.rank.selectedTitle) 
+            ? `${userInfo.rank.selectedTitle}1` 
+            : 'Trainee1';
+          
+          setImageSource(images[imageKey] || images.Trainee1);
         }
       } catch (error) {
         Alert.alert('Error', 'Unable to fetch user info. Please try again later.');

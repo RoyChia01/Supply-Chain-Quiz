@@ -45,10 +45,14 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useUser } from './userInfo';
-import { LogBox } from 'react-native';
+import { LogBox,Dimensions } from 'react-native';
 import Colors from '../constants/Colors';
 
 LogBox.ignoreAllLogs(); // Ignore all log notifications
+
+
+const { width, height } = Dimensions.get('window');
+const scaleSize = (size) => size * (width / 375); // Base size scaling
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -158,6 +162,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.mainBackgroundColor,
   },
   logo: {
+    marginTop: Platform.OS === 'ios' ? scaleSize(10) : scaleSize(50), // Slightly taller on Android
     width: 180,
     height: 250,
     resizeMode:'cover',

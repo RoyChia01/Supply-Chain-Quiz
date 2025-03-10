@@ -1,6 +1,6 @@
 //This file handles all the request to the backend server and returns the response
 //The server is hosted on a local machine and the IP address is used to connect to the server
-const BASE_URL = `http://192.168.50.26:8080`; // Replace with your server IP address
+const BASE_URL = `http://10.132.0.85:8080`; // Replace with your server IP address
 // Fetch all the topics from the backend
 export const fetchTopics = async () => {
   try {
@@ -299,5 +299,30 @@ export const resetScoreMultiplier = async (userDocumentID) => {
   } catch (error) {
     console.error('Error resetting:', error.message);
     return { success: false, error: error.message };
+  }
+};
+
+export const getQuizStatus = async (userDocumentID) => {
+  //console.log("Fetching Quiz Status for User:", userDocumentID);
+
+  try {
+    const response = await fetch(`${BASE_URL}/user/${userDocumentID}/quiz-completed`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    //console.log('User Quiz Status Retrieved:', data);
+    return data;
+
+  } catch (error) {
+    console.error('Error fetching Quiz Status:', error.message);
+    return error;
   }
 };
