@@ -94,8 +94,19 @@ RSAF/
 ```
 
 ## 🖥 Usage
-1. Start the project as described in the installation steps.
-2. Open it on an emulator or a physical device using the Expo Go app.
+1. Navigate to the project folder
+cd QuizApp
+
+2. Install dependencies (only required the first time)
+npm install
+
+3. Start the Expo development server
+npx expo
+
+Once the server starts:
+	•	📱 Scan the QR code using the Expo Go app on your mobile device to run it on your phone.
+	•	💻 Or, press:
+	•	w to open in your web browser
 
 ## 📩 Contact
 For any questions or support, reach out at [roychiaqiyi@gmail.com].
